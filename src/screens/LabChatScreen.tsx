@@ -121,7 +121,7 @@ ${user?.tier === 'free' ? 'ðŸ”¬ Hai 1 incrocio gratuito disponibile oggi.' : 'ðŸ
     } catch (error) {
       toast.show({
         description: 'Errore durante l\'incrocio',
-        status: 'error',
+        colorScheme: 'error',
       });
     }
   };

@@ -1,0 +1,128 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null; // Allow read for other users (for chat)
+    }
+    
+    // User stats collection
+    match /user_stats/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null; // Allow read for leaderboards
+    }
+    
+    // Strains collection - read-only for users, write for admins
+    match /strains/{strainId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Breeding projects - private to user
+    match /breeding_projects/{projectId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Chat messages - read for all authenticated users, write with rate limiting
+    match /chat_messages/{messageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.timestamp == request.time;
+      allow update, delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // AI chat history - private to user
+    match /ai_chat_history/{chatId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Lab chat sessions - private to user
+    match /lab_chat_sessions/{sessionId} {
+      allow read, write: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // Analytics - only admins can read/write
+    match /analytics/{docId} {
+      allow read, write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // System stats - read for all, write for admins only
+    match /system_stats/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Popular strains - read for all, write for system only
+    match /popular_strains/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Terpene profiles - read for all authenticated users
+    match /terpene_profiles/{profileId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Subscription data - private to user
+    match /subscriptions/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Function to validate user subscription
+    function hasValidSubscription(userId) {
+      return exists(/databases/$(database)/documents/subscriptions/$(userId)) &&
+        get(/databases/$(database)/documents/subscriptions/$(userId)).data.status == 'active' &&
+        get(/databases/$(database)/documents/subscriptions/$(userId)).data.expiresAt > request.time;
+    }
+    
+    // Premium features access control
+    function isPremiumUser(userId) {
+      return hasValidSubscription(userId) || 
+        (exists(/databases/$(database)/documents/users/$(userId)) &&
+         get(/databases/$(database)/documents/users/$(userId)).data.role in ['admin', 'premium']);
+    }
+    
+    // Rate limiting for AI requests (simplified)
+    function canMakeAIRequest(userId) {
+      return request.auth != null && 
+        (isPremiumUser(userId) || 
+         !exists(/databases/$(database)/documents/ai_rate_limits/$(userId)) ||
+         get(/databases/$(database)/documents/ai_rate_limits/$(userId)).data.lastRequest < 
+         timestamp.date(request.time.toMillis() - 60000)); // 1 minute cooldown for free users
+    }
+    
+    // AI rate limiting collection
+    match /ai_rate_limits/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Block/deny all other paths not explicitly allowed
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -261,16 +261,18 @@ export async function getTerpeneProfile(terpeneName: string): Promise<any | null
 // Breeding Tips
 export async function getBreedingTips(category?: string, difficulty?: string): Promise<any[]> {
   try {
-    let q = collection(db, COLLECTIONS.BREEDING_TIPS);
+    const baseCollection = collection(db, COLLECTIONS.BREEDING_TIPS);
+    const constraints = [];
     
     if (category) {
-      q = query(q, where('category', '==', category));
+      constraints.push(where('category', '==', category));
     }
     
     if (difficulty) {
-      q = query(q, where('difficulty', '==', difficulty));
+      constraints.push(where('difficulty', '==', difficulty));
     }
     
+    const q = constraints.length > 0 ? query(baseCollection, ...constraints) : baseCollection;
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,

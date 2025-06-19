@@ -76,9 +76,7 @@ export default function SplashScreen() {
             colorScheme="primary"
             bg="gray.800"
             _filledTrack={{
-              bg: 'gradient.horizontal',
-              bgGradientFrom: colors.primary,
-              bgGradientTo: colors.secondary,
+              bg: 'linear-gradient(90deg, #4CAF50, #8BC34A)',
             }}
           />
           <Text style={styles.progressText}>

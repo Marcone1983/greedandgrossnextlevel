@@ -142,7 +142,7 @@ export default function PaywallScreen() {
       dispatch(updateUser({ tier: 'premium' }));
       toast.show({
         description: 'Accesso Premium attivato (Admin)',
-        status: 'success',
+        colorScheme: 'success',
       });
       navigation.goBack();
       return;
@@ -158,14 +158,14 @@ export default function PaywallScreen() {
         dispatch(updateUser({ tier: 'premium' }));
         toast.show({
           description: 'Abbonamento Premium attivato!',
-          status: 'success',
+          colorScheme: 'success',
         });
         navigation.goBack();
       }
     } catch (error: any) {
       toast.show({
         description: error.message || 'Errore durante l\'acquisto',
-        status: 'error',
+        colorScheme: 'error',
       });
     } finally {
       setIsLoading(false);
@@ -182,19 +182,19 @@ export default function PaywallScreen() {
         dispatch(updateUser({ tier: 'premium' }));
         toast.show({
           description: 'Abbonamento ripristinato!',
-          status: 'success',
+          colorScheme: 'success',
         });
         navigation.goBack();
       } else {
         toast.show({
           description: 'Nessun abbonamento trovato',
-          status: 'info',
+          colorScheme: 'info',
         });
       }
     } catch (error: any) {
       toast.show({
         description: error.message || 'Errore durante il ripristino',
-        status: 'error',
+        colorScheme: 'error',
       });
     } finally {
       setIsLoading(false);

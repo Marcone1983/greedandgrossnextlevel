@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -17,7 +18,7 @@ import {
   Select,
   CheckIcon,
   useToast,
-  ActionSheet,
+  Actionsheet,
   useDisclose,
   Center,
   Spinner,
@@ -68,7 +69,7 @@ export default function StrainLibraryScreen() {
     } catch (error) {
       toast.show({
         description: 'Errore nel caricamento delle strain',
-        status: 'error',
+        colorScheme: 'error',
       });
     } finally {
       setIsLoading(false);
@@ -163,12 +164,12 @@ export default function StrainLibraryScreen() {
       
       toast.show({
         description: 'PDF esportato con successo',
-        status: 'success',
+        colorScheme: 'success',
       });
     } catch (error) {
       toast.show({
         description: 'Errore durante l\'esportazione',
-        status: 'error',
+        colorScheme: 'error',
       });
     }
   };
@@ -318,9 +319,9 @@ export default function StrainLibraryScreen() {
         />
       )}
 
-      <ActionSheet isOpen={isOpen} onClose={onClose}>
-        <ActionSheet.Content>
-          <ActionSheet.Item
+      <Actionsheet isOpen={isOpen} onClose={onClose}>
+        <Actionsheet.Content>
+          <Actionsheet.Item
             startIcon={<Icon as={MaterialIcons} name="share" />}
             onPress={() => {
               // Share strain logic
@@ -328,8 +329,8 @@ export default function StrainLibraryScreen() {
             }}
           >
             Condividi Strain
-          </ActionSheet.Item>
-          <ActionSheet.Item
+          </Actionsheet.Item>
+          <Actionsheet.Item
             startIcon={<Icon as={MaterialIcons} name="file-download" />}
             onPress={() => {
               // Export single strain
@@ -337,8 +338,8 @@ export default function StrainLibraryScreen() {
             }}
           >
             Esporta PDF
-          </ActionSheet.Item>
-          <ActionSheet.Item
+          </Actionsheet.Item>
+          <Actionsheet.Item
             startIcon={<Icon as={MaterialIcons} name="delete" />}
             _text={{ color: 'red.500' }}
             onPress={() => {
@@ -349,9 +350,9 @@ export default function StrainLibraryScreen() {
             }}
           >
             Elimina dalla Libreria
-          </ActionSheet.Item>
-        </ActionSheet.Content>
-      </ActionSheet>
+          </Actionsheet.Item>
+        </Actionsheet.Content>
+      </Actionsheet>
     </View>
   );
 }

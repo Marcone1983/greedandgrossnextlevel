@@ -98,3 +98,23 @@ export function formatNumber(num: number): string {
   }
   return num.toString();
 }
+
+export function validateUsername(username: string): boolean {
+  if (!username || username.length < 3 || username.length > 20) {
+    return false;
+  }
+  
+  // Allow alphanumeric characters, underscores, and hyphens
+  const validPattern = /^[a-zA-Z0-9_-]+$/;
+  return validPattern.test(username);
+}
+
+export function validateStrainName(strainName: string): boolean {
+  if (!strainName || strainName.length < 2 || strainName.length > 50) {
+    return false;
+  }
+  
+  // Allow letters, numbers, spaces, and common symbols
+  const validPattern = /^[a-zA-Z0-9\s\-_#.()]+$/;
+  return validPattern.test(strainName);
+}

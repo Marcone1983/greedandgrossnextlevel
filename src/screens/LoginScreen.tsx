@@ -43,7 +43,7 @@ export default function LoginScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       toast.show({
         description: 'Username deve essere 3-20 caratteri alfanumerici',
-        status: 'error',
+        colorScheme: 'error',
         placement: 'top',
       });
       return;
@@ -59,13 +59,13 @@ export default function LoginScreen() {
       
       toast.show({
         description: `Benvenuto ${username}!`,
-        status: 'success',
+        colorScheme: 'success',
         placement: 'top',
       });
     } catch (error) {
       toast.show({
         description: 'Errore durante il login',
-        status: 'error',
+        colorScheme: 'error',
         placement: 'top',
       });
     } finally {

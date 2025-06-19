@@ -50,7 +50,8 @@
     "react-native-dotenv": "^3.4.9",
     "expo-secure-store": "~12.3.1",
     "react-native-modal": "^13.0.1",
-    "react-native-toast-message": "^2.1.7"
+    "react-native-toast-message": "^2.1.7",
+    "expo-sharing": "~11.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

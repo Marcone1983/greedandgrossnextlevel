@@ -92,7 +92,7 @@ export default function GlobalChatScreen() {
       socketRef.current.on('user_joined', (username: string) => {
         toast.show({
           description: `${username} si è unito alla chat`,
-          status: 'info',
+          colorScheme: 'info',
           duration: 2000,
         });
       });
@@ -101,14 +101,14 @@ export default function GlobalChatScreen() {
         console.error('Socket error:', error);
         toast.show({
           description: 'Errore di connessione',
-          status: 'error',
+          colorScheme: 'error',
         });
       });
     } catch (error) {
       setIsConnecting(false);
       toast.show({
         description: 'Impossibile connettersi alla chat',
-        status: 'error',
+        colorScheme: 'error',
       });
     }
   };

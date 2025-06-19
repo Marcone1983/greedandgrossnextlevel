@@ -9,7 +9,7 @@ import {
   query,
   where,
   orderBy,
-  limit,
+  limit as firestoreLimit,
   Timestamp,
 } from 'firebase/firestore';
 import { getAnalytics, logEvent } from 'firebase/analytics';
@@ -109,7 +109,7 @@ export async function getPopularStrains(limit: number = 10): Promise<Strain[]> {
     const q = query(
       collection(db, STRAINS_COLLECTION),
       orderBy('popularity', 'desc'),
-      limit(limit)
+      firestoreLimit(limit)
     );
     
     const snapshot = await getDocs(q);

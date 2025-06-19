@@ -135,7 +135,7 @@ export async function purchaseSubscription(productId: string) {
   try {
     const { customerInfo } = await Purchases.purchaseProduct(productId);
     return customerInfo.activeSubscriptions.length > 0;
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
       throw new Error('Acquisto annullato');
     }

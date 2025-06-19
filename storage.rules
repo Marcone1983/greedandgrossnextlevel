@@ -1,0 +1,62 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // User profile images
+    match /users/{userId}/profile/{imageId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        request.auth.uid == userId &&
+        request.resource.size < 5 * 1024 * 1024 && // 5MB limit
+        request.resource.contentType.matches('image/.*');
+    }
+    
+    // Strain images - read for all, write for admins
+    match /strains/{strainId}/images/{imageId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        request.resource.size < 10 * 1024 * 1024 && // 10MB limit
+        request.resource.contentType.matches('image/.*') &&
+        // Check if user is admin
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // User breeding project images
+    match /breeding_projects/{userId}/{projectId}/images/{imageId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId &&
+        request.resource.size < 10 * 1024 * 1024 && // 10MB limit
+        request.resource.contentType.matches('image/.*');
+    }
+    
+    // Chat images (for global chat)
+    match /chat/images/{userId}/{imageId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        request.auth.uid == userId &&
+        request.resource.size < 5 * 1024 * 1024 && // 5MB limit
+        request.resource.contentType.matches('image/.*');
+    }
+    
+    // Export files (PDF reports, etc.)
+    match /exports/{userId}/{exportId} {
+      allow read, write: if request.auth != null && 
+        request.auth.uid == userId &&
+        request.resource.size < 50 * 1024 * 1024; // 50MB limit for reports
+    }
+    
+    // App assets (public read, admin write)
+    match /assets/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+        firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Block all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

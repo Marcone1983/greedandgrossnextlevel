@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -49,7 +50,7 @@ export default function AdminPanel() {
     } catch (error) {
       toast.show({
         description: 'Errore nel caricamento statistiche',
-        status: 'error',
+        colorScheme: 'error',
       });
     } finally {
       setIsLoading(false);
@@ -85,12 +86,12 @@ export default function AdminPanel() {
               
               toast.show({
                 description: `Database esportato in ${format.toUpperCase()}`,
-                status: 'success',
+                colorScheme: 'success',
               });
             } catch (error) {
               toast.show({
                 description: 'Errore durante l\'export',
-                status: 'error',
+                colorScheme: 'error',
               });
             }
           },

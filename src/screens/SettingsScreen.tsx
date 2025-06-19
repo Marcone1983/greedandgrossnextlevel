@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import React, { useState } from 'react';
 import {
   View,
@@ -57,7 +58,7 @@ export default function SettingsScreen() {
             await clearAllData();
             toast.show({
               description: 'Logout effettuato',
-              status: 'info',
+              colorScheme: 'info',
             });
           },
         },
@@ -79,7 +80,7 @@ export default function SettingsScreen() {
             dispatch(logout());
             toast.show({
               description: 'Tutti i dati sono stati eliminati',
-              status: 'warning',
+              colorScheme: 'warning',
             });
           },
         },
@@ -92,7 +93,7 @@ export default function SettingsScreen() {
     if (adminTaps === 6) {
       toast.show({
         description: 'Admin panel sbloccato!',
-        status: 'success',
+        colorScheme: 'success',
       });
     }
   };
