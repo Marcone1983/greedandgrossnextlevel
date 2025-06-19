@@ -223,20 +223,19 @@ jobs:
         name: greed-gross-aab-aab
         path: ./artifacts
     
-    - name: 🔐 Setup Google Play credentials
-      if: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT != '' }}
-      run: |
-        echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}" > google-play-key.json
-    
-    - name: 🚀 Upload to Google Play Internal Testing
-      if: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT != '' }}
-      uses: r0adkll/upload-google-play@v1
-      with:
-        serviceAccountJson: google-play-key.json
-        packageName: com.greedandgross.cannabisbreeding
-        releaseFiles: ./artifacts/*.aab
-        track: internal
-        status: completed
+    # Google Play upload (optional - only if credentials are configured)
+    # - name: 🔐 Setup Google Play credentials
+    #   run: |
+    #     echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}" > google-play-key.json
+    # 
+    # - name: 🚀 Upload to Google Play Internal Testing
+    #   uses: r0adkll/upload-google-play@v1
+    #   with:
+    #     serviceAccountJson: google-play-key.json
+    #     packageName: com.greedandgross.cannabisbreeding
+    #     releaseFiles: ./artifacts/*.aab
+    #     track: internal
+    #     status: completed
     
     - name: 📧 Notify deployment
       run: |
