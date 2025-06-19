@@ -279,7 +279,7 @@ declare module '@reduxjs/toolkit' {
   export const createAsyncThunk: any;
   export const createReducer: any;
   export const createAction: any;
-  export type PayloadAction<T> = any;
+  export type PayloadAction<T = any> = any;
 }
 
 declare module '@reduxjs/toolkit/query' {

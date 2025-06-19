@@ -1,4 +1,4 @@
-import { analyticsCollector, UserInteraction } from '@/services/analyticsCollector';
+import { analyticsCollector } from '@/services/analyticsCollector';
 
 /**
  * Analytics Helper Functions
@@ -9,7 +9,7 @@ import { analyticsCollector, UserInteraction } from '@/services/analyticsCollect
 export const trackScreenTransition = async (
   fromScreen: string,
   toScreen: string,
-  navigationMethod: 'push' | 'replace' | 'goBack' | 'reset' = 'push'
+  _navigationMethod: 'push' | 'replace' | 'goBack' | 'reset' = 'push'
 ) => {
   await analyticsCollector.trackUserInteraction(
     'app_open',
@@ -410,7 +410,7 @@ const getRetentionCohort = (daysSinceInstall: number): string => {
 
 // Batch analytics operations for better performance
 export class AnalyticsBatcher {
-  private batch: Array<() => Promise<void>> = [];
+  private batch: (() => Promise<void>)[] = [];
   private batchTimeout: any = null;
   private readonly BATCH_SIZE = 10;
   private readonly BATCH_TIMEOUT = 5000; // 5 seconds

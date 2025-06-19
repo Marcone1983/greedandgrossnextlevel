@@ -228,9 +228,9 @@ export const ProductionAnalyticsHelpers = {
    */
   formatNumber(num: number, precision: number = 2): string {
     if (num >= 1000000) {
-      return (num / 1000000).toFixed(precision) + 'M';
+      return `${(num / 1000000).toFixed(precision)}M`;
     } else if (num >= 1000) {
-      return (num / 1000).toFixed(precision) + 'K';
+      return `${(num / 1000).toFixed(precision)}K`;
     }
     return num.toFixed(precision);
   },
@@ -368,9 +368,9 @@ export const FIREBASE_INDEXES_CONFIG = `
 }
 `;
 
-console.log('✅ Production Analytics System - 100% Complete');
-console.log('📊 SQL-style queries: IMPLEMENTED');
-console.log('🔌 Admin REST API: IMPLEMENTED');
-console.log('🌍 Geographic detection: IMPLEMENTED');
-console.log('📄 CSV export: IMPLEMENTED');
-console.log('🚀 Ready for production deployment');
+// console.log('✅ Production Analytics System - 100% Complete');
+// console.log('📊 SQL-style queries: IMPLEMENTED');
+// console.log('🔌 Admin REST API: IMPLEMENTED');
+// console.log('🌍 Geographic detection: IMPLEMENTED');
+// console.log('📄 CSV export: IMPLEMENTED');
+// console.log('🚀 Ready for production deployment');

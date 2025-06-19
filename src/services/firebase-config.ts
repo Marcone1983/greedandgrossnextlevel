@@ -320,7 +320,7 @@ export async function getSystemStats() {
     }
     
     // Fallback: Calculate stats from collections
-    const [usersSnapshot, _strainsSnapshot, crossesSnapshot, _analyticsSnapshot] = await Promise.all([
+    const [usersSnapshot, , crossesSnapshot] = await Promise.all([
       getDocs(collection(db, COLLECTIONS.USERS)),
       getDocs(collection(db, COLLECTIONS.STRAINS)),
       getDocs(collection(db, COLLECTIONS.CROSSES_CACHE)),

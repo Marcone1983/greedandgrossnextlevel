@@ -254,7 +254,7 @@ class GeoLocationService {
   }
 
   // GEOGRAPHIC ANALYTICS
-  async getGeographicInsights(days: number = 30): Promise<GeographicInsight[]> {
+  async getGeographicInsights(_days: number = 30): Promise<GeographicInsight[]> {
     try {
       // This would query Firebase for geographic data
       // For now, we'll return mock data that demonstrates the structure
@@ -295,14 +295,14 @@ class GeoLocationService {
     }
   }
 
-  async getCountryPopularity(): Promise<Array<{
+  async getCountryPopularity(): Promise<{
     country: string;
     countryCode: string;
     userCount: number;
     growthRate: number;
     averageRevenue: number;
     topStrains: string[];
-  }>> {
+  }[]> {
     try {
       // Mock data for country popularity
       return [

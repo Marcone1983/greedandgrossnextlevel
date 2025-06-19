@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirestore, collection, addDoc, query, where, orderBy, limit, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import CryptoJS from 'crypto-js';
-import { User } from '@/types';
+// import { User } from '@/types';
 
 export interface ConversationEntry {
   id?: string;
@@ -260,7 +260,7 @@ class MemoryService {
     if (conversations.length === 0) return '';
 
     const recentStrains = [...new Set(conversations.flatMap(c => c.strainsHentioned || []))];
-    const recentEffects = [...new Set(conversations.flatMap(c => c.effectsRequested || []))];
+    const _recentEffects = [...new Set(conversations.flatMap(c => c.effectsRequested || []))];
     const queryTypes = conversations.map(c => c.queryType);
     
     let summary = `CONTESTO CONVERSAZIONI PRECEDENTI:\n`;

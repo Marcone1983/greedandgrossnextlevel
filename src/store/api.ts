@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { Strain, ChatMessage, AdminStats } from '@/types';
+// import { Strain, ChatMessage, AdminStats } from '@/types';
 
 const API_BASE_URL = 'https://api.greedandgross.com';
 

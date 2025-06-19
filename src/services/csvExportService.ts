@@ -1,5 +1,5 @@
 import { analyticsEngine } from './analyticsEngine';
-import { memoryService } from './memoryService';
+// import { memoryService } from './memoryService';
 import { geoLocationService } from './geoLocationService';
 
 export interface ExportOptions {
@@ -45,7 +45,7 @@ class CSVExportService {
     exportType: 'overview' | 'insights' | 'users' | 'revenue' | 'breeding' | 'memory' | 'geographic' | 'complete',
     options: Partial<ExportOptions> = {}
   ): Promise<CSVExportResult> {
-    const startTime = Date.now();
+    const _startTime = Date.now();
     const exportId = this.generateExportId();
     
     try {
@@ -605,7 +605,7 @@ class CSVExportService {
         if (batch.length === 0) break;
 
         const rows = batch.map(csvRowMapper);
-        csvData += '\n' + this.arrayToCSV(rows);
+        csvData += `\n${this.arrayToCSV(rows)}`;
         totalRecords += rows.length;
         offset += batchSize;
 

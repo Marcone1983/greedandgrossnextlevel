@@ -46,15 +46,15 @@ export interface RevenueAnalytics {
 
 export interface BreedingAnalytics {
   totalSimulations: number;
-  popularCrosses: Array<{parents: string[], count: number, avgRating?: number}>;
-  trendingStrains: Array<{name: string, mentions: number, trend: 'up' | 'down'}>;
+  popularCrosses: {parents: string[], count: number, avgRating?: number}[];
+  trendingStrains: {name: string, mentions: number, trend: 'up' | 'down'}[];
   userEngagement: {
     avgSimulationsPerUser: number;
     retentionBySimulationCount: Record<number, number>;
   };
   geneticPatterns: {
-    mostSuccessfulCrosses: Array<{cross: string, successRate: number}>;
-    preferredTraits: Array<{trait: string, frequency: number}>;
+    mostSuccessfulCrosses: {cross: string, successRate: number}[];
+    preferredTraits: {trait: string, frequency: number}[];
   };
 }
 
@@ -760,12 +760,12 @@ class AnalyticsEngine {
     }
   }
 
-  private async analyzeRevenuePatterns(days: number): Promise<any> {
+  private async analyzeRevenuePatterns(_days: number): Promise<any> {
     // Implementation would analyze revenue patterns
     return { growth: 12, currentRevenue: 1500, churnRate: 3, churnReasons: [] };
   }
 
-  private async analyzeBreedingTrends(days: number): Promise<any> {
+  private async analyzeBreedingTrends(_days: number): Promise<any> {
     // Implementation would analyze breeding trends
     return { 
       emergingTrends: [{ name: 'Blue Dream x OG Kush', growth: 25, simulations: 150 }],
@@ -801,47 +801,47 @@ class AnalyticsEngine {
     };
   }
 
-  private async calculateTotalRevenue(days: number): Promise<number> {
+  private async calculateTotalRevenue(_days: number): Promise<number> {
     // Implementation would calculate total revenue
     return 2500;
   }
 
-  private async calculateRecurringRevenue(days: number): Promise<number> {
+  private async calculateRecurringRevenue(_days: number): Promise<number> {
     // Implementation would calculate recurring revenue
     return 2100;
   }
 
-  private async calculateNewRevenue(days: number): Promise<number> {
+  private async calculateNewRevenue(_days: number): Promise<number> {
     // Implementation would calculate new revenue
     return 400;
   }
 
-  private async calculateChurnRevenue(days: number): Promise<number> {
+  private async calculateChurnRevenue(_days: number): Promise<number> {
     // Implementation would calculate churned revenue
     return 150;
   }
 
-  private async calculateConversionRate(days: number): Promise<number> {
+  private async calculateConversionRate(_days: number): Promise<number> {
     // Implementation would calculate conversion rate
     return 4.2;
   }
 
-  private async calculateRevenueByTier(days: number): Promise<Record<string, number>> {
+  private async calculateRevenueByTier(_days: number): Promise<Record<string, number>> {
     // Implementation would calculate revenue by subscription tier
     return { basic: 800, premium: 1200, pro: 500 };
   }
 
-  private async calculateRevenueGrowth(days: number): Promise<number> {
+  private async calculateRevenueGrowth(_days: number): Promise<number> {
     // Implementation would calculate revenue growth
     return 15;
   }
 
-  private async getTotalBreedingSimulations(startDate: Date): Promise<number> {
+  private async getTotalBreedingSimulations(_startDate: Date): Promise<number> {
     // Implementation would count breeding simulations
     return 1250;
   }
 
-  private async getPopularCrosses(startDate: Date): Promise<any[]> {
+  private async getPopularCrosses(_startDate: Date): Promise<any[]> {
     // Implementation would get popular breeding crosses
     return [
       { parents: ['Blue Dream', 'OG Kush'], count: 45 },
@@ -849,7 +849,7 @@ class AnalyticsEngine {
     ];
   }
 
-  private async getTrendingStrains(days: number): Promise<any[]> {
+  private async getTrendingStrains(_days: number): Promise<any[]> {
     // Implementation would get trending strains
     return [
       { name: 'Blue Dream', mentions: 156, trend: 'up' },
@@ -857,7 +857,7 @@ class AnalyticsEngine {
     ];
   }
 
-  private async getBreedingUserEngagement(startDate: Date): Promise<any> {
+  private async getBreedingUserEngagement(_startDate: Date): Promise<any> {
     // Implementation would calculate breeding engagement
     return {
       avgSimulationsPerUser: 3.4,
@@ -865,7 +865,7 @@ class AnalyticsEngine {
     };
   }
 
-  private async getGeneticPatterns(startDate: Date): Promise<any> {
+  private async getGeneticPatterns(_startDate: Date): Promise<any> {
     // Implementation would analyze genetic patterns
     return {
       mostSuccessfulCrosses: [
@@ -878,17 +878,17 @@ class AnalyticsEngine {
     };
   }
 
-  private async generateFeatureUsageInsights(days: number): Promise<AnalyticsInsight[]> {
+  private async generateFeatureUsageInsights(_days: number): Promise<AnalyticsInsight[]> {
     // Implementation would generate feature usage insights
     return [];
   }
 
-  private async generatePerformanceInsights(days: number): Promise<AnalyticsInsight[]> {
+  private async generatePerformanceInsights(_days: number): Promise<AnalyticsInsight[]> {
     // Implementation would generate performance insights
     return [];
   }
 
-  private async generatePerformanceMetrics(days: number): Promise<any> {
+  private async generatePerformanceMetrics(_days: number): Promise<any> {
     // Implementation would generate performance metrics
     return {
       avgLoadTime: 1.2,
@@ -943,13 +943,13 @@ class AnalyticsEngine {
       : 0;
   }
 
-  private calculateFunnelDropOff(userJourneys: Record<string, any[]>): Array<{
+  private calculateFunnelDropOff(userJourneys: Record<string, any[]>): {
     screen: string;
     usersEntered: number;
     usersRetained: number;
     usersLost: number;
     dropOffRate: number;
-  }> {
+  }[] {
     const funnelSteps = ['SplashScreen', 'LoginScreen', 'LabChatScreen', 'BreedingScreen', 'SubscriptionScreen'];
     const funnelData: any[] = [];
     
@@ -1040,14 +1040,14 @@ class AnalyticsEngine {
   }
 
   // ADVANCED SQL-STYLE AGGREGATION QUERIES
-  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<Array<{
+  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<{
     strainName: string;
     totalRequests: number;
     uniqueUsers: number;
     averageSatisfaction: number;
     trendDirection: 'up' | 'down' | 'stable';
     weekOverWeekGrowth: number;
-  }>> {
+  }[]> {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - timeframe);
