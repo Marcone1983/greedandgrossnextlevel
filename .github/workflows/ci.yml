@@ -188,10 +188,8 @@ jobs:
         cat settings.gradle
         echo "🔍 Checking for google-services.json..."
         ls -la app/google-services.json || echo "❌ google-services.json not found"
-        echo "🔍 Setting up memory for Gradle..."
-        export GRADLE_OPTS="-Xmx2g -XX:MaxMetaspaceSize=256m -XX:+UseG1GC"
         echo "🔍 Running Gradle build..."
-        ./gradlew clean assembleRelease --no-daemon --stacktrace --max-workers=1
+        ./gradlew clean assembleRelease --no-daemon --stacktrace --max-workers=4
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -206,10 +204,8 @@ jobs:
         cd android
         echo "🔍 Checking for google-services.json..."
         ls -la app/google-services.json || echo "❌ google-services.json not found"
-        echo "🔍 Setting up memory for Gradle..."
-        export GRADLE_OPTS="-Xmx2g -XX:MaxMetaspaceSize=256m -XX:+UseG1GC"
         echo "🔍 Running Gradle bundle..."
-        ./gradlew bundleRelease --no-daemon --stacktrace --max-workers=1
+        ./gradlew bundleRelease --no-daemon --stacktrace --max-workers=4
         
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
