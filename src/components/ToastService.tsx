@@ -11,7 +11,6 @@ export const useAppToast = () => {
       variant: 'solid',
       colorScheme: getColorScheme(type),
       duration: 3000,
-      isClosable: true,
     });
   };
 

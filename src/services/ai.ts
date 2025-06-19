@@ -1,5 +1,8 @@
 import axios from 'axios';
-import { OPENAI_API_KEY, OPENAI_MODEL, API_BASE_URL } from '@env';
+import { OPENAI_API_KEY } from '@env';
+
+const OPENAI_MODEL = 'gpt-4o-mini';
+const API_BASE_URL = 'https://api.openai.com/v1';
 import { CrossRequest, CrossResult, Strain } from '@/types';
 import { checkCachedCross, saveCachedCross } from './firebase';
 import { generateStrainId } from '@/utils/helpers';

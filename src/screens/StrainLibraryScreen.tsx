@@ -259,7 +259,7 @@ export default function StrainLibraryScreen() {
             <Select
               selectedValue={filters.type}
               placeholder="Tipo"
-              onValueChange={(value) => dispatch(setFilters({ type: value }))}
+              onValueChange={(value) => dispatch(setFilters({ type: value as 'sativa' | 'indica' | 'hybrid' | 'all' }))}
               dropdownIcon={<Icon as={MaterialIcons} name="arrow-drop-down" />}
               _selectedItem={{
                 bg: colors.primary,

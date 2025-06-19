@@ -1,7 +1,7 @@
 import Purchases from 'react-native-purchases';
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
-import { REVENUECAT_API_KEY_IOS, REVENUECAT_API_KEY_ANDROID } from '@env';
+import { REVENUECAT_APPLE_KEY, REVENUECAT_GOOGLE_KEY } from '@env';
 import { getUser } from './storage';
 import { saveUserToFirebase, logAnalytics } from './firebase';
 import { resetDailyUsage } from '@/store/slices/authSlice';
@@ -34,8 +34,8 @@ export async function initializeServices() {
 async function initializeRevenueCat() {
   try {
     const apiKey = Platform.OS === 'ios' 
-      ? REVENUECAT_API_KEY_IOS 
-      : REVENUECAT_API_KEY_ANDROID;
+      ? REVENUECAT_APPLE_KEY 
+      : REVENUECAT_GOOGLE_KEY;
     
     if (apiKey) {
       Purchases.configure({ apiKey });

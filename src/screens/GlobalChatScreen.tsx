@@ -32,7 +32,7 @@ import { colors, gradients } from '@/constants/theme';
 import { ChatMessage } from '@/types';
 import { addMessage, setConnected, setOnlineUsers } from '@/store/slices/chatSlice';
 import { incrementDailyUsage } from '@/store/slices/authSlice';
-import { WEBSOCKET_URL } from '@env';
+const WEBSOCKET_URL = 'wss://api.greedandgross.com/ws';
 import ChatBubble from '@/components/ChatBubble';
 
 export default function GlobalChatScreen() {
