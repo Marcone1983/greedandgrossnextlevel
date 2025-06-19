@@ -437,6 +437,7 @@ export default function AdminDocumentManager() {
                   fontSize="sm"
                   fontFamily="monospace"
                   isReadOnly={false}
+                  autoCompleteType="off"
                 />
               )}
 
