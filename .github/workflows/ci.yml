@@ -40,7 +40,9 @@ jobs:
       run: npm install -g @expo/cli@latest
     
     - name: 🔧 Install dependencies
-      run: npm ci
+      run: |
+        npm install
+        npx expo install --fix
     
     - name: 🔍 TypeScript check
       run: npm run type-check
@@ -91,7 +93,9 @@ jobs:
       run: npm install -g @expo/cli@latest eas-cli@latest
     
     - name: 🔧 Install dependencies
-      run: npm ci
+      run: |
+        npm install
+        npx expo install --fix
     
     - name: 🔐 Create environment file
       run: |
