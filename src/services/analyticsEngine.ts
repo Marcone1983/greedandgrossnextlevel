@@ -46,15 +46,15 @@ export interface RevenueAnalytics {
 
 export interface BreedingAnalytics {
   totalSimulations: number;
-  popularCrosses: {parents: string[], count: number, avgRating?: number}[];
-  trendingStrains: {name: string, mentions: number, trend: 'up' | 'down'}[];
+  popularCrosses: Array<{parents: string[], count: number, avgRating?: number}>;
+  trendingStrains: Array<{name: string, mentions: number, trend: 'up' | 'down'}>;
   userEngagement: {
     avgSimulationsPerUser: number;
     retentionBySimulationCount: Record<number, number>;
   };
   geneticPatterns: {
-    mostSuccessfulCrosses: {cross: string, successRate: number}[];
-    preferredTraits: {trait: string, frequency: number}[];
+    mostSuccessfulCrosses: Array<{cross: string, successRate: number}>;
+    preferredTraits: Array<{trait: string, frequency: number}>;
   };
 }
 
@@ -943,7 +943,7 @@ class AnalyticsEngine {
       : 0;
   }
 
-  private calculateFunnelDropOff(userJourneys: Record<string, any[]>): []{
+  private calculateFunnelDropOff(userJourneys: Record<string, any[]>): Array<{
     screen: string;
     usersEntered: number;
     usersRetained: number;
@@ -1040,7 +1040,7 @@ class AnalyticsEngine {
   }
 
   // ADVANCED SQL-STYLE AGGREGATION QUERIES
-  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<[]{
+  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<Array<{
     strainName: string;
     totalRequests: number;
     uniqueUsers: number;
