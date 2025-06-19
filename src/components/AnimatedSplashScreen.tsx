@@ -38,10 +38,6 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
   const [loadingText, setLoadingText] = useState('Initializing...');
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    startAnimation();
-  }, [startAnimation]);
-
   const startAnimation = useCallback(() => {
     // Step 1: Logo entrance (scale + rotate + fade in)
     Animated.parallel([
@@ -100,6 +96,10 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
       }, 1000);
     });
   }, []);
+
+  useEffect(() => {
+    startAnimation();
+  }, [startAnimation]);
 
   const simulateLoading = () => {
     const loadingSteps = [

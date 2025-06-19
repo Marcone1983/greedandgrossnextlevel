@@ -65,11 +65,6 @@ export default function AdminDocumentManager() {
   const borderColor = useColorModeValue('gray.200', colors.darkBorder);
   const textAreaBgColor = useColorModeValue('white', colors.darkCard);
 
-  useEffect(() => {
-    loadExistingDocument();
-    logAnalytics('admin_document_manager_opened');
-  }, [selectedDocumentType, selectedLanguage, loadExistingDocument]);
-
   const loadExistingDocument = async () => {
     try {
       setIsLoading(true);
@@ -97,6 +92,11 @@ export default function AdminDocumentManager() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadExistingDocument();
+    logAnalytics('admin_document_manager_opened');
+  }, [selectedDocumentType, selectedLanguage]);
 
   const generateDefaultContent = () => {
     const documentName = DOCUMENT_TYPES.find(doc => doc.value === selectedDocumentType)?.label;
