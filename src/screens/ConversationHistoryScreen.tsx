@@ -168,6 +168,12 @@ export default function ConversationHistoryScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const bgColor = useColorModeValue('gray.50', colors.darkBackground);
+  const inputBgColor = useColorModeValue('white', colors.darkCard);
+  const cardBgColor = useColorModeValue('white', colors.darkCard);
+  const borderColor = useColorModeValue('gray.200', colors.darkBorder);
+  const metadataBgColor = useColorModeValue('gray.50', colors.darkCard);
+  const queryBgColor = useColorModeValue('blue.50', colors.darkCard);
+  const responseBgColor = useColorModeValue('green.50', colors.darkCard);
 
   useEffect(() => {
     if (!isLoaded) {
@@ -329,7 +335,7 @@ export default function ConversationHistoryScreen() {
                   </Pressable>
                 ) : undefined
               }
-              bg={useColorModeValue('white', colors.darkCard)}
+              bg={inputBgColor}
             />
 
             {/* Filters */}
@@ -347,11 +353,11 @@ export default function ConversationHistoryScreen() {
           {/* Statistics */}
           {analytics.totalConversations > 0 && (
             <Box
-              bg={useColorModeValue('white', colors.darkCard)}
+              bg={cardBgColor}
               p={4}
               borderRadius="lg"
               borderWidth={1}
-              borderColor={useColorModeValue('gray.200', colors.darkBorder)}
+              borderColor={borderColor}
             >
               <VStack space={3}>
                 <Text fontSize="md" fontWeight="semibold">
@@ -408,7 +414,7 @@ export default function ConversationHistoryScreen() {
             
             {filteredConversations.length === 0 ? (
               <Box
-                bg={useColorModeValue('white', colors.darkCard)}
+                bg={cardBgColor}
                 p={8}
                 borderRadius="lg"
                 alignItems="center"
@@ -461,7 +467,7 @@ export default function ConversationHistoryScreen() {
               <VStack space={4}>
                 {/* Metadata */}
                 <Box
-                  bg={useColorModeValue('gray.50', colors.darkCard)}
+                  bg={metadataBgColor}
                   p={3}
                   borderRadius="md"
                 >
@@ -509,7 +515,7 @@ export default function ConversationHistoryScreen() {
                     Domanda:
                   </Text>
                   <Box
-                    bg={useColorModeValue('blue.50', colors.darkCard)}
+                    bg={queryBgColor}
                     p={3}
                     borderRadius="md"
                     borderLeftWidth={3}
@@ -527,7 +533,7 @@ export default function ConversationHistoryScreen() {
                     Risposta:
                   </Text>
                   <Box
-                    bg={useColorModeValue('green.50', colors.darkCard)}
+                    bg={responseBgColor}
                     p={3}
                     borderRadius="md"
                     borderLeftWidth={3}

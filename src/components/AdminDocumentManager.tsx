@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import {
   VStack,
   HStack,
@@ -9,13 +9,13 @@ import {
   Button,
   Icon,
   Select,
-  Input,
+  // Input,
   TextArea,
   Progress,
   useToast,
   useColorModeValue,
   Badge,
-  Divider,
+  // Divider,
   Modal,
   Alert as NBAlert,
 } from 'native-base';
@@ -50,7 +50,7 @@ const DOCUMENT_TYPES = [
 ] as const;
 
 export default function AdminDocumentManager() {
-  const { t } = useTranslation();
+  const { t: _t } = useTranslation();
   const toast = useToast();
 
   const [selectedDocumentType, setSelectedDocumentType] = useState<string>('privacy-policy');
@@ -58,16 +58,17 @@ export default function AdminDocumentManager() {
   const [documentContent, setDocumentContent] = useState('');
   const [uploadProgress, setUploadProgress] = useState<DocumentUploadProgress>({});
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [loadedDocuments, setLoadedDocuments] = useState<DocumentContent[]>([]);
+  const [_loadedDocuments, _setLoadedDocuments] = useState<DocumentContent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const bgColor = useColorModeValue('white', colors.darkCard);
   const borderColor = useColorModeValue('gray.200', colors.darkBorder);
+  const textAreaBgColor = useColorModeValue('white', colors.darkCard);
 
   useEffect(() => {
     loadExistingDocument();
     logAnalytics('admin_document_manager_opened');
-  }, [selectedDocumentType, selectedLanguage]);
+  }, [selectedDocumentType, selectedLanguage, loadExistingDocument]);
 
   const loadExistingDocument = async () => {
     try {
@@ -433,7 +434,7 @@ export default function AdminDocumentManager() {
                   onChangeText={setDocumentContent}
                   placeholder="Enter HTML content for the document..."
                   h={300}
-                  bg={useColorModeValue('white', colors.darkCard)}
+                  bg={textAreaBgColor}
                   fontSize="sm"
                   fontFamily="monospace"
                   isReadOnly={false}

@@ -22,7 +22,7 @@ try {
     credential: admin.credential.cert(serviceAccount),
     projectId: serviceAccount.project_id,
   });
-} catch (error) {
+} catch (_error) {
   console.error('❌ Error initializing Firebase Admin SDK:');
   console.error('Make sure firebase-config.json exists in the project root');
   process.exit(1);

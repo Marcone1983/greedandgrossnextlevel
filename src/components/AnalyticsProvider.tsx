@@ -18,7 +18,7 @@ interface AnalyticsProviderProps {
 export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   const { user } = useSelector((state: RootState) => state.auth);
   const [isEnabled, setIsEnabled] = React.useState(true);
-  const memoryAnalytics = useMemoryAnalytics();
+  const _memoryAnalytics = useMemoryAnalytics();
 
   useEffect(() => {
     // Initialize analytics when user is available

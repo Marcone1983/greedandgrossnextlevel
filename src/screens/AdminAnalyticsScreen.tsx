@@ -56,6 +56,7 @@ export default function AdminAnalyticsScreen() {
   const bgColor = useColorModeValue('gray.50', colors.darkBackground);
   const cardBg = useColorModeValue('white', colors.darkCard);
   const borderColor = useColorModeValue('gray.200', colors.darkBorder);
+  const insightBgColor = useColorModeValue('gray.50', colors.darkBackground);
 
   useEffect(() => {
     loadAnalytics();
@@ -221,7 +222,7 @@ export default function AdminAnalyticsScreen() {
           <Text fontSize="lg" fontWeight="bold" mb={4}>Insights Principali</Text>
           <VStack space={3}>
             {dashboard.insights.slice(0, 5).map((insight, index) => (
-              <Box key={insight.id} p={3} bg={useColorModeValue('gray.50', colors.darkBackground)} borderRadius="md">
+              <Box key={insight.id} p={3} bg={insightBgColor} borderRadius="md">
                 <HStack justifyContent="space-between" alignItems="flex-start">
                   <VStack flex={1} space={1}>
                     <HStack alignItems="center" space={2}>
@@ -525,7 +526,7 @@ export default function AdminAnalyticsScreen() {
           <Text fontSize="lg" fontWeight="bold" mb={4}>Incroci Popolari</Text>
           <VStack space={3}>
             {dashboard.breeding.popularCrosses.map((cross, index) => (
-              <Box key={index} p={3} bg={useColorModeValue('gray.50', colors.darkBackground)} borderRadius="md">
+              <Box key={index} p={3} bg={insightBgColor} borderRadius="md">
                 <HStack justifyContent="space-between" alignItems="center">
                   <VStack flex={1}>
                     <Text fontSize="sm" fontWeight="semibold">

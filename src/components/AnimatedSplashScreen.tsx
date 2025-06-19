@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -40,9 +40,9 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
 
   useEffect(() => {
     startAnimation();
-  }, []);
+  }, [startAnimation]);
 
-  const startAnimation = () => {
+  const startAnimation = useCallback(() => {
     // Step 1: Logo entrance (scale + rotate + fade in)
     Animated.parallel([
       Animated.spring(logoScale, {
@@ -99,7 +99,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
         startParticleAnimation();
       }, 1000);
     });
-  };
+  }, []);
 
   const simulateLoading = () => {
     const loadingSteps = [
