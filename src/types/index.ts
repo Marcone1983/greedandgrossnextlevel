@@ -6,6 +6,7 @@ export interface User {
   lastActive: Date;
   stats: UserStats;
   preferences: UserPreferences;
+  avatar?: string;
 }
 
 export interface UserStats {

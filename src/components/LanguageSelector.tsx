@@ -115,13 +115,14 @@ export default function LanguageSelector({
               {language.name}
             </Text>
           </VStack>
-          <Radio.Icon
-            icon={<Icon as={MaterialIcons} name="check" />}
-            _checked={{ 
-              color: colors.primary,
-              bg: colors.primary + '20' 
-            }}
-          />
+          {isSelected && (
+            <Icon 
+              as={MaterialIcons} 
+              name="check" 
+              size="sm" 
+              color={colors.primary} 
+            />
+          )}
         </HStack>
       </Pressable>
     );

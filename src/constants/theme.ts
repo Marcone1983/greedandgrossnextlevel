@@ -17,6 +17,10 @@ export const colors = {
   gradientEnd: '#2E7D32',
   gold: '#FFD700',
   darkGreen: '#0D3D0D',
+  // Dark mode colors
+  darkBackground: '#0D1117',
+  darkCard: '#161B22',
+  darkBorder: '#30363D',
 };
 
 export const theme = extendTheme({

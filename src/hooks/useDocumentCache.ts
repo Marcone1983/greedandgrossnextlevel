@@ -114,7 +114,7 @@ export function useDocumentCache(documentType: DocumentType, language: string): 
       }
     } catch (error) {
       console.error('Error downloading document from Firebase:', error);
-      throw new Error(`Failed to download document: ${error.message}`);
+      throw new Error(`Failed to download document: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

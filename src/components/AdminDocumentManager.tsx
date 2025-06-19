@@ -254,13 +254,13 @@ export default function AdminDocumentManager() {
             [progressKey]: { 
               progress: 0, 
               uploading: false, 
-              error: error.message 
+              error: error instanceof Error ? error.message : 'Upload failed'
             }
           }));
           
           toast.show({
             title: 'Upload Failed',
-            description: error.message,
+            description: error instanceof Error ? error.message : 'Upload failed',
             colorScheme: 'error',
           });
         },
@@ -293,13 +293,13 @@ export default function AdminDocumentManager() {
         [progressKey]: { 
           progress: 0, 
           uploading: false, 
-          error: error.message 
+          error: error instanceof Error ? error.message : 'Upload failed'
         }
       }));
       
       toast.show({
         title: 'Upload Failed',
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Upload failed',
         colorScheme: 'error',
       });
     }
@@ -432,11 +432,11 @@ export default function AdminDocumentManager() {
                   value={documentContent}
                   onChangeText={setDocumentContent}
                   placeholder="Enter HTML content for the document..."
-                  minH={300}
-                  maxH={500}
+                  h={300}
                   bg={useColorModeValue('white', colors.darkCard)}
                   fontSize="sm"
                   fontFamily="monospace"
+                  isReadOnly={false}
                 />
               )}
 
