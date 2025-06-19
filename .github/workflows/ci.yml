@@ -97,6 +97,9 @@ jobs:
         npm install --legacy-peer-deps
         npx expo install --fix
     
+    - name: 🔧 Fix Gradle Wrapper
+      run: ./scripts/fix-gradle-wrapper.sh
+    
     - name: 🔐 Create environment file
       run: |
         cat > .env << EOF
