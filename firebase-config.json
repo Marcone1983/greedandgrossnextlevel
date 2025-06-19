@@ -1,0 +1,664 @@
+{
+  "users": {
+    "user_1704123456789_abc123def": {
+      "id": "user_1704123456789_abc123def",
+      "username": "MasterBreeder",
+      "tier": "premium",
+      "joinDate": "2024-01-01T00:00:00.000Z",
+      "lastActive": "2024-01-15T10:30:00.000Z",
+      "stats": {
+        "totalCrosses": 47,
+        "strainsCreated": 23,
+        "xp": 2350,
+        "level": 5,
+        "badges": [
+          {
+            "id": "badge_first_cross",
+            "name": "Primo Incrocio",
+            "description": "Completa il tuo primo incrocio genetico",
+            "icon": "science",
+            "unlockedAt": "2024-01-01T12:00:00.000Z"
+          },
+          {
+            "id": "badge_breeder_novice",
+            "name": "Breeder Novizio",
+            "description": "Completa 10 incroci",
+            "icon": "local_florist",
+            "unlockedAt": "2024-01-03T15:30:00.000Z"
+          },
+          {
+            "id": "badge_collector",
+            "name": "Collezionista",
+            "description": "Salva 25 strain diverse",
+            "icon": "collections",
+            "unlockedAt": "2024-01-10T09:15:00.000Z"
+          }
+        ],
+        "dailyMessagesUsed": 2,
+        "dailyCrossesUsed": 0
+      },
+      "preferences": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "it"
+      }
+    },
+    "user_1704123456790_def456ghi": {
+      "id": "user_1704123456790_def456ghi",
+      "username": "GreenThumb420",
+      "tier": "free",
+      "joinDate": "2024-01-05T14:20:00.000Z",
+      "lastActive": "2024-01-15T08:45:00.000Z",
+      "stats": {
+        "totalCrosses": 8,
+        "strainsCreated": 5,
+        "xp": 450,
+        "level": 2,
+        "badges": [
+          {
+            "id": "badge_first_cross",
+            "name": "Primo Incrocio",
+            "description": "Completa il tuo primo incrocio genetico",
+            "icon": "science",
+            "unlockedAt": "2024-01-05T16:00:00.000Z"
+          }
+        ],
+        "dailyMessagesUsed": 4,
+        "dailyCrossesUsed": 1
+      },
+      "preferences": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "it"
+      }
+    },
+    "user_1704123456791_ghi789jkl": {
+      "id": "user_1704123456791_ghi789jkl",
+      "username": "greedgross",
+      "tier": "admin",
+      "joinDate": "2024-01-01T00:00:00.000Z",
+      "lastActive": "2024-01-15T11:00:00.000Z",
+      "stats": {
+        "totalCrosses": 150,
+        "strainsCreated": 89,
+        "xp": 15000,
+        "level": 12,
+        "badges": [
+          {
+            "id": "badge_admin",
+            "name": "Amministratore",
+            "description": "Accesso completo al sistema",
+            "icon": "admin_panel_settings",
+            "unlockedAt": "2024-01-01T00:00:00.000Z"
+          },
+          {
+            "id": "badge_master_breeder",
+            "name": "Master Breeder",
+            "description": "Completa 100 incroci",
+            "icon": "emoji_events",
+            "unlockedAt": "2024-01-08T12:00:00.000Z"
+          }
+        ],
+        "dailyMessagesUsed": 0,
+        "dailyCrossesUsed": 0
+      },
+      "preferences": {
+        "theme": "dark",
+        "notifications": true,
+        "language": "it"
+      }
+    }
+  },
+  "strains": {
+    "strain_1704123456789_abc123": {
+      "id": "strain_1704123456789_abc123",
+      "name": "Purple Dream Kush",
+      "parentA": "Purple Haze",
+      "parentB": "OG Kush",
+      "type": "hybrid",
+      "thc": 22.5,
+      "cbd": 0.8,
+      "terpenes": [
+        {
+          "name": "Myrcene",
+          "percentage": 0.65,
+          "effects": ["Sedating", "Muscle relaxant", "Sleep aid"]
+        },
+        {
+          "name": "Limonene",
+          "percentage": 0.42,
+          "effects": ["Mood elevation", "Stress relief", "Euphoria"]
+        },
+        {
+          "name": "Pinene",
+          "percentage": 0.28,
+          "effects": ["Alertness", "Memory retention", "Focus"]
+        },
+        {
+          "name": "Caryophyllene",
+          "percentage": 0.35,
+          "effects": ["Anti-inflammatory", "Pain relief", "Anxiety reduction"]
+        }
+      ],
+      "effects": ["Relaxed", "Euphoric", "Creative", "Happy", "Sleepy"],
+      "flavors": ["Berry", "Earthy", "Pine", "Sweet", "Herbal"],
+      "genetics": {
+        "phenotypes": ["Dense purple buds", "High resin production", "Compact structure"],
+        "floweringTime": 8,
+        "yield": "High",
+        "difficulty": "medium",
+        "resistance": ["Mold", "Pests", "Cold weather"],
+        "dominantTraits": ["Purple coloration", "Strong aroma", "Fast flowering"]
+      },
+      "createdBy": "user_1704123456789_abc123def",
+      "createdAt": "2024-01-10T15:30:00.000Z",
+      "popularity": 89,
+      "imageUrl": "https://storage.googleapis.com/greed-gross/strains/purple-dream-kush.jpg"
+    },
+    "strain_1704123456790_def456": {
+      "id": "strain_1704123456790_def456",
+      "name": "Lemon Diesel Express",
+      "parentA": "Lemon Haze",
+      "parentB": "Sour Diesel",
+      "type": "sativa",
+      "thc": 24.2,
+      "cbd": 0.3,
+      "terpenes": [
+        {
+          "name": "Limonene",
+          "percentage": 0.85,
+          "effects": ["Energizing", "Mood boost", "Creativity"]
+        },
+        {
+          "name": "Pinene",
+          "percentage": 0.52,
+          "effects": ["Mental clarity", "Focus", "Alertness"]
+        },
+        {
+          "name": "Terpinolene",
+          "percentage": 0.41,
+          "effects": ["Uplifting", "Antioxidant", "Antibacterial"]
+        }
+      ],
+      "effects": ["Energetic", "Creative", "Focused", "Uplifted", "Social"],
+      "flavors": ["Citrus", "Diesel", "Lemon", "Herbal", "Spicy"],
+      "genetics": {
+        "phenotypes": ["Tall structure", "Long colas", "Bright green buds"],
+        "floweringTime": 10,
+        "yield": "Very High",
+        "difficulty": "easy",
+        "resistance": ["Heat", "Humidity", "Nutrients stress"],
+        "dominantTraits": ["Fast growth", "High yield", "Citrus aroma"]
+      },
+      "createdBy": "user_1704123456789_abc123def",
+      "createdAt": "2024-01-12T09:15:00.000Z",
+      "popularity": 76,
+      "imageUrl": "https://storage.googleapis.com/greed-gross/strains/lemon-diesel-express.jpg"
+    },
+    "strain_1704123456791_ghi789": {
+      "id": "strain_1704123456791_ghi789",
+      "name": "Northern Lights Cookies",
+      "parentA": "Northern Lights",
+      "parentB": "Girl Scout Cookies",
+      "type": "indica",
+      "thc": 20.8,
+      "cbd": 1.2,
+      "terpenes": [
+        {
+          "name": "Myrcene",
+          "percentage": 0.78,
+          "effects": ["Deep relaxation", "Sleep aid", "Muscle relief"]
+        },
+        {
+          "name": "Linalool",
+          "percentage": 0.45,
+          "effects": ["Calming", "Anti-anxiety", "Sleep promotion"]
+        },
+        {
+          "name": "Caryophyllene",
+          "percentage": 0.38,
+          "effects": ["Pain relief", "Anti-inflammatory", "Stress reduction"]
+        }
+      ],
+      "effects": ["Sleepy", "Relaxed", "Happy", "Hungry", "Peaceful"],
+      "flavors": ["Sweet", "Earthy", "Vanilla", "Spicy", "Cookie dough"],
+      "genetics": {
+        "phenotypes": ["Dense buds", "Purple hints", "Crystal coverage"],
+        "floweringTime": 7,
+        "yield": "Medium-High",
+        "difficulty": "easy",
+        "resistance": ["Cold", "Beginner friendly", "Stable genetics"],
+        "dominantTraits": ["Fast flowering", "High potency", "Sweet flavor"]
+      },
+      "createdBy": "user_1704123456790_def456ghi",
+      "createdAt": "2024-01-08T20:45:00.000Z",
+      "popularity": 92,
+      "imageUrl": "https://storage.googleapis.com/greed-gross/strains/northern-lights-cookies.jpg"
+    },
+    "strain_1704123456792_jkl012": {
+      "id": "strain_1704123456792_jkl012",
+      "name": "Gorilla Glue Haze",
+      "parentA": "Gorilla Glue #4",
+      "parentB": "Amnesia Haze",
+      "type": "hybrid",
+      "thc": 26.1,
+      "cbd": 0.4,
+      "terpenes": [
+        {
+          "name": "Caryophyllene",
+          "percentage": 0.68,
+          "effects": ["Pain relief", "Anti-inflammatory", "Euphoria"]
+        },
+        {
+          "name": "Myrcene",
+          "percentage": 0.55,
+          "effects": ["Relaxation", "Sedation", "Muscle relief"]
+        },
+        {
+          "name": "Limonene",
+          "percentage": 0.43,
+          "effects": ["Mood elevation", "Stress relief", "Focus"]
+        }
+      ],
+      "effects": ["Potent", "Euphoric", "Relaxed", "Creative", "Couch-lock"],
+      "flavors": ["Diesel", "Earthy", "Pine", "Chocolate", "Coffee"],
+      "genetics": {
+        "phenotypes": ["Extremely resinous", "Dense structure", "Strong branches"],
+        "floweringTime": 9,
+        "yield": "High",
+        "difficulty": "medium",
+        "resistance": ["Mold", "Pests", "Outdoor conditions"],
+        "dominantTraits": ["High resin", "Potent effects", "Sticky buds"]
+      },
+      "createdBy": "user_1704123456791_ghi789jkl",
+      "createdAt": "2024-01-14T13:20:00.000Z",
+      "popularity": 67,
+      "imageUrl": "https://storage.googleapis.com/greed-gross/strains/gorilla-glue-haze.jpg"
+    }
+  },
+  "crosses_cache": {
+    "purple_haze_x_og_kush": {
+      "strain": {
+        "id": "strain_1704123456789_abc123",
+        "name": "Purple Dream Kush",
+        "parentA": "Purple Haze",
+        "parentB": "OG Kush",
+        "type": "hybrid",
+        "thc": 22.5,
+        "cbd": 0.8,
+        "terpenes": [
+          {
+            "name": "Myrcene",
+            "percentage": 0.65,
+            "effects": ["Sedating", "Muscle relaxant"]
+          }
+        ],
+        "effects": ["Relaxed", "Euphoric", "Creative"],
+        "flavors": ["Berry", "Earthy", "Pine"],
+        "genetics": {
+          "phenotypes": ["Dense purple buds"],
+          "floweringTime": 8,
+          "yield": "High",
+          "difficulty": "medium",
+          "resistance": ["Mold", "Pests"],
+          "dominantTraits": ["Purple coloration"]
+        },
+        "createdBy": "cached",
+        "createdAt": "2024-01-10T15:30:00.000Z",
+        "popularity": 89
+      },
+      "timestamp": "2024-01-10T15:30:00.000Z",
+      "hitCount": 12
+    },
+    "white_widow_x_ak_47": {
+      "strain": {
+        "id": "strain_cached_001",
+        "name": "White AK Express",
+        "parentA": "White Widow",
+        "parentB": "AK-47",
+        "type": "hybrid",
+        "thc": 21.3,
+        "cbd": 0.6,
+        "terpenes": [
+          {
+            "name": "Pinene",
+            "percentage": 0.58,
+            "effects": ["Mental clarity", "Focus"]
+          },
+          {
+            "name": "Myrcene",
+            "percentage": 0.44,
+            "effects": ["Relaxation", "Body high"]
+          }
+        ],
+        "effects": ["Balanced", "Euphoric", "Focused", "Relaxed"],
+        "flavors": ["Earthy", "Woody", "Spicy", "Sweet"],
+        "genetics": {
+          "phenotypes": ["Balanced structure", "White crystals"],
+          "floweringTime": 8,
+          "yield": "High",
+          "difficulty": "easy",
+          "resistance": ["Beginner friendly", "Stable"],
+          "dominantTraits": ["Balanced effects", "Good yield"]
+        },
+        "createdBy": "cached",
+        "createdAt": "2024-01-05T12:00:00.000Z",
+        "popularity": 54
+      },
+      "timestamp": "2024-01-05T12:00:00.000Z",
+      "hitCount": 8
+    },
+    "blue_dream_x_gelato": {
+      "strain": {
+        "id": "strain_cached_002",
+        "name": "Blue Gelato Dream",
+        "parentA": "Blue Dream",
+        "parentB": "Gelato",
+        "type": "hybrid",
+        "thc": 23.7,
+        "cbd": 0.5,
+        "terpenes": [
+          {
+            "name": "Limonene",
+            "percentage": 0.72,
+            "effects": ["Mood elevation", "Creativity"]
+          },
+          {
+            "name": "Linalool",
+            "percentage": 0.39,
+            "effects": ["Calming", "Anti-anxiety"]
+          }
+        ],
+        "effects": ["Creative", "Happy", "Relaxed", "Euphoric"],
+        "flavors": ["Berry", "Sweet", "Creamy", "Vanilla"],
+        "genetics": {
+          "phenotypes": ["Colorful buds", "Sweet aroma"],
+          "floweringTime": 9,
+          "yield": "Medium-High",
+          "difficulty": "medium",
+          "resistance": ["Indoor friendly", "Mold resistant"],
+          "dominantTraits": ["Sweet flavor", "Colorful buds"]
+        },
+        "createdBy": "cached",
+        "createdAt": "2024-01-07T16:45:00.000Z",
+        "popularity": 71
+      },
+      "timestamp": "2024-01-07T16:45:00.000Z",
+      "hitCount": 15
+    }
+  },
+  "chats": {
+    "message_1704123456789_001": {
+      "id": "message_1704123456789_001",
+      "userId": "user_1704123456789_abc123def",
+      "username": "MasterBreeder",
+      "content": "Ciao a tutti! Qualcuno ha mai provato a incrociare Purple Haze con OG Kush? Sto pensando di sperimentare con questi genitori.",
+      "timestamp": "2024-01-15T09:30:00.000Z",
+      "type": "user",
+      "attachments": []
+    },
+    "message_1704123456789_002": {
+      "id": "message_1704123456789_002",
+      "userId": "user_1704123456790_def456ghi",
+      "username": "GreenThumb420",
+      "content": "Interessante combinazione! Io ho appena finito un incrocio simile con Northern Lights e Girl Scout Cookies. I risultati sono stati incredibili!",
+      "timestamp": "2024-01-15T09:32:00.000Z",
+      "type": "user",
+      "attachments": [
+        {
+          "type": "strain",
+          "data": {
+            "id": "strain_1704123456791_ghi789",
+            "name": "Northern Lights Cookies"
+          }
+        }
+      ]
+    },
+    "message_1704123456789_003": {
+      "id": "message_1704123456789_003",
+      "userId": "system",
+      "username": "Sistema",
+      "content": "Benvenuto nella community GREED & GROSS! Ricorda di condividere sempre responsabilmente e rispettare le regole della community.",
+      "timestamp": "2024-01-15T09:00:00.000Z",
+      "type": "system",
+      "attachments": []
+    },
+    "message_1704123456789_004": {
+      "id": "message_1704123456789_004",
+      "userId": "user_1704123456791_ghi789jkl",
+      "username": "greedgross",
+      "content": "💡 Tip del giorno: Quando incrociate strain con alti livelli di Myrcene, aspettatevi effetti più sedativi. Il Myrcene è il terpene responsabile dell'effetto 'couch-lock'!",
+      "timestamp": "2024-01-15T10:00:00.000Z",
+      "type": "user",
+      "attachments": []
+    },
+    "message_1704123456789_005": {
+      "id": "message_1704123456789_005",
+      "userId": "user_1704123456789_abc123def",
+      "username": "MasterBreeder",
+      "content": "Grazie per il tip! Questo spiega perché il mio ultimo incrocio è risultato così rilassante. Avete consigli per strain più energizzanti?",
+      "timestamp": "2024-01-15T10:15:00.000Z",
+      "type": "user",
+      "attachments": []
+    }
+  },
+  "analytics": {
+    "event_1704123456789_001": {
+      "event": "app_open",
+      "data": {
+        "platform": "android",
+        "version": "1.0.0",
+        "user_tier": "premium"
+      },
+      "timestamp": "2024-01-15T09:00:00.000Z",
+      "userId": "user_1704123456789_abc123def",
+      "sessionId": "session_1704123456789_abc"
+    },
+    "event_1704123456789_002": {
+      "event": "cross_request",
+      "data": {
+        "parentA": "Purple Haze",
+        "parentB": "OG Kush",
+        "cached": true,
+        "user_tier": "premium"
+      },
+      "timestamp": "2024-01-15T09:30:00.000Z",
+      "userId": "user_1704123456789_abc123def",
+      "sessionId": "session_1704123456789_abc"
+    },
+    "event_1704123456789_003": {
+      "event": "strain_saved",
+      "data": {
+        "strain_name": "Purple Dream Kush",
+        "strain_type": "hybrid",
+        "user_tier": "premium"
+      },
+      "timestamp": "2024-01-15T09:35:00.000Z",
+      "userId": "user_1704123456789_abc123def",
+      "sessionId": "session_1704123456789_abc"
+    },
+    "event_1704123456789_004": {
+      "event": "message_sent",
+      "data": {
+        "chat_type": "global",
+        "message_length": 89,
+        "user_tier": "free"
+      },
+      "timestamp": "2024-01-15T09:32:00.000Z",
+      "userId": "user_1704123456790_def456ghi",
+      "sessionId": "session_1704123456790_def"
+    },
+    "event_1704123456789_005": {
+      "event": "subscription_start",
+      "data": {
+        "plan": "monthly",
+        "price": "9.99",
+        "platform": "android"
+      },
+      "timestamp": "2024-01-10T14:20:00.000Z",
+      "userId": "user_1704123456789_abc123def",
+      "sessionId": "session_1704123456789_premium"
+    }
+  },
+  "popular_strains_global": {
+    "og_kush": {
+      "name": "OG Kush",
+      "requests": 156,
+      "type": "indica",
+      "popularity_score": 92
+    },
+    "white_widow": {
+      "name": "White Widow",
+      "requests": 143,
+      "type": "hybrid",
+      "popularity_score": 89
+    },
+    "blue_dream": {
+      "name": "Blue Dream",
+      "requests": 138,
+      "type": "sativa",
+      "popularity_score": 87
+    },
+    "girl_scout_cookies": {
+      "name": "Girl Scout Cookies",
+      "requests": 121,
+      "type": "hybrid",
+      "popularity_score": 83
+    },
+    "ak_47": {
+      "name": "AK-47",
+      "requests": 118,
+      "type": "hybrid",
+      "popularity_score": 81
+    },
+    "northern_lights": {
+      "name": "Northern Lights",
+      "requests": 112,
+      "type": "indica",
+      "popularity_score": 79
+    },
+    "sour_diesel": {
+      "name": "Sour Diesel",
+      "requests": 108,
+      "type": "sativa",
+      "popularity_score": 76
+    },
+    "purple_haze": {
+      "name": "Purple Haze",
+      "requests": 95,
+      "type": "sativa",
+      "popularity_score": 72
+    },
+    "jack_herer": {
+      "name": "Jack Herer",
+      "requests": 89,
+      "type": "sativa",
+      "popularity_score": 68
+    },
+    "gorilla_glue_4": {
+      "name": "Gorilla Glue #4",
+      "requests": 87,
+      "type": "hybrid",
+      "popularity_score": 66
+    }
+  },
+  "terpene_profiles": {
+    "myrcene": {
+      "name": "Myrcene",
+      "description": "Terpene dominante negli strain indica, responsabile degli effetti sedativi",
+      "effects": ["Sedating", "Muscle relaxant", "Sleep aid", "Pain relief"],
+      "aroma": "Earthy, musky, fruity",
+      "common_strains": ["OG Kush", "Purple Haze", "Granddaddy Purple"],
+      "medical_benefits": ["Insomnia", "Muscle tension", "Anxiety", "Pain"]
+    },
+    "limonene": {
+      "name": "Limonene",
+      "description": "Terpene energizzante con proprietà antidepressive",
+      "effects": ["Mood elevation", "Stress relief", "Energy boost", "Focus"],
+      "aroma": "Citrus, lemon, orange",
+      "common_strains": ["Lemon Haze", "Super Lemon Haze", "Sour Diesel"],
+      "medical_benefits": ["Depression", "Stress", "Anxiety", "ADHD"]
+    },
+    "pinene": {
+      "name": "Pinene",
+      "description": "Terpene che promuove allerta mentale e memoria",
+      "effects": ["Alertness", "Memory retention", "Focus", "Clarity"],
+      "aroma": "Pine, forest, earthy",
+      "common_strains": ["Jack Herer", "Blue Dream", "Strawberry Cough"],
+      "medical_benefits": ["Memory loss", "ADHD", "Asthma", "Inflammation"]
+    },
+    "caryophyllene": {
+      "name": "Caryophyllene",
+      "description": "Unico terpene che interagisce con i recettori cannabinoidi",
+      "effects": ["Anti-inflammatory", "Pain relief", "Anxiety reduction"],
+      "aroma": "Spicy, peppery, woody",
+      "common_strains": ["Girl Scout Cookies", "Bubba Kush", "Chemdog"],
+      "medical_benefits": ["Chronic pain", "Inflammation", "Anxiety", "Depression"]
+    },
+    "linalool": {
+      "name": "Linalool",
+      "description": "Terpene calmante con proprietà anti-ansia",
+      "effects": ["Calming", "Anti-anxiety", "Sleep promotion", "Relaxation"],
+      "aroma": "Floral, lavender, spicy",
+      "common_strains": ["Lavender", "Amnesia Haze", "Special Kush"],
+      "medical_benefits": ["Anxiety", "Insomnia", "Epilepsy", "Psychosis"]
+    },
+    "terpinolene": {
+      "name": "Terpinolene",
+      "description": "Terpene raro con effetti energizzanti e antiossidanti",
+      "effects": ["Uplifting", "Energizing", "Antibacterial", "Antioxidant"],
+      "aroma": "Piney, floral, herbal",
+      "common_strains": ["Ghost Train Haze", "Chernobyl", "Golden Pineapple"],
+      "medical_benefits": ["Fatigue", "Bacterial infections", "Oxidative stress"]
+    }
+  },
+  "breeding_tips": {
+    "tip_001": {
+      "id": "tip_001",
+      "title": "Dominanza Genetica",
+      "content": "I tratti dominanti si manifestano in F1, mentre i recessivi emergono in F2. Pianifica le generazioni di conseguenza.",
+      "category": "genetics",
+      "difficulty": "intermediate",
+      "author": "GREED & GROSS AI"
+    },
+    "tip_002": {
+      "id": "tip_002",
+      "title": "Stabilizzazione Strain",
+      "content": "Per stabilizzare una strain, sono necessarie almeno 6-8 generazioni di backcrossing selettivo.",
+      "category": "stabilization",
+      "difficulty": "advanced",
+      "author": "GREED & GROSS AI"
+    },
+    "tip_003": {
+      "id": "tip_003",
+      "title": "Selezione Fenotipi",
+      "content": "Seleziona sempre dai migliori 10% delle piante. La qualità è più importante della quantità.",
+      "category": "selection",
+      "difficulty": "beginner",
+      "author": "GREED & GROSS AI"
+    },
+    "tip_004": {
+      "id": "tip_004",
+      "title": "Conservazione Genetica",
+      "content": "Mantieni sempre madri delle linee parentali originali per preservare la diversità genetica.",
+      "category": "preservation",
+      "difficulty": "intermediate",
+      "author": "GREED & GROSS AI"
+    }
+  },
+  "system_stats": {
+    "total_users": 1247,
+    "active_users_24h": 423,
+    "premium_users": 156,
+    "total_crosses": 8934,
+    "cache_hit_rate": 0.78,
+    "api_latency_ms": 145,
+    "error_rate": 0.02,
+    "revenue": {
+      "daily": 52.47,
+      "monthly": 1558.44,
+      "yearly": 15584.4
+    },
+    "last_updated": "2024-01-15T11:00:00.000Z"
+  }
+}

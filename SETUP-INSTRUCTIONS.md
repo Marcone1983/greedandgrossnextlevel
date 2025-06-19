@@ -1,0 +1,193 @@
+# 🚀 GREED & GROSS - Setup Instructions
+
+Il repository è pronto per il deployment! Segui questi passi per completare la configurazione.
+
+## 📁 Step 1: Crea Repository GitHub
+
+1. **Vai su GitHub**: https://github.com/new
+2. **Repository name**: `greedandgrossnextlevel`
+3. **Description**: `🌿 GREED & GROSS - Cannabis Breeding Simulator with AI Integration`
+4. **Visibility**: Private (consigliato per app commerciale)
+5. **NON inizializzare** con README, .gitignore, o license
+6. **Clicca "Create repository"**
+
+## 📤 Step 2: Push del Codice
+
+Dopo aver creato il repository, esegui:
+
+```bash
+# Il codice è già committed localmente
+git push -u origin main
+```
+
+## 🔐 Step 3: Configura GitHub Secrets
+
+### Opzione A: Setup Automatico (Raccomandato)
+```bash
+# Installa GitHub CLI se non ce l'hai
+# macOS: brew install gh
+# Ubuntu: sudo apt install gh
+
+# Autenticati
+gh auth login
+
+# Configura tutti i secrets automaticamente
+./scripts/setup-github-secrets.sh
+
+# Genera il keystore Android
+./scripts/generate-keystore.sh
+
+# Verifica la configurazione
+./scripts/verify-secrets.sh
+```
+
+### Opzione B: Setup Manuale
+Vai su GitHub Repository → Settings → Secrets and variables → Actions
+
+**Secrets Essenziali:**
+```bash
+FIREBASE_API_KEY = AIzaSyBvOyiDlEcFqTdDjMjp5K8L9nN2mR3oP4q
+FIREBASE_PROJECT_ID = greed-and-gross-app
+FIREBASE_AUTH_DOMAIN = greed-and-gross-app.firebaseapp.com
+OPENAI_API_KEY = your_openai_api_key_here
+ANDROID_KEYSTORE_PASSWORD = GreedGross2024!
+ANDROID_KEY_ALIAS = greedgrosskey
+ANDROID_KEY_PASSWORD = GreedGross2024Key!
+```
+
+**Secrets da configurare manualmente:**
+- `FIREBASE_SERVICE_ACCOUNT` (JSON completo da Firebase Console)
+- `ANDROID_KEYSTORE_BASE64` (Generato da `generate-keystore.sh`)
+- `EXPO_TOKEN` (Da `expo login && expo whoami --json`)
+
+## 🔥 Step 4: Setup Firebase
+
+1. **Crea progetto Firebase**: https://console.firebase.google.com/
+2. **Nome progetto**: `greed-and-gross-app`
+3. **Abilita Firestore Database**
+4. **Abilita Firebase Storage**
+5. **Abilita Analytics**
+6. **Ottieni configurazione web** → Copia le chiavi per .env
+
+**Importa dati di esempio:**
+```bash
+cd scripts
+npm install firebase-admin
+# Aggiungi il tuo service-account.json
+node import-firebase-data.js
+```
+
+## 📱 Step 5: Test Locale
+
+```bash
+# Installa dipendenze
+npm install
+
+# Copia file ambiente
+cp .env.example .env
+# Modifica .env con le tue API keys
+
+# Avvia app
+npm start
+```
+
+## 🚀 Step 6: Attiva CI/CD
+
+Dopo il push, GitHub Actions si attiverà automaticamente per:
+- ✅ Lint del codice
+- ✅ Type checking TypeScript
+- ✅ Test Jest
+- ✅ Build Android APK
+- ✅ Deploy automatico (quando configurato)
+
+## 📊 Step 7: Verifica Deployment
+
+1. **GitHub Actions**: Repository → Actions tab
+2. **Secrets configurati**: Settings → Secrets and variables → Actions
+3. **Build status**: Badge nel README
+
+## 🔧 Risoluzione Problemi
+
+### Build Fallisce
+```bash
+# Verifica secrets
+./scripts/verify-secrets.sh
+
+# Controlla logs GitHub Actions
+# Repository → Actions → Click on failed workflow
+```
+
+### Firebase Errori
+```bash
+# Verifica configurazione Firebase
+# Console Firebase → Project Settings → General
+# Controlla regole Firestore: Database → Rules
+```
+
+### RevenueCat Setup
+1. Crea account su https://www.revenuecat.com/
+2. Aggiungi la tua app iOS/Android
+3. Copia le API keys pubbliche
+4. Configura prodotti in-app su App Store Connect / Play Console
+
+## 🎯 Funzionalità App
+
+### 🆓 Tier Gratuito
+- 1 incrocio AI/giorno
+- 5 messaggi chat/giorno  
+- 10 strain salvabili
+- Funzionalità base
+
+### 💎 Tier Premium (€9.99/mese)
+- Incroci AI illimitati
+- Chat community illimitata
+- Strain library illimitata
+- Export PDF
+- Backup cloud
+- Supporto prioritario
+
+### 👑 Tier Admin (Nascosto)
+- Accesso con 7 tap consecutivi su Settings
+- Dashboard analytics completa
+- Export database
+- System health monitoring
+
+## 🌿 Demo Accounts
+
+**Test Accounts** (dati di esempio in Firebase):
+- **MasterBreeder** (Premium) - 47 incroci, Level 5
+- **GreenThumb420** (Free) - 8 incroci, Level 2
+- **greedgross** (Admin) - Accesso completo
+
+## 📚 Documentazione
+
+- **Firebase Setup**: `scripts/setup-firebase.md`
+- **Secrets Setup**: `.github/secrets-setup.md`
+- **API Documentation**: Generata automaticamente
+- **Component Storybook**: `npm run storybook` (se configurato)
+
+## 📞 Support
+
+- **Technical Issues**: GitHub Issues
+- **Firebase**: Firebase Support Console  
+- **RevenueCat**: RevenueCat Dashboard Support
+- **OpenAI**: OpenAI Platform Support
+
+---
+
+## 🎉 App Ready Checklist
+
+- [ ] Repository creato su GitHub
+- [ ] Codice pushato su `main`
+- [ ] GitHub Secrets configurati (essenziali)
+- [ ] Firebase progetto configurato
+- [ ] Dati di esempio importati
+- [ ] Build locale funzionante
+- [ ] CI/CD pipeline attiva
+- [ ] RevenueCat configurato (per abbonamenti)
+
+**Una volta completati tutti i passi, la tua app GREED & GROSS sarà production-ready! 🌿🚀**
+
+---
+
+*Generated by Claude Code for GREED & GROSS Cannabis Breeding Simulator*
