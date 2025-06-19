@@ -1,5 +1,5 @@
 import { analyticsEngine } from './analyticsEngine';
-import { analyticsCollector } from './analyticsCollector';
+// import { analyticsCollector } from './analyticsCollector';
 import { memoryService } from './memoryService';
 
 export interface AdminAPIResponse<T = any> {
@@ -388,7 +388,7 @@ class AdminDashboardAPI {
     }
   }
 
-  private async getRealtimeStats(params: any, query: any): Promise<any> {
+  private async getRealtimeStats(_params: any, _query: any): Promise<any> {
     // This would connect to real-time analytics stream
     return {
       timestamp: new Date().toISOString(),
@@ -404,7 +404,7 @@ class AdminDashboardAPI {
     };
   }
 
-  private async getSystemHealth(params: any, query: any): Promise<any> {
+  private async getSystemHealth(_params: any, _query: any): Promise<any> {
     return {
       status: 'healthy',
       uptime: 99.9,
@@ -466,7 +466,7 @@ class AdminDashboardAPI {
   private checkRateLimit(headers: any, limit: number): boolean {
     const clientId = headers['x-client-id'] || 'anonymous';
     const now = Date.now();
-    const windowStart = now - (60 * 1000); // 1 minute window
+    const _windowStart = now - (60 * 1000); // 1 minute window
 
     const clientLimit = this.rateLimitStore.get(clientId);
     
@@ -506,10 +506,10 @@ class AdminDashboardAPI {
   }
 
   // PUBLIC INTERFACE FOR EXPRESS/FASTIFY INTEGRATION
-  getExpressRoutes(): Array<{ method: string; path: string; handler: Function }> {
-    const routes: Array<{ method: string; path: string; handler: Function }> = [];
+  getExpressRoutes(): { method: string; path: string; handler: Function }[] {
+    const routes: { method: string; path: string; handler: Function }[] = [];
     
-    for (const [key, endpoint] of this.endpoints) {
+    for (const [key, _endpoint] of this.endpoints) {
       const [method, path] = key.split(':');
       
       routes.push({

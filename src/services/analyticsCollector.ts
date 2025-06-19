@@ -1,7 +1,7 @@
-import { getFirestore, collection, addDoc, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { memoryService } from './memoryService';
+// import { memoryService } from './memoryService';
 
 export interface UserInteraction {
   id?: string;
@@ -123,7 +123,7 @@ class AnalyticsCollector {
     // Firebase Analytics event
     logEvent(this.analytics, eventType as any, {
       screen_name: screen,
-      action: action,
+      action,
       user_id: this.userId,
       session_id: this.sessionId,
       ...metadata
@@ -158,8 +158,8 @@ class AnalyticsCollector {
       // Firebase Analytics purchase event
       logEvent(this.analytics, 'purchase', {
         transaction_id: this.generateSessionId(),
-        value: value,
-        currency: currency,
+        value,
+        currency,
         user_id: this.userId
       });
     } catch (error) {
@@ -195,7 +195,7 @@ class AnalyticsCollector {
     parentStrain1: string,
     parentStrain2: string,
     result: any,
-    userId?: string
+    _userId?: string
   ): Promise<void> {
     await this.trackUserInteraction('breeding_simulation', 'BreedingScreen', 'simulate_cross', {
       strainName: `${parentStrain1} x ${parentStrain2}`,
@@ -484,7 +484,7 @@ class AnalyticsCollector {
     }
   }
 
-  private getTopActions(interactions: any[]): Array<{action: string, count: number}> {
+  private getTopActions(interactions: any[]): {action: string, count: number}[] {
     const actionCounts = {};
     interactions.forEach(i => {
       actionCounts[i.action] = (actionCounts[i.action] || 0) + 1;

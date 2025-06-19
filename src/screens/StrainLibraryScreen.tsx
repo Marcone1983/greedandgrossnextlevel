@@ -64,7 +64,7 @@ export default function StrainLibraryScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   const filterStrains = useCallback(() => {
     let filtered = [...strains];
@@ -170,7 +170,7 @@ export default function StrainLibraryScreen() {
         colorScheme: 'error',
       });
     }
-  }, []);
+  }, [filteredStrains, navigation, toast, user?.tier]);
 
   const generatePDFContent = (strains: Strain[]): string => {
     return JSON.stringify(strains, null, 2); // Simplified for now
