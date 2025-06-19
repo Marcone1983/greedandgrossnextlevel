@@ -7,6 +7,7 @@ import LoginScreen from '@/screens/LoginScreen';
 import MainNavigator from './MainNavigator';
 import PaywallScreen from '@/screens/PaywallScreen';
 import AdminPanel from '@/screens/AdminPanel';
+import ConversationHistoryScreen from '@/screens/ConversationHistoryScreen';
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -14,6 +15,7 @@ export type RootStackParamList = {
   Main: undefined;
   Paywall: { feature: string };
   AdminPanel: undefined;
+  ConversationHistory: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -48,6 +50,13 @@ export default function RootNavigator() {
             options={{
               presentation: 'modal',
               cardOverlayEnabled: true,
+            }}
+          />
+          <Stack.Screen 
+            name="ConversationHistory" 
+            component={ConversationHistoryScreen}
+            options={{
+              headerShown: false,
             }}
           />
           {isAdmin && (

@@ -34,6 +34,8 @@ import { performCrossBreeding } from '@/services/ai';
 import { saveCrossResult } from '@/services/storage';
 import ChatBubble from '@/components/ChatBubble';
 import StrainSelector from '@/components/StrainSelector';
+import MemoryIndicator from '@/components/MemoryIndicator';
+import { useConversationMemory } from '@/hooks/useConversationMemory';
 
 const AI_AVATAR = require('@assets/images/ai-scientist.png');
 
@@ -50,22 +52,36 @@ export default function LabChatScreen() {
   
   const { user } = useSelector((state: RootState) => state.auth);
   const { isLoading } = useSelector((state: RootState) => state.strain);
+  
+  // Memory system integration
+  const {
+    saveConversation,
+    getContextPrompt,
+    getSuggestedPrompts,
+    memoryEnabled,
+    contextSummary,
+  } = useConversationMemory();
 
   useEffect(() => {
+    const contextPrompt = memoryEnabled ? getContextPrompt() : '';
+    const isReturningUser = contextSummary?.conversationPattern !== 'New user';
+    
     const welcomeMessage: ChatMessage = {
       id: '1',
       userId: 'ai',
       username: 'GREED & GROSS',
-      content: `Benvenuto nel laboratorio genetico! Sono GREED & GROSS, il tuo esperto di breeding cannabis. 
+      content: `${isReturningUser ? 'Bentornato' : 'Benvenuto'} nel laboratorio genetico! Sono GREED & GROSS, il tuo esperto di breeding cannabis. 
 
-Posso aiutarti a simulare incroci genetici, analizzare terpeni, prevedere fenotipi e molto altro. 
+${isReturningUser && contextPrompt ? `🧠 Ho memoria delle nostre conversazioni precedenti: ${contextPrompt}
 
-${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '🔬 Premium: Incroci illimitati disponibili!'}`,
+` : ''}Posso aiutarti a simulare incroci genetici, analizzare terpeni, prevedere fenotipi e molto altro. 
+
+${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '🔬 Premium: Incroci illimitati disponibili!'}${memoryEnabled ? '\n\n💾 Sistema di memoria attivo - le nostre conversazioni vengono ricordate per un\'esperienza personalizzata.' : ''}`,
       timestamp: new Date(),
       type: 'ai',
     };
     setMessages([welcomeMessage]);
-  }, [user]);
+  }, [user, contextSummary, memoryEnabled]);
 
   const checkUsageLimit = () => {
     if (user?.tier === 'free' && user.stats.dailyCrossesUsed >= 1) {
@@ -95,20 +111,22 @@ ${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '�
     dispatch(incrementDailyUsage('crosses'));
 
     try {
+      const contextPrompt = memoryEnabled ? getContextPrompt() : undefined;
       const result = await performCrossBreeding({
         parentA: selectedParents.parentA || extractStrainFromText(inputText, 0),
         parentB: selectedParents.parentB || extractStrainFromText(inputText, 1),
         userId: user!.id,
-      });
+      }, contextPrompt);
 
       await saveCrossResult(result);
       dispatch(setCrossResult(result));
 
+      const aiResponseContent = formatCrossResult(result);
       const aiResponse: ChatMessage = {
         id: (Date.now() + 1).toString(),
         userId: 'ai',
         username: 'GREED & GROSS',
-        content: formatCrossResult(result),
+        content: aiResponseContent,
         timestamp: new Date(),
         type: 'ai',
         attachments: [{
@@ -118,11 +136,33 @@ ${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '�
       };
 
       setMessages(prev => [...prev, aiResponse]);
+
+      // Save conversation to memory system
+      if (memoryEnabled) {
+        try {
+          const strainsMentioned = [
+            selectedParents.parentA || extractStrainFromText(inputText, 0),
+            selectedParents.parentB || extractStrainFromText(inputText, 1),
+            result.result.name,
+          ].filter(Boolean);
+
+          await saveConversation(
+            inputText,
+            aiResponseContent,
+            strainsMentioned
+          );
+        } catch (memoryError) {
+          console.error('Failed to save conversation to memory:', memoryError);
+          // Don't show error to user as this is a background operation
+        }
+      }
     } catch (error) {
       toast.show({
         description: 'Errore durante l\'incrocio',
         colorScheme: 'error',
       });
+    } finally {
+      dispatch(setCrossLoading(false));
     }
   };
 
@@ -173,6 +213,13 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
     </View>
   );
 
+  const suggestedPrompts = getSuggestedPrompts();
+  
+  const handleSuggestedPromptPress = (prompt: string) => {
+    setInputText(prompt);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -186,11 +233,24 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
               Laboratorio AI
             </Text>
           </HStack>
-          <Badge colorScheme="primary" variant="subtle">
-            {user?.tier === 'free' ? `${1 - user.stats.dailyCrossesUsed}/1` : '∞'} Incroci
-          </Badge>
+          <HStack alignItems="center" space={2}>
+            <Badge colorScheme="primary" variant="subtle">
+              {user?.tier === 'free' ? `${1 - user.stats.dailyCrossesUsed}/1` : '∞'} Incroci
+            </Badge>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ConversationHistory')}
+              style={styles.historyButton}
+            >
+              <Icon as={MaterialIcons} name="history" size={5} color={colors.text} />
+            </TouchableOpacity>
+          </HStack>
         </HStack>
       </LinearGradient>
+
+      <MemoryIndicator 
+        position="top-right" 
+        showDetails={true}
+      />
 
       <FlatList
         ref={flatListRef}
@@ -226,6 +286,28 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
         )}
 
         <VStack style={styles.inputContainer}>
+          {/* Suggested Prompts */}
+          {memoryEnabled && suggestedPrompts.length > 0 && !inputText.trim() && (
+            <VStack space={2} mb={3}>
+              <Text fontSize="xs" color={colors.textSecondary} fontWeight="medium">
+                💡 Suggerimenti basati sulla tua cronologia:
+              </Text>
+              <HStack flexWrap="wrap" space={2}>
+                {suggestedPrompts.slice(0, 3).map((prompt, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => handleSuggestedPromptPress(prompt)}
+                    style={styles.suggestedPrompt}
+                  >
+                    <Text fontSize="xs" color={colors.primary}>
+                      {prompt}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </HStack>
+            </VStack>
+          )}
+
           {selectedParents.parentA && selectedParents.parentB && (
             <HStack style={styles.selectedStrains} space={2}>
               <Badge colorScheme="primary">{selectedParents.parentA}</Badge>
@@ -330,5 +412,19 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: 'Roboto',
     color: colors.text,
+  },
+  historyButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  suggestedPrompt: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: colors.background,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    marginBottom: 4,
   },
 });

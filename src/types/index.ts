@@ -23,6 +23,16 @@ export interface UserPreferences {
   theme: 'light' | 'dark';
   notifications: boolean;
   language: string;
+  memorySettings?: MemoryPrivacySettings;
+}
+
+export interface MemoryPrivacySettings {
+  enableMemory: boolean;
+  encryptSensitive: boolean;
+  retentionDays: number;
+  allowAnalytics: boolean;
+  allowPersonalization: boolean;
+  gdprCompliant: boolean;
 }
 
 export interface Badge {

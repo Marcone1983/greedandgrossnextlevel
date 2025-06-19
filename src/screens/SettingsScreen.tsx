@@ -30,6 +30,7 @@ import LanguageSelector from '@/components/LanguageSelector';
 import DocumentViewer from '@/components/DocumentViewer';
 import { SupportedLanguage, LANGUAGES } from '@/i18n';
 import { logAnalytics } from '@/services/firebase';
+import { useConversationMemory } from '@/hooks/useConversationMemory';
 
 interface SettingsSectionProps {
   title: string;
@@ -111,6 +112,16 @@ export default function SettingsScreen() {
   const { colorMode, toggleColorMode } = useColorMode();
   
   const { user } = useSelector((state: RootState) => state.auth);
+  
+  // Memory system integration
+  const {
+    memoryEnabled,
+    conversationCount,
+    memoryProfile,
+    updatePrivacySettings,
+    clearHistory,
+    exportData,
+  } = useConversationMemory();
   
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(() => 
     i18n.language as SupportedLanguage || 'en'
@@ -283,6 +294,94 @@ Thank you!
     }
   };
 
+  // Memory Settings Handlers
+  const handleMemoryToggle = async () => {
+    try {
+      await updatePrivacySettings({ enableMemory: !memoryEnabled });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      logAnalytics('memory_setting_changed', { enabled: !memoryEnabled });
+    } catch (error) {
+      toast.show({
+        title: 'Error',
+        description: 'Failed to update memory settings',
+        colorScheme: 'error',
+      });
+    }
+  };
+
+  const handleEncryptionToggle = async () => {
+    try {
+      await updatePrivacySettings({ 
+        encryptSensitive: !memoryProfile?.privacySettings.encryptSensitive 
+      });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      logAnalytics('encryption_setting_changed', { 
+        enabled: !memoryProfile?.privacySettings.encryptSensitive 
+      });
+    } catch (error) {
+      toast.show({
+        title: 'Error',
+        description: 'Failed to update encryption settings',
+        colorScheme: 'error',
+      });
+    }
+  };
+
+  const handleClearMemory = () => {
+    Alert.alert(
+      'Clear Memory',
+      'This will permanently delete all your conversation history and learned preferences. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Clear All',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await clearHistory();
+              toast.show({
+                title: 'Success',
+                description: 'Memory cleared successfully',
+                colorScheme: 'success',
+              });
+              logAnalytics('memory_cleared');
+            } catch (error) {
+              toast.show({
+                title: 'Error',
+                description: 'Failed to clear memory',
+                colorScheme: 'error',
+              });
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleExportData = async () => {
+    try {
+      const data = await exportData();
+      toast.show({
+        title: 'Export Ready',
+        description: 'Your data has been prepared for export',
+        colorScheme: 'success',
+      });
+      logAnalytics('data_exported');
+      // In a real app, implement file sharing here
+    } catch (error) {
+      toast.show({
+        title: 'Error',
+        description: 'Failed to export data',
+        colorScheme: 'error',
+      });
+    }
+  };
+
+  const handleConversationHistory = () => {
+    navigation.navigate('ConversationHistory');
+    logAnalytics('conversation_history_opened');
+  };
+
   if (documentViewer.isOpen && documentViewer.type) {
     return (
       <DocumentViewer
@@ -411,6 +510,77 @@ Thank you!
             isFirst
             isLast
           />
+        </SettingsSection>
+
+        {/* Memory & Privacy Section */}
+        <SettingsSection title="Memory & Privacy">
+          <SettingsItem
+            icon="memory"
+            title="Smart Memory"
+            subtitle={memoryEnabled 
+              ? `Active with ${conversationCount} conversations` 
+              : "Disabled - No conversation tracking"
+            }
+            rightElement={
+              <Switch
+                isChecked={memoryEnabled}
+                onToggle={handleMemoryToggle}
+                colorScheme="primary"
+              />
+            }
+            showArrow={false}
+            isFirst
+          />
+          
+          {memoryEnabled && (
+            <>
+              <SettingsItem
+                icon="enhanced-encryption"
+                title="Encrypt Sensitive Data"
+                subtitle="Encrypt conversations and personal preferences"
+                rightElement={
+                  <Switch
+                    isChecked={memoryProfile?.privacySettings.encryptSensitive || false}
+                    onToggle={handleEncryptionToggle}
+                    colorScheme="primary"
+                  />
+                }
+                showArrow={false}
+              />
+              
+              <SettingsItem
+                icon="history"
+                title="Conversation History"
+                subtitle={`View and manage ${conversationCount} conversations`}
+                onPress={handleConversationHistory}
+              />
+              
+              <SettingsItem
+                icon="download"
+                title="Export My Data"
+                subtitle="Download all your data (GDPR compliant)"
+                onPress={handleExportData}
+              />
+              
+              <SettingsItem
+                icon="delete-forever"
+                title="Clear All Memory"
+                subtitle="Permanently delete all conversation history"
+                onPress={handleClearMemory}
+                isLast
+              />
+            </>
+          )}
+          
+          {!memoryEnabled && (
+            <SettingsItem
+              icon="info"
+              title="About Smart Memory"
+              subtitle="Enable to get personalized AI responses based on your conversation history"
+              showArrow={false}
+              isLast
+            />
+          )}
         </SettingsSection>
 
         {/* Subscription Section */}

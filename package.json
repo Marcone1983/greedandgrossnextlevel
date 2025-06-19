@@ -56,7 +56,9 @@
     "react-native-localize": "^3.0.6",
     "i18next": "^23.7.16",
     "react-native-webview": "^13.6.4",
-    "@react-native-firebase/storage": "^18.7.1"
+    "@react-native-firebase/storage": "^18.7.1",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^2.30.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -71,7 +73,8 @@
     "jest-expo": "~49.0.0",
     "@testing-library/react-native": "^12.3.2",
     "detox": "^20.13.5",
-    "@types/jest": "^29.5.5"
+    "@types/jest": "^29.5.5",
+    "@types/crypto-js": "^4.2.1"
   },
   "private": true
 }
