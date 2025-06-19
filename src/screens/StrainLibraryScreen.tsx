@@ -1,10 +1,9 @@
 import { Platform } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   Alert,
 } from 'react-native';
 import {
@@ -14,7 +13,6 @@ import {
   IconButton,
   Icon,
   Text,
-  Badge,
   Select,
   CheckIcon,
   useToast,
@@ -56,13 +54,13 @@ export default function StrainLibraryScreen() {
 
   useEffect(() => {
     loadStrains();
-  }, []);
+  }, [loadStrains]);
 
   useEffect(() => {
     filterStrains();
-  }, [searchQuery, filters, strains]);
+  }, [filterStrains, searchQuery, filters, strains]);
 
-  const loadStrains = async () => {
+  const loadStrains = useCallback(async () => {
     try {
       const savedStrains = await getStrains();
       setStrains(savedStrains);
@@ -76,7 +74,7 @@ export default function StrainLibraryScreen() {
     }
   };
 
-  const filterStrains = () => {
+  const filterStrains = useCallback(() => {
     let filtered = [...strains];
 
     // Search filter
@@ -112,7 +110,7 @@ export default function StrainLibraryScreen() {
     }
 
     setFilteredStrains(filtered);
-  };
+  }, [strains, searchQuery, filters]);
 
   const handleSearch = debounce((text: string) => {
     setSearchQuery(text);
@@ -156,7 +154,7 @@ export default function StrainLibraryScreen() {
 
     try {
       const pdfContent = generatePDFContent(filteredStrains);
-      const fileUri = FileSystem.documentDirectory + 'strain_library.pdf';
+      const fileUri = `${FileSystem.documentDirectory}strain_library.pdf`;
       
       // In a real app, you'd use react-native-pdf or similar
       await FileSystem.writeAsStringAsync(fileUri, pdfContent);
@@ -172,7 +170,7 @@ export default function StrainLibraryScreen() {
         colorScheme: 'error',
       });
     }
-  };
+  }, []);
 
   const generatePDFContent = (strains: Strain[]): string => {
     return JSON.stringify(strains, null, 2); // Simplified for now

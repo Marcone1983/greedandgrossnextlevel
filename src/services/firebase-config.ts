@@ -13,7 +13,6 @@ import {
   Timestamp,
   addDoc,
   updateDoc,
-  deleteDoc,
   onSnapshot,
 } from 'firebase/firestore';
 import { getAnalytics, logEvent } from 'firebase/analytics';
@@ -321,7 +320,7 @@ export async function getSystemStats() {
     }
     
     // Fallback: Calculate stats from collections
-    const [usersSnapshot, strainsSnapshot, crossesSnapshot, analyticsSnapshot] = await Promise.all([
+    const [usersSnapshot, _strainsSnapshot, crossesSnapshot, _analyticsSnapshot] = await Promise.all([
       getDocs(collection(db, COLLECTIONS.USERS)),
       getDocs(collection(db, COLLECTIONS.STRAINS)),
       getDocs(collection(db, COLLECTIONS.CROSSES_CACHE)),
@@ -403,14 +402,14 @@ export async function exportDatabase(format: 'json' | 'csv' = 'json') {
         csvContent += `\n\n--- ${collectionName.toUpperCase()} ---\n`;
         if (Array.isArray(documents) && documents.length > 0) {
           const headers = Object.keys(documents[0]);
-          csvContent += headers.join(',') + '\n';
+          csvContent += `${headers.join(',')}\n`;
           
           documents.forEach((doc: any) => {
             const row = headers.map(header => {
               const value = doc[header];
               return typeof value === 'object' ? JSON.stringify(value) : value;
             });
-            csvContent += row.join(',') + '\n';
+            csvContent += `${row.join(',')}\n`;
           });
         }
       }

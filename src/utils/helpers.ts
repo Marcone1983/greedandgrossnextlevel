@@ -28,7 +28,7 @@ export function xpToNextLevel(currentXp: number): number {
 
 export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.substr(0, maxLength - 3) + '...';
+  return `${text.substr(0, maxLength - 3)}...`;
 }
 
 export function capitalizeFirst(text: string): string {
@@ -92,9 +92,9 @@ export function getStrainTypeColor(type: 'sativa' | 'indica' | 'hybrid'): string
 
 export function formatNumber(num: number): string {
   if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
+    return `${(num / 1000000).toFixed(1)}M`;
   } else if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
+    return `${(num / 1000).toFixed(1)}K`;
   }
   return num.toString();
 }

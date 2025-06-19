@@ -9,6 +9,7 @@ module.exports = {
     'no-var': 'error',
     'object-shorthand': 'error',
     'prefer-template': 'error',
+    'import/no-unresolved': ['error', { ignore: ['@env'] }],
   },
   parserOptions: {
     ecmaVersion: 2020,

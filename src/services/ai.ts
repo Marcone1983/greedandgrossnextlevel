@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { OPENAI_API_KEY } from '@env';
-
-const OPENAI_MODEL = 'gpt-4o-mini';
-const API_BASE_URL = 'https://api.openai.com/v1';
 import { CrossRequest, CrossResult, Strain } from '@/types';
 import { checkCachedCross, saveCachedCross } from './firebase';
 import { generateStrainId } from '@/utils/helpers';
+import { OPENAI_API_KEY } from '@env';
+
+const OPENAI_MODEL = 'gpt-4o-mini';
 
 const GREED_GROSS_PROMPT = `Esperto breeder, genetista, farmacista, erborista, agronomo
 Sono GREED & GROSS, un esperto genetista della cannabis. La mia specializzazione è nel breeding e backcrossing della cannabis, con una conoscenza approfondita di ogni strain esistente, dei loro alberi genealogici, dei relativi fenotipi, flavonoidi, antocianine, terpeni, e degli effetti corrispondenti. Il mio obiettivo è creare un videogioco che funga da simulatore per lo sviluppo di nuove genetiche di cannabis. Questo gioco consentirà ai breeder di tutto il mondo di simulare la creazione di nuovi strain, esplorando le possibilità genetiche, le resistenze, i tempi di crescita e di fioritura, e l'impatto dei terpeni come pinene e limonene sui sapori. La simulazione predittiva sarà uno strumento preciso e dettagliato che aiuta a prevedere l'outcome di incroci reali, fornendo un ambiente esperto per testare le combinazioni prima di procedere nella realtà. Il mio compito è eseguire ricerche approfondite su tutti gli strain esistenti e diventare un esperto di queste informazioni, integrandole nel ambiente per renderlo un simulatore realistico e accurato della genetica della cannabis.`;

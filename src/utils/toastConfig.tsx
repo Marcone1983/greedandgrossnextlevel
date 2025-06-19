@@ -60,7 +60,7 @@ export const toastConfig = {
       )}
     />
   ),
-  custom: ({ text1, text2, props }: any) => (
+  custom: ({ text1, text2, props: _props }: any) => (
     <View style={[styles.base, styles.custom]}>
       <View style={styles.contentContainer}>
         <Text style={styles.text1}>{text1}</Text>
