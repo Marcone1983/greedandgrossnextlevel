@@ -13,11 +13,13 @@ import { theme } from '@/constants/theme';
 import { initializeServices } from '@/services/initialization';
 import RootNavigator from '@/navigation/RootNavigator';
 import { toastConfig } from '@/utils/toastConfig';
+import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [appIsReady, setAppIsReady] = React.useState(false);
+  const [showAnimatedSplash, setShowAnimatedSplash] = React.useState(true);
 
   useEffect(() => {
     async function prepare() {
@@ -41,8 +43,8 @@ export default function App() {
     prepare();
   }, []);
 
-  if (!appIsReady) {
-    return null;
+  if (!appIsReady || showAnimatedSplash) {
+    return <AnimatedSplashScreen onFinish={() => setShowAnimatedSplash(false)} />;
   }
 
   return (
