@@ -72,7 +72,7 @@ export default function StrainLibraryScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const filterStrains = useCallback(() => {
     let filtered = [...strains];
@@ -146,7 +146,7 @@ export default function StrainLibraryScreen() {
     );
   };
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = useCallback(async () => {
     if (user?.tier === 'free') {
       navigation.navigate('Paywall', { feature: 'export_pdf' });
       return;
