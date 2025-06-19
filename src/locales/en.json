@@ -1,0 +1,207 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "retry": "Retry",
+    "delete": "Delete",
+    "edit": "Edit",
+    "send": "Send",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "share": "Share",
+    "download": "Download",
+    "upload": "Upload",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "labChat": "Lab Chat",
+    "globalChat": "Global Chat",
+    "strainLibrary": "Strain Library",
+    "settings": "Settings",
+    "adminPanel": "Admin Panel"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "username": "Username",
+      "tier": "Tier",
+      "avatar": "Avatar",
+      "changePicture": "Change picture"
+    },
+    "language": {
+      "title": "Language",
+      "description": "Select your preferred language",
+      "current": "Current language",
+      "changeLanguage": "Change language",
+      "confirmChange": "Change language to {{language}}?",
+      "reloadRequired": "The app will reload to apply the new language"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "push": "Push notifications",
+      "pushDescription": "Receive push notifications from the app",
+      "chatMessages": "Chat messages",
+      "chatDescription": "Notifications for new messages",
+      "breeding": "Breeding completed",
+      "breedingDescription": "Notifications for completed crosses",
+      "updates": "App updates",
+      "updatesDescription": "Notifications for new features"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "darkMode": "Dark mode",
+      "lightMode": "Light mode",
+      "systemMode": "System"
+    },
+    "subscription": {
+      "title": "Manage Subscription",
+      "currentPlan": "Current plan",
+      "free": "Free",
+      "premium": "Premium",
+      "admin": "Admin",
+      "managePlan": "Manage plan",
+      "restorePurchases": "Restore purchases",
+      "upgrade": "Upgrade to Premium",
+      "features": "Features",
+      "billing": "Billing"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "disclaimer": "Educational Disclaimer",
+      "support": "Support"
+    },
+    "app": {
+      "title": "App Info",
+      "version": "Version",
+      "build": "Build",
+      "credits": "Credits",
+      "licenses": "Licenses",
+      "aboutApp": "About GREED & GROSS"
+    }
+  },
+  "chat": {
+    "placeholder": "Type a message...",
+    "send": "Send",
+    "typing": "Typing...",
+    "online": "Online",
+    "offline": "Offline",
+    "connecting": "Connecting...",
+    "connectionLost": "Connection lost",
+    "reconnecting": "Reconnecting...",
+    "messageLimit": "Message limit reached",
+    "upgradeToUnlock": "Upgrade to Premium for unlimited messages"
+  },
+  "breeding": {
+    "selectParents": "Select parents",
+    "parent1": "Parent 1",
+    "parent2": "Parent 2",
+    "startBreeding": "Start breeding",
+    "breedingInProgress": "Breeding in progress...",
+    "breedingComplete": "Breeding complete!",
+    "newStrain": "New strain created",
+    "saveStrain": "Save strain",
+    "discardStrain": "Discard strain",
+    "breedingLimit": "Breeding limit reached",
+    "upgradeMessage": "Upgrade to Premium for unlimited breeding"
+  },
+  "strains": {
+    "library": "Strain Library",
+    "myStrains": "My strains",
+    "popularStrains": "Popular strains",
+    "searchPlaceholder": "Search strains...",
+    "filterBy": "Filter by",
+    "type": "Type",
+    "effects": "Effects",
+    "difficulty": "Difficulty",
+    "sativa": "Sativa",
+    "indica": "Indica",
+    "hybrid": "Hybrid",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "thc": "THC",
+    "cbd": "CBD",
+    "flowering": "Flowering",
+    "yield": "Yield",
+    "details": "Details",
+    "genetics": "Genetics",
+    "terpenes": "Terpenes",
+    "addToLibrary": "Add to library",
+    "removeFromLibrary": "Remove from library"
+  },
+  "subscription": {
+    "freeTier": "Free Tier",
+    "premiumTier": "Premium Tier",
+    "freeFeatures": [
+      "10 crosses per day",
+      "Limited chat",
+      "Basic library access",
+      "Community support"
+    ],
+    "premiumFeatures": [
+      "Unlimited crosses",
+      "Unlimited chat",
+      "Full library access",
+      "Advanced AI features",
+      "Priority support",
+      "Cloud backup",
+      "Data export"
+    ],
+    "monthlyPrice": "$9.99/month",
+    "yearlyPrice": "$99.99/year",
+    "yearlyDiscount": "Save 17%",
+    "startTrial": "Start free trial",
+    "subscribe": "Subscribe now",
+    "alreadySubscribed": "Already subscribed"
+  },
+  "errors": {
+    "networkError": "Network error",
+    "serverError": "Server error",
+    "unknownError": "Unknown error",
+    "invalidInput": "Invalid input",
+    "unauthorized": "Unauthorized",
+    "permissionDenied": "Permission denied",
+    "notFound": "Not found",
+    "timeout": "Timeout",
+    "offline": "You are offline",
+    "documentNotFound": "Document not found",
+    "documentLoadError": "Document load error",
+    "cacheError": "Cache error",
+    "storageError": "Storage error",
+    "uploadError": "Upload error",
+    "downloadError": "Download error"
+  },
+  "languages": {
+    "it": "Italiano",
+    "en": "English",
+    "es": "Español",
+    "de": "Deutsch",
+    "fr": "Français"
+  },
+  "legal": {
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "educationalDisclaimer": "Educational Disclaimer",
+    "supportContact": "Support Contact",
+    "lastUpdated": "Last updated",
+    "effectiveDate": "Effective date",
+    "documentLoading": "Loading document...",
+    "documentError": "Unable to load document",
+    "goBack": "Back to settings"
+  }
+}

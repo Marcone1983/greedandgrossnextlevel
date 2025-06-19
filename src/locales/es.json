@@ -1,0 +1,207 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Hecho",
+    "retry": "Reintentar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "send": "Enviar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "share": "Compartir",
+    "download": "Descargar",
+    "upload": "Subir",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "navigation": {
+    "dashboard": "Panel",
+    "labChat": "Chat Lab",
+    "globalChat": "Chat Global",
+    "strainLibrary": "Biblioteca de Cepas",
+    "settings": "Configuración",
+    "adminPanel": "Panel Admin"
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": {
+      "title": "Perfil",
+      "username": "Nombre de usuario",
+      "tier": "Plan",
+      "avatar": "Avatar",
+      "changePicture": "Cambiar foto"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Selecciona tu idioma preferido",
+      "current": "Idioma actual",
+      "changeLanguage": "Cambiar idioma",
+      "confirmChange": "¿Cambiar idioma a {{language}}?",
+      "reloadRequired": "La app se recargará para aplicar el nuevo idioma"
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "push": "Notificaciones push",
+      "pushDescription": "Recibir notificaciones push de la app",
+      "chatMessages": "Mensajes de chat",
+      "chatDescription": "Notificaciones para nuevos mensajes",
+      "breeding": "Cruces completados",
+      "breedingDescription": "Notificaciones para cruces completados",
+      "updates": "Actualizaciones",
+      "updatesDescription": "Notificaciones para nuevas funciones"
+    },
+    "appearance": {
+      "title": "Apariencia",
+      "theme": "Tema",
+      "darkMode": "Modo oscuro",
+      "lightMode": "Modo claro",
+      "systemMode": "Sistema"
+    },
+    "subscription": {
+      "title": "Gestionar Suscripción",
+      "currentPlan": "Plan actual",
+      "free": "Gratuito",
+      "premium": "Premium",
+      "admin": "Admin",
+      "managePlan": "Gestionar plan",
+      "restorePurchases": "Restaurar compras",
+      "upgrade": "Actualizar a Premium",
+      "features": "Características",
+      "billing": "Facturación"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacyPolicy": "Política de Privacidad",
+      "termsOfService": "Términos de Servicio",
+      "disclaimer": "Descargo Educativo",
+      "support": "Soporte"
+    },
+    "app": {
+      "title": "Info de la App",
+      "version": "Versión",
+      "build": "Build",
+      "credits": "Créditos",
+      "licenses": "Licencias",
+      "aboutApp": "Acerca de GREED & GROSS"
+    }
+  },
+  "chat": {
+    "placeholder": "Escribe un mensaje...",
+    "send": "Enviar",
+    "typing": "Escribiendo...",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "connecting": "Conectando...",
+    "connectionLost": "Conexión perdida",
+    "reconnecting": "Reconectando...",
+    "messageLimit": "Límite de mensajes alcanzado",
+    "upgradeToUnlock": "Actualiza a Premium para mensajes ilimitados"
+  },
+  "breeding": {
+    "selectParents": "Seleccionar padres",
+    "parent1": "Padre 1",
+    "parent2": "Padre 2",
+    "startBreeding": "Iniciar cruce",
+    "breedingInProgress": "Cruce en progreso...",
+    "breedingComplete": "¡Cruce completado!",
+    "newStrain": "Nueva cepa creada",
+    "saveStrain": "Guardar cepa",
+    "discardStrain": "Descartar cepa",
+    "breedingLimit": "Límite de cruces alcanzado",
+    "upgradeMessage": "Actualiza a Premium para cruces ilimitados"
+  },
+  "strains": {
+    "library": "Biblioteca de Cepas",
+    "myStrains": "Mis cepas",
+    "popularStrains": "Cepas populares",
+    "searchPlaceholder": "Buscar cepas...",
+    "filterBy": "Filtrar por",
+    "type": "Tipo",
+    "effects": "Efectos",
+    "difficulty": "Dificultad",
+    "sativa": "Sativa",
+    "indica": "Indica",
+    "hybrid": "Híbrida",
+    "beginner": "Principiante",
+    "intermediate": "Intermedio",
+    "advanced": "Avanzado",
+    "thc": "THC",
+    "cbd": "CBD",
+    "flowering": "Floración",
+    "yield": "Rendimiento",
+    "details": "Detalles",
+    "genetics": "Genética",
+    "terpenes": "Terpenos",
+    "addToLibrary": "Añadir a biblioteca",
+    "removeFromLibrary": "Eliminar de biblioteca"
+  },
+  "subscription": {
+    "freeTier": "Plan Gratuito",
+    "premiumTier": "Plan Premium",
+    "freeFeatures": [
+      "10 cruces por día",
+      "Chat limitado",
+      "Acceso básico a biblioteca",
+      "Soporte comunitario"
+    ],
+    "premiumFeatures": [
+      "Cruces ilimitados",
+      "Chat ilimitado",
+      "Acceso completo a biblioteca",
+      "Funciones IA avanzadas",
+      "Soporte prioritario",
+      "Respaldo en la nube",
+      "Exportación de datos"
+    ],
+    "monthlyPrice": "€9.99/mes",
+    "yearlyPrice": "€99.99/año",
+    "yearlyDiscount": "Ahorra 17%",
+    "startTrial": "Iniciar prueba gratuita",
+    "subscribe": "Suscribirse ahora",
+    "alreadySubscribed": "Ya suscrito"
+  },
+  "errors": {
+    "networkError": "Error de red",
+    "serverError": "Error del servidor",
+    "unknownError": "Error desconocido",
+    "invalidInput": "Entrada inválida",
+    "unauthorized": "No autorizado",
+    "permissionDenied": "Permiso denegado",
+    "notFound": "No encontrado",
+    "timeout": "Tiempo agotado",
+    "offline": "Estás desconectado",
+    "documentNotFound": "Documento no encontrado",
+    "documentLoadError": "Error al cargar documento",
+    "cacheError": "Error de caché",
+    "storageError": "Error de almacenamiento",
+    "uploadError": "Error de subida",
+    "downloadError": "Error de descarga"
+  },
+  "languages": {
+    "it": "Italiano",
+    "en": "English",
+    "es": "Español",
+    "de": "Deutsch",
+    "fr": "Français"
+  },
+  "legal": {
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio",
+    "educationalDisclaimer": "Descargo Educativo",
+    "supportContact": "Contacto de Soporte",
+    "lastUpdated": "Última actualización",
+    "effectiveDate": "Fecha de entrada en vigor",
+    "documentLoading": "Cargando documento...",
+    "documentError": "No se pudo cargar el documento",
+    "goBack": "Volver a configuración"
+  }
+}

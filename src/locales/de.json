@@ -1,0 +1,207 @@
+{
+  "common": {
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "save": "Speichern",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "done": "Fertig",
+    "retry": "Wiederholen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "send": "Senden",
+    "search": "Suchen",
+    "filter": "Filter",
+    "sort": "Sortieren",
+    "share": "Teilen",
+    "download": "Herunterladen",
+    "upload": "Hochladen",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "labChat": "Labor Chat",
+    "globalChat": "Globaler Chat",
+    "strainLibrary": "Sorten-Bibliothek",
+    "settings": "Einstellungen",
+    "adminPanel": "Admin-Panel"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "profile": {
+      "title": "Profil",
+      "username": "Benutzername",
+      "tier": "Stufe",
+      "avatar": "Avatar",
+      "changePicture": "Bild ändern"
+    },
+    "language": {
+      "title": "Sprache",
+      "description": "Wählen Sie Ihre bevorzugte Sprache",
+      "current": "Aktuelle Sprache",
+      "changeLanguage": "Sprache ändern",
+      "confirmChange": "Sprache zu {{language}} ändern?",
+      "reloadRequired": "Die App wird neu geladen, um die neue Sprache anzuwenden"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "push": "Push-Benachrichtigungen",
+      "pushDescription": "Push-Benachrichtigungen von der App erhalten",
+      "chatMessages": "Chat-Nachrichten",
+      "chatDescription": "Benachrichtigungen für neue Nachrichten",
+      "breeding": "Zucht abgeschlossen",
+      "breedingDescription": "Benachrichtigungen für abgeschlossene Kreuzungen",
+      "updates": "App-Updates",
+      "updatesDescription": "Benachrichtigungen für neue Funktionen"
+    },
+    "appearance": {
+      "title": "Aussehen",
+      "theme": "Design",
+      "darkMode": "Dunkler Modus",
+      "lightMode": "Heller Modus",
+      "systemMode": "System"
+    },
+    "subscription": {
+      "title": "Abonnement verwalten",
+      "currentPlan": "Aktueller Plan",
+      "free": "Kostenlos",
+      "premium": "Premium",
+      "admin": "Admin",
+      "managePlan": "Plan verwalten",
+      "restorePurchases": "Käufe wiederherstellen",
+      "upgrade": "Auf Premium upgraden",
+      "features": "Funktionen",
+      "billing": "Abrechnung"
+    },
+    "legal": {
+      "title": "Rechtliches",
+      "privacyPolicy": "Datenschutzrichtlinie",
+      "termsOfService": "Nutzungsbedingungen",
+      "disclaimer": "Bildungshinweis",
+      "support": "Support"
+    },
+    "app": {
+      "title": "App-Info",
+      "version": "Version",
+      "build": "Build",
+      "credits": "Credits",
+      "licenses": "Lizenzen",
+      "aboutApp": "Über GREED & GROSS"
+    }
+  },
+  "chat": {
+    "placeholder": "Nachricht eingeben...",
+    "send": "Senden",
+    "typing": "Tippt...",
+    "online": "Online",
+    "offline": "Offline",
+    "connecting": "Verbinde...",
+    "connectionLost": "Verbindung verloren",
+    "reconnecting": "Verbindung wird wiederhergestellt...",
+    "messageLimit": "Nachrichtenlimit erreicht",
+    "upgradeToUnlock": "Auf Premium upgraden für unbegrenzte Nachrichten"
+  },
+  "breeding": {
+    "selectParents": "Eltern auswählen",
+    "parent1": "Elternteil 1",
+    "parent2": "Elternteil 2",
+    "startBreeding": "Zucht starten",
+    "breedingInProgress": "Zucht läuft...",
+    "breedingComplete": "Zucht abgeschlossen!",
+    "newStrain": "Neue Sorte erstellt",
+    "saveStrain": "Sorte speichern",
+    "discardStrain": "Sorte verwerfen",
+    "breedingLimit": "Zuchtlimit erreicht",
+    "upgradeMessage": "Auf Premium upgraden für unbegrenzte Zucht"
+  },
+  "strains": {
+    "library": "Sorten-Bibliothek",
+    "myStrains": "Meine Sorten",
+    "popularStrains": "Beliebte Sorten",
+    "searchPlaceholder": "Sorten suchen...",
+    "filterBy": "Filtern nach",
+    "type": "Typ",
+    "effects": "Effekte",
+    "difficulty": "Schwierigkeit",
+    "sativa": "Sativa",
+    "indica": "Indica",
+    "hybrid": "Hybrid",
+    "beginner": "Anfänger",
+    "intermediate": "Fortgeschritten",
+    "advanced": "Experte",
+    "thc": "THC",
+    "cbd": "CBD",
+    "flowering": "Blüte",
+    "yield": "Ertrag",
+    "details": "Details",
+    "genetics": "Genetik",
+    "terpenes": "Terpene",
+    "addToLibrary": "Zur Bibliothek hinzufügen",
+    "removeFromLibrary": "Aus Bibliothek entfernen"
+  },
+  "subscription": {
+    "freeTier": "Kostenlose Stufe",
+    "premiumTier": "Premium-Stufe",
+    "freeFeatures": [
+      "10 Kreuzungen pro Tag",
+      "Eingeschränkter Chat",
+      "Basis-Bibliothekszugang",
+      "Community-Support"
+    ],
+    "premiumFeatures": [
+      "Unbegrenzte Kreuzungen",
+      "Unbegrenzter Chat",
+      "Vollständiger Bibliothekszugang",
+      "Erweiterte KI-Funktionen",
+      "Prioritätssupport",
+      "Cloud-Backup",
+      "Datenexport"
+    ],
+    "monthlyPrice": "9,99€/Monat",
+    "yearlyPrice": "99,99€/Jahr",
+    "yearlyDiscount": "17% sparen",
+    "startTrial": "Kostenlose Testversion starten",
+    "subscribe": "Jetzt abonnieren",
+    "alreadySubscribed": "Bereits abonniert"
+  },
+  "errors": {
+    "networkError": "Netzwerkfehler",
+    "serverError": "Serverfehler",
+    "unknownError": "Unbekannter Fehler",
+    "invalidInput": "Ungültige Eingabe",
+    "unauthorized": "Nicht autorisiert",
+    "permissionDenied": "Berechtigung verweigert",
+    "notFound": "Nicht gefunden",
+    "timeout": "Zeitüberschreitung",
+    "offline": "Sie sind offline",
+    "documentNotFound": "Dokument nicht gefunden",
+    "documentLoadError": "Fehler beim Laden des Dokuments",
+    "cacheError": "Cache-Fehler",
+    "storageError": "Speicherfehler",
+    "uploadError": "Upload-Fehler",
+    "downloadError": "Download-Fehler"
+  },
+  "languages": {
+    "it": "Italienisch",
+    "en": "Englisch",
+    "es": "Spanisch",
+    "de": "Deutsch",
+    "fr": "Französisch"
+  },
+  "legal": {
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "termsOfService": "Nutzungsbedingungen",
+    "educationalDisclaimer": "Bildungshinweis",
+    "supportContact": "Support-Kontakt",
+    "lastUpdated": "Zuletzt aktualisiert",
+    "effectiveDate": "Gültigkeitsdatum",
+    "documentLoading": "Dokument wird geladen...",
+    "documentError": "Dokument kann nicht geladen werden",
+    "goBack": "Zurück zu den Einstellungen"
+  }
+}

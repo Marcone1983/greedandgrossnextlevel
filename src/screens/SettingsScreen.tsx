@@ -1,422 +1,489 @@
-import { Platform } from 'react-native';
-import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Alert, Linking, Platform } from 'react-native';
 import {
   VStack,
   HStack,
   Text,
-  Switch,
+  ScrollView,
+  Box,
+  Pressable,
   Icon,
-  Divider,
-  Badge,
-  Progress,
-  useToast,
+  Switch,
   Avatar,
+  Badge,
+  Divider,
+  useColorMode,
+  useColorModeValue,
+  useToast,
 } from 'native-base';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { colors } from '@/constants/theme';
 import { RootState } from '@/store';
-import { colors, gradients } from '@/constants/theme';
-import { logout, updateUser } from '@/store/slices/authSlice';
-import { toggleTheme, incrementAdminTaps } from '@/store/slices/uiSlice';
-import { clearAllData } from '@/services/storage';
-import { calculateUserLevel, xpToNextLevel } from '@/utils/helpers';
-import { checkSubscriptionStatus } from '@/services/initialization';
+import LanguageSelector from '@/components/LanguageSelector';
+import DocumentViewer from '@/components/DocumentViewer';
+import { SupportedLanguage, LANGUAGES } from '@/i18n';
+import { logAnalytics } from '@/services/firebase';
+
+interface SettingsSectionProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+interface SettingsItemProps {
+  icon: string;
+  iconLib?: 'MaterialIcons' | 'MaterialCommunityIcons';
+  title: string;
+  subtitle?: string;
+  onPress?: () => void;
+  rightElement?: React.ReactNode;
+  showArrow?: boolean;
+  isFirst?: boolean;
+  isLast?: boolean;
+}
+
+function SettingsSection({ title, children }: SettingsSectionProps) {
+  return (
+    <VStack space={2} mb={6}>
+      <Text fontSize="sm" fontWeight="bold" color="gray.500" px={4} textTransform="uppercase">
+        {title}
+      </Text>
+      <Box bg={useColorModeValue('white', colors.darkCard)} borderRadius="lg" mx={4}>
+        {children}
+      </Box>
+    </VStack>
+  );
+}
+
+function SettingsItem({
+  icon,
+  iconLib = 'MaterialIcons',
+  title,
+  subtitle,
+  onPress,
+  rightElement,
+  showArrow = true,
+  isFirst = false,
+  isLast = false,
+}: SettingsItemProps) {
+  const IconComponent = iconLib === 'MaterialIcons' ? MaterialIcons : MaterialCommunityIcons;
+  
+  return (
+    <Pressable
+      onPress={onPress}
+      _pressed={{ bg: colors.primary + '10' }}
+      borderTopRadius={isFirst ? 'lg' : 0}
+      borderBottomRadius={isLast ? 'lg' : 0}
+    >
+      <HStack alignItems="center" p={4} space={3}>
+        <Icon as={IconComponent} name={icon} size="md" color={colors.primary} />
+        <VStack flex={1}>
+          <Text fontSize="md" fontWeight="medium">
+            {title}
+          </Text>
+          {subtitle && (
+            <Text fontSize="sm" color="gray.500">
+              {subtitle}
+            </Text>
+          )}
+        </VStack>
+        {rightElement}
+        {showArrow && !rightElement && (
+          <Icon as={MaterialIcons} name="arrow-forward-ios" size="sm" color="gray.400" />
+        )}
+      </HStack>
+      {!isLast && <Divider ml={16} />}
+    </Pressable>
+  );
+}
 
 export default function SettingsScreen() {
-  const [notifications, setNotifications] = useState(true);
-  const [hapticFeedback, setHapticFeedback] = useState(true);
-  
-  const dispatch = useDispatch();
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const toast = useToast();
+  const { colorMode, toggleColorMode } = useColorMode();
   
-  const { user, isAdmin } = useSelector((state: RootState) => state.auth);
-  const { theme, adminTaps } = useSelector((state: RootState) => state.ui);
+  const { user } = useSelector((state: RootState) => state.auth);
+  
+  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(() => 
+    i18n.language as SupportedLanguage || 'en'
+  );
+  const [notificationSettings, setNotificationSettings] = useState({
+    push: true,
+    chatMessages: true,
+    breeding: true,
+    updates: false,
+  });
+  const [documentViewer, setDocumentViewer] = useState<{
+    isOpen: boolean;
+    type: 'privacy-policy' | 'terms-service' | 'disclaimer' | 'support-info' | null;
+  }>({
+    isOpen: false,
+    type: null,
+  });
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Sei sicuro di voler uscire? I tuoi dati saranno conservati.',
-      [
-        { text: 'Annulla', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            dispatch(logout());
-            await clearAllData();
-            toast.show({
-              description: 'Logout effettuato',
-              colorScheme: 'info',
-            });
-          },
-        },
-      ]
-    );
+  const bgColor = useColorModeValue('gray.50', colors.darkBackground);
+  const isDarkMode = colorMode === 'dark';
+
+  useEffect(() => {
+    loadNotificationSettings();
+    logAnalytics('screen_view', { screen_name: 'settings' });
+  }, []);
+
+  const loadNotificationSettings = async () => {
+    try {
+      const settings = await AsyncStorage.getItem('@greedgross:notifications');
+      if (settings) {
+        setNotificationSettings(JSON.parse(settings));
+      }
+    } catch (error) {
+      console.error('Error loading notification settings:', error);
+    }
   };
 
-  const handleClearData = () => {
-    Alert.alert(
-      'Cancella Tutti i Dati',
-      'Questa azione eliminerà TUTTI i tuoi dati incluse strain, cronologia e preferenze. Operazione irreversibile!',
-      [
-        { text: 'Annulla', style: 'cancel' },
-        {
-          text: 'Elimina Tutto',
-          style: 'destructive',
-          onPress: async () => {
-            await clearAllData();
-            dispatch(logout());
-            toast.show({
-              description: 'Tutti i dati sono stati eliminati',
-              colorScheme: 'warning',
-            });
-          },
-        },
-      ]
-    );
-  };
-
-  const handleAdminTap = () => {
-    dispatch(incrementAdminTaps());
-    if (adminTaps === 6) {
+  const saveNotificationSettings = async (newSettings: typeof notificationSettings) => {
+    try {
+      await AsyncStorage.setItem('@greedgross:notifications', JSON.stringify(newSettings));
+      setNotificationSettings(newSettings);
+    } catch (error) {
+      console.error('Error saving notification settings:', error);
       toast.show({
-        description: 'Admin panel sbloccato!',
-        colorScheme: 'success',
+        title: t('errors.storageError'),
+        colorScheme: 'error',
       });
     }
   };
 
-  const handleSubscriptionManage = async () => {
-    const isActive = await checkSubscriptionStatus();
-    if (isActive) {
-      // Show subscription management
-      Alert.alert(
-        'Abbonamento Attivo',
-        'Il tuo abbonamento Premium è attivo. Gestisci da App Store o Play Store.',
-        [{ text: 'OK' }]
-      );
-    } else {
-      navigation.navigate('Paywall', { feature: 'premium_features' });
+  const handleNotificationToggle = async (key: keyof typeof notificationSettings) => {
+    const newSettings = { ...notificationSettings, [key]: !notificationSettings[key] };
+    
+    if (key === 'push') {
+      // Request notification permissions if enabling
+      if (!notificationSettings.push) {
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== 'granted') {
+          toast.show({
+            title: t('errors.permissionDenied'),
+            description: t('settings.notifications.permissionRequired'),
+            colorScheme: 'warning',
+          });
+          return;
+        }
+      }
+    }
+    
+    await saveNotificationSettings(newSettings);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    
+    logAnalytics('notification_setting_changed', {
+      setting: key,
+      enabled: newSettings[key],
+    });
+  };
+
+  const handleLanguageChange = (language: SupportedLanguage) => {
+    setCurrentLanguage(language);
+    logAnalytics('language_changed', { language });
+  };
+
+  const handleThemeToggle = () => {
+    toggleColorMode();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    logAnalytics('theme_changed', { theme: isDarkMode ? 'light' : 'dark' });
+  };
+
+  const handleSubscriptionPress = () => {
+    navigation.navigate('Paywall', { feature: 'subscription_management' });
+    logAnalytics('subscription_management_opened');
+  };
+
+  const handleRestorePurchases = async () => {
+    try {
+      // RevenueCat restore purchases logic here
+      toast.show({
+        title: t('settings.subscription.restorePurchases'),
+        description: t('common.success'),
+        colorScheme: 'success',
+      });
+      logAnalytics('purchases_restored');
+    } catch (error) {
+      toast.show({
+        title: t('common.error'),
+        description: t('errors.unknownError'),
+        colorScheme: 'error',
+      });
     }
   };
 
-  const SettingItem = ({ 
-    icon, 
-    iconColor = colors.textSecondary,
-    title, 
-    subtitle, 
-    rightElement, 
-    onPress,
-    showDivider = true 
-  }: any) => (
-    <>
-      <TouchableOpacity onPress={onPress} style={styles.settingItem}>
-        <HStack alignItems="center" space={3} flex={1}>
-          <Icon as={MaterialIcons} name={icon} size={6} color={iconColor} />
-          <VStack flex={1}>
-            <Text color={colors.text} fontSize="md">
-              {title}
-            </Text>
-            {subtitle && (
-              <Text color={colors.textSecondary} fontSize="sm">
-                {subtitle}
-              </Text>
-            )}
-          </VStack>
-          {rightElement}
-        </HStack>
-      </TouchableOpacity>
-      {showDivider && <Divider bg={colors.border} />}
-    </>
-  );
+  const handleDocumentPress = (type: 'privacy-policy' | 'terms-service' | 'disclaimer' | 'support-info') => {
+    setDocumentViewer({ isOpen: true, type });
+    logAnalytics('legal_document_opened', { document_type: type });
+  };
 
-  if (!user) return null;
+  const handleSupportPress = () => {
+    const email = 'support@greedandgross.com';
+    const subject = encodeURIComponent('GREED & GROSS - Support Request');
+    const body = encodeURIComponent(`
+Hi GREED & GROSS Support Team,
 
-  const currentLevel = calculateUserLevel(user.stats.xp);
-  const xpToNext = xpToNextLevel(user.stats.xp);
+User ID: ${user?.id || 'N/A'}
+App Version: ${Platform.OS === 'ios' ? '1.0.0' : '1.0.0'}
+Device: ${Platform.OS} ${Platform.Version}
+Language: ${currentLanguage}
+
+Issue Description:
+[Please describe your issue here]
+
+Thank you!
+    `);
+    
+    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
+    
+    Linking.canOpenURL(mailtoUrl).then((supported) => {
+      if (supported) {
+        Linking.openURL(mailtoUrl);
+      } else {
+        toast.show({
+          title: t('common.error'),
+          description: t('errors.emailNotSupported'),
+          colorScheme: 'error',
+        });
+      }
+    });
+    
+    logAnalytics('support_contact_opened');
+  };
+
+  const getTierBadgeColor = () => {
+    switch (user?.tier) {
+      case 'premium':
+        return 'yellow';
+      case 'admin':
+        return 'purple';
+      default:
+        return 'gray';
+    }
+  };
+
+  const getTierLabel = () => {
+    switch (user?.tier) {
+      case 'premium':
+        return t('settings.subscription.premium');
+      case 'admin':
+        return t('settings.subscription.admin');
+      default:
+        return t('settings.subscription.free');
+    }
+  };
+
+  if (documentViewer.isOpen && documentViewer.type) {
+    return (
+      <DocumentViewer
+        documentType={documentViewer.type}
+        language={currentLanguage}
+        onClose={() => setDocumentViewer({ isOpen: false, type: null })}
+      />
+    );
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <LinearGradient
-        colors={gradients.dark}
-        style={styles.headerGradient}
-      >
-        <VStack space={4} px={4} py={6}>
-          <HStack alignItems="center" space={4}>
-            <Avatar bg={colors.primary} size="lg">
-              <Text color="white" fontSize="xl" fontWeight="bold">
-                {user.username.charAt(0).toUpperCase()}
-              </Text>
-            </Avatar>
-            <VStack flex={1}>
+    <Box flex={1} bg={bgColor}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Profile Section */}
+        <SettingsSection title={t('settings.profile.title')}>
+          <SettingsItem
+            icon="person"
+            title={user?.username || 'Anonymous User'}
+            subtitle={`${t('settings.profile.tier')}: ${getTierLabel()}`}
+            rightElement={
               <HStack alignItems="center" space={2}>
-                <Text fontSize="xl" fontWeight="bold" color={colors.text}>
-                  {user.username}
-                </Text>
-                <Badge
-                  colorScheme={
-                    user.tier === 'admin' ? 'warning' :
-                    user.tier === 'premium' ? 'success' : 'gray'
-                  }
-                  variant="subtle"
-                >
-                  {user.tier.toUpperCase()}
+                <Badge colorScheme={getTierBadgeColor()} variant="solid">
+                  {getTierLabel().toUpperCase()}
                 </Badge>
+                <Avatar
+                  size="sm"
+                  bg={colors.primary}
+                  source={user?.avatar ? { uri: user.avatar } : undefined}
+                >
+                  {user?.username?.charAt(0).toUpperCase() || 'A'}
+                </Avatar>
               </HStack>
-              <Text color={colors.textSecondary}>
-                Livello {currentLevel} • {user.stats.totalCrosses} incroci
-              </Text>
-            </VStack>
-          </HStack>
+            }
+            showArrow={false}
+            isFirst
+            isLast
+          />
+        </SettingsSection>
 
-          {/* XP Progress */}
-          <VStack space={2}>
-            <HStack justifyContent="space-between">
-              <Text color={colors.textSecondary} fontSize="sm">
-                XP: {user.stats.xp}
-              </Text>
-              <Text color={colors.textSecondary} fontSize="sm">
-                {xpToNext} XP al prossimo livello
-              </Text>
-            </HStack>
-            <Progress
-              value={(user.stats.xp % 100)}
-              max={100}
-              colorScheme="primary"
-              bg="gray.700"
-              size="sm"
+        {/* Language Section */}
+        <SettingsSection title={t('settings.language.title')}>
+          <Box p={4}>
+            <LanguageSelector
+              currentLanguage={currentLanguage}
+              onLanguageChange={handleLanguageChange}
             />
-          </VStack>
-        </VStack>
-      </LinearGradient>
+          </Box>
+        </SettingsSection>
 
-      <VStack style={styles.content}>
-        {/* Account Section */}
-        <VStack space={0} bg={colors.surface} borderRadius={12} mb={4}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          
-          <SettingItem
-            icon="workspace-premium"
-            iconColor={user.tier === 'premium' ? colors.secondary : colors.textSecondary}
-            title="Abbonamento"
-            subtitle={
-              user.tier === 'premium' 
-                ? 'Premium attivo' 
-                : 'Passa a Premium per funzioni illimitate'
-            }
-            rightElement={
-              <Icon as={MaterialIcons} name="chevron-right" color={colors.textSecondary} />
-            }
-            onPress={handleSubscriptionManage}
-          />
-
-          <SettingItem
-            icon="bar-chart"
-            title="Statistiche"
-            subtitle={`${user.stats.strainsCreated} strain • ${user.stats.badges.length} badge`}
-            rightElement={
-              <Icon as={MaterialIcons} name="chevron-right" color={colors.textSecondary} />
-            }
-            onPress={() => {
-              // Navigate to stats screen
-            }}
-          />
-
-          <SettingItem
-            icon="logout"
-            iconColor={colors.error}
-            title="Logout"
-            subtitle="Esci dall'account"
-            onPress={handleLogout}
-            showDivider={false}
-          />
-        </VStack>
-
-        {/* App Settings */}
-        <VStack space={0} bg={colors.surface} borderRadius={12} mb={4}>
-          <Text style={styles.sectionTitle}>Impostazioni App</Text>
-          
-          <SettingItem
-            icon="palette"
-            title="Tema"
-            subtitle={theme === 'dark' ? 'Modalità scura' : 'Modalità chiara'}
-            rightElement={
-              <Switch
-                value={theme === 'dark'}
-                onToggle={() => dispatch(toggleTheme())}
-                colorScheme="primary"
-              />
-            }
-          />
-
-          <SettingItem
+        {/* Notifications Section */}
+        <SettingsSection title={t('settings.notifications.title')}>
+          <SettingsItem
             icon="notifications"
-            title="Notifiche"
-            subtitle="Ricevi aggiornamenti e promemoria"
+            title={t('settings.notifications.push')}
+            subtitle={t('settings.notifications.pushDescription')}
             rightElement={
               <Switch
-                value={notifications}
-                onToggle={setNotifications}
+                isChecked={notificationSettings.push}
+                onToggle={() => handleNotificationToggle('push')}
                 colorScheme="primary"
               />
             }
+            showArrow={false}
+            isFirst
           />
-
-          <SettingItem
-            icon="vibration"
-            title="Feedback Aptico"
-            subtitle="Vibrazioni per interazioni"
+          <SettingsItem
+            icon="chat"
+            title={t('settings.notifications.chatMessages')}
+            subtitle={t('settings.notifications.chatDescription')}
             rightElement={
               <Switch
-                value={hapticFeedback}
-                onToggle={setHapticFeedback}
+                isChecked={notificationSettings.chatMessages}
+                onToggle={() => handleNotificationToggle('chatMessages')}
+                colorScheme="primary"
+                isDisabled={!notificationSettings.push}
+              />
+            }
+            showArrow={false}
+          />
+          <SettingsItem
+            icon="science"
+            iconLib="MaterialCommunityIcons"
+            title={t('settings.notifications.breeding')}
+            subtitle={t('settings.notifications.breedingDescription')}
+            rightElement={
+              <Switch
+                isChecked={notificationSettings.breeding}
+                onToggle={() => handleNotificationToggle('breeding')}
+                colorScheme="primary"
+                isDisabled={!notificationSettings.push}
+              />
+            }
+            showArrow={false}
+          />
+          <SettingsItem
+            icon="system-update"
+            title={t('settings.notifications.updates')}
+            subtitle={t('settings.notifications.updatesDescription')}
+            rightElement={
+              <Switch
+                isChecked={notificationSettings.updates}
+                onToggle={() => handleNotificationToggle('updates')}
+                colorScheme="primary"
+                isDisabled={!notificationSettings.push}
+              />
+            }
+            showArrow={false}
+            isLast
+          />
+        </SettingsSection>
+
+        {/* Appearance Section */}
+        <SettingsSection title={t('settings.appearance.title')}>
+          <SettingsItem
+            icon="palette"
+            title={t('settings.appearance.theme')}
+            subtitle={isDarkMode ? t('settings.appearance.darkMode') : t('settings.appearance.lightMode')}
+            rightElement={
+              <Switch
+                isChecked={isDarkMode}
+                onToggle={handleThemeToggle}
                 colorScheme="primary"
               />
             }
-            showDivider={false}
+            showArrow={false}
+            isFirst
+            isLast
           />
-        </VStack>
+        </SettingsSection>
 
-        {/* Data Management */}
-        <VStack space={0} bg={colors.surface} borderRadius={12} mb={4}>
-          <Text style={styles.sectionTitle}>Gestione Dati</Text>
-          
-          <SettingItem
-            icon="cloud-download"
-            title="Backup Dati"
-            subtitle="Salva le tue strain nel cloud"
-            rightElement={
-              <Icon as={MaterialIcons} name="chevron-right" color={colors.textSecondary} />
-            }
-            onPress={() => {
-              if (user.tier === 'free') {
-                navigation.navigate('Paywall', { feature: 'cloud_backup' });
-              }
-            }}
+        {/* Subscription Section */}
+        <SettingsSection title={t('settings.subscription.title')}>
+          <SettingsItem
+            icon="card-membership"
+            title={t('settings.subscription.managePlan')}
+            subtitle={`${t('settings.subscription.currentPlan')}: ${getTierLabel()}`}
+            onPress={handleSubscriptionPress}
+            isFirst
           />
-
-          <SettingItem
-            icon="delete-forever"
-            iconColor={colors.error}
-            title="Cancella Tutti i Dati"
-            subtitle="Elimina definitivamente tutti i dati"
-            onPress={handleClearData}
-            showDivider={false}
+          <SettingsItem
+            icon="restore"
+            title={t('settings.subscription.restorePurchases')}
+            onPress={handleRestorePurchases}
+            showArrow={false}
+            isLast
           />
-        </VStack>
+        </SettingsSection>
 
-        {/* About & Legal */}
-        <VStack space={0} bg={colors.surface} borderRadius={12} mb={4}>
-          <Text style={styles.sectionTitle}>Informazioni</Text>
-          
-          <SettingItem
+        {/* Legal Section */}
+        <SettingsSection title={t('settings.legal.title')}>
+          <SettingsItem
+            icon="privacy-tip"
+            title={t('settings.legal.privacyPolicy')}
+            onPress={() => handleDocumentPress('privacy-policy')}
+            isFirst
+          />
+          <SettingsItem
+            icon="description"
+            title={t('settings.legal.termsOfService')}
+            onPress={() => handleDocumentPress('terms-service')}
+          />
+          <SettingsItem
+            icon="school"
+            title={t('settings.legal.disclaimer')}
+            onPress={() => handleDocumentPress('disclaimer')}
+          />
+          <SettingsItem
+            icon="support"
+            title={t('settings.legal.support')}
+            onPress={handleSupportPress}
+            isLast
+          />
+        </SettingsSection>
+
+        {/* App Info Section */}
+        <SettingsSection title={t('settings.app.title')}>
+          <SettingsItem
             icon="info"
-            title="Informazioni App"
-            subtitle="Versione 1.0.0"
-            rightElement={
-              <Icon as={MaterialIcons} name="chevron-right" color={colors.textSecondary} />
-            }
+            title={t('settings.app.version')}
+            subtitle="1.0.0 (1)"
+            showArrow={false}
+            isFirst
           />
-
-          <SettingItem
-            icon="gavel"
-            title="Termini e Privacy"
-            subtitle="Leggi i nostri termini di servizio"
-            rightElement={
-              <Icon as={MaterialIcons} name="chevron-right" color={colors.textSecondary} />
-            }
+          <SettingsItem
+            icon="build"
+            title={t('settings.app.build')}
+            subtitle={Platform.OS === 'ios' ? 'iOS' : 'Android'}
+            showArrow={false}
           />
-
-          <SettingItem
-            icon="help"
-            title="Supporto"
-            subtitle="Aiuto e contatti"
-            rightElement={
-              <Icon as={MaterialIcons} name="chevron-right" color={colors.textSecondary} />
-            }
-            showDivider={false}
+          <SettingsItem
+            icon="favorite"
+            title={t('settings.app.credits')}
+            subtitle="Made with ❤️ for cannabis breeders"
+            showArrow={false}
+            isLast
           />
-        </VStack>
+        </SettingsSection>
 
-        {/* Easter Egg - Admin Access */}
-        <TouchableOpacity onPress={handleAdminTap} style={styles.adminEasterEgg}>
-          <Text color={colors.textSecondary} fontSize="xs" textAlign="center">
-            GREED & GROSS v1.0.0
-          </Text>
-          {adminTaps > 0 && (
-            <Text color={colors.primary} fontSize="xs" textAlign="center">
-              {7 - adminTaps} tap rimanenti per accesso admin
-            </Text>
-          )}
-        </TouchableOpacity>
-
-        {isAdmin && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('AdminPanel')}
-            style={styles.adminButton}
-          >
-            <LinearGradient
-              colors={[colors.secondary, '#FFA000']}
-              style={styles.adminGradient}
-            >
-              <Icon as={MaterialIcons} name="admin-panel-settings" size={6} color="white" />
-              <Text color="white" fontWeight="bold" ml={2}>
-                Panel Amministratore
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
-      </VStack>
-    </ScrollView>
+        {/* Bottom spacing */}
+        <Box h={20} />
+      </ScrollView>
+    </Box>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  headerGradient: {
-    paddingTop: Platform.OS === 'ios' ? 50 : 30,
-  },
-  content: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontFamily: 'Roboto-Bold',
-    fontSize: 18,
-    color: colors.text,
-    padding: 16,
-    paddingBottom: 8,
-  },
-  settingItem: {
-    padding: 16,
-  },
-  adminEasterEgg: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  adminButton: {
-    marginTop: 16,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  adminGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-});
