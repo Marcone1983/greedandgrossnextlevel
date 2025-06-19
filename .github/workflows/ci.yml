@@ -18,8 +18,8 @@ on:
         - both
 
 env:
-  NODE_VERSION: '18'
-  JAVA_VERSION: '11'
+  NODE_VERSION: 18
+  JAVA_VERSION: 11
 
 jobs:
   test:
