@@ -4,7 +4,6 @@ import {
   calculateUserLevel,
   xpToNextLevel,
   formatNumber,
-  validateUsername,
   validateStrainName,
 } from '@/utils/helpers';
 import { validateUsername as validateUsernameFn } from '@/utils/validation';

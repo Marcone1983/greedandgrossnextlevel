@@ -27,4 +27,12 @@ module.exports = {
       version: 'detect',
     },
   },
+  overrides: [
+    {
+      files: ['scripts/*.js'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+  ],
 };
