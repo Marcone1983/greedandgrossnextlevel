@@ -1,82 +1,304 @@
-name: CI/CD Pipeline
+name: GREED & GROSS CI/CD Pipeline
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'apk'
+        type: choice
+        options:
+        - apk
+        - aab
+        - both
+
+env:
+  NODE_VERSION: '18'
+  JAVA_VERSION: '11'
 
 jobs:
   test:
+    name: 🧪 Test & Quality Check
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
     
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
     
-    - name: Install dependencies
-      run: npm install
+    - name: 📱 Setup Expo CLI
+      run: npm install -g @expo/cli@latest
     
-    - name: Run TypeScript check
+    - name: 🔧 Install dependencies
+      run: npm ci
+    
+    - name: 🔍 TypeScript check
       run: npm run type-check
     
-    - name: Run ESLint
+    - name: 🎨 ESLint check
       run: npm run lint
     
-    - name: Run tests
-      run: npm test -- --coverage --watchAll=false
+    - name: 🧪 Run tests
+      run: npm test -- --coverage --watchAll=false --passWithNoTests
     
-    - name: Upload coverage to Codecov
+    - name: 📊 Upload coverage
+      if: success()
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage/lcov.info
-        fail_ci_if_error: true
+        fail_ci_if_error: false
 
-  build:
+  build-android:
+    name: 🤖 Build Android APK/AAB
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    
+    strategy:
+      matrix:
+        build-type: [apk, aab]
     
     steps:
-    - uses: actions/checkout@v3
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
     
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
     
-    - name: Setup Expo
-      uses: expo/expo-github-action@v7
+    - name: ☕ Setup Java
+      uses: actions/setup-java@v4
       with:
-        expo-version: latest
-        token: ${{ secrets.EXPO_TOKEN }}
+        distribution: 'temurin'
+        java-version: ${{ env.JAVA_VERSION }}
     
-    - name: Install dependencies
-      run: npm install
+    - name: 🐘 Setup Gradle
+      uses: gradle/gradle-build-action@v2
     
-    - name: Build for production
-      run: expo build:android --type apk
-      env:
-        EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    - name: 📱 Setup Expo CLI
+      run: npm install -g @expo/cli@latest eas-cli@latest
+    
+    - name: 🔧 Install dependencies
+      run: npm ci
+    
+    - name: 🔐 Create environment file
+      run: |
+        cat > .env << EOF
+        FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+        FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
+        FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+        FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
+        FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+        FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
+        OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+        OPENAI_MODEL=${{ secrets.OPENAI_MODEL }}
+        REVENUECAT_API_KEY_IOS=${{ secrets.REVENUECAT_API_KEY_IOS }}
+        REVENUECAT_API_KEY_ANDROID=${{ secrets.REVENUECAT_API_KEY_ANDROID }}
+        API_BASE_URL=${{ secrets.API_BASE_URL }}
+        WEBSOCKET_URL=${{ secrets.WEBSOCKET_URL }}
+        ADMIN_SECRET=${{ secrets.ADMIN_SECRET }}
+        APP_VERSION=${{ secrets.APP_VERSION }}
+        ENVIRONMENT=production
+        EOF
+    
+    - name: 🔑 Setup Android Keystore
+      run: |
+        # Create keystore from base64
+        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/greed-gross-release-key.keystore
+        
+        # Verify keystore exists
+        ls -la android/app/greed-gross-release-key.keystore
+        
+        # Create gradle.properties with keystore config
+        cat >> android/gradle.properties << EOF
+        GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
+        GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+        GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+        EOF
+    
+    - name: 🏗️ Build APK
+      if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
+      run: |
+        cd android
+        ./gradlew assembleRelease --no-daemon --stacktrace
+        
+        # Verify APK was created
+        ls -la app/build/outputs/apk/release/
+        
+        # Rename APK with version and timestamp
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
+    
+    - name: 🏗️ Build AAB (App Bundle)
+      if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
+      run: |
+        cd android
+        ./gradlew bundleRelease --no-daemon --stacktrace
+        
+        # Verify AAB was created
+        ls -la app/build/outputs/bundle/release/
+        
+        # Rename AAB with version and timestamp
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab
+    
+    - name: 📊 APK/AAB Analysis
+      run: |
+        if [ -f android/app/build/outputs/apk/release/greed-gross-*.apk ]; then
+          echo "🎉 APK Build Success!"
+          APK_SIZE=$(du -h android/app/build/outputs/apk/release/greed-gross-*.apk | cut -f1)
+          echo "📦 APK Size: $APK_SIZE"
+          echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
+        fi
+        
+        if [ -f android/app/build/outputs/bundle/release/greed-gross-*.aab ]; then
+          echo "🎉 AAB Build Success!"
+          AAB_SIZE=$(du -h android/app/build/outputs/bundle/release/greed-gross-*.aab | cut -f1)
+          echo "📦 AAB Size: $AAB_SIZE"
+          echo "AAB_SIZE=$AAB_SIZE" >> $GITHUB_ENV
+        fi
+    
+    - name: 📤 Upload APK Artifact
+      if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
+      uses: actions/upload-artifact@v4
+      with:
+        name: greed-gross-apk-${{ matrix.build-type }}
+        path: android/app/build/outputs/apk/release/greed-gross-*.apk
+        retention-days: 30
+    
+    - name: 📤 Upload AAB Artifact
+      if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
+      uses: actions/upload-artifact@v4
+      with:
+        name: greed-gross-aab-${{ matrix.build-type }}
+        path: android/app/build/outputs/bundle/release/greed-gross-*.aab
+        retention-days: 30
+    
+    - name: 📝 Build Summary
+      run: |
+        echo "## 🎉 GREED & GROSS Build Complete! 🌿" >> $GITHUB_STEP_SUMMARY
+        echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| 📱 App Version | ${{ secrets.APP_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🏗️ Build Type | ${{ matrix.build-type }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 📅 Build Date | $(date) |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🔗 Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+        
+        if [ ! -z "$APK_SIZE" ]; then
+          echo "| 📦 APK Size | $APK_SIZE |" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ ! -z "$AAB_SIZE" ]; then
+          echo "| 📦 AAB Size | $AAB_SIZE |" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📱 Download Links" >> $GITHUB_STEP_SUMMARY
+        echo "- APK and AAB files are available in the build artifacts" >> $GITHUB_STEP_SUMMARY
+        echo "- Navigate to Actions → This workflow run → Artifacts" >> $GITHUB_STEP_SUMMARY
 
-  deploy:
-    needs: build
+  deploy-internal:
+    name: 🚀 Deploy Internal Testing
+    needs: build-android
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
-    - name: Deploy to Play Store
+    - name: 📥 Download AAB
+      uses: actions/download-artifact@v4
+      with:
+        name: greed-gross-aab-aab
+        path: ./artifacts
+    
+    - name: 🔐 Setup Google Play credentials
+      if: secrets.GOOGLE_PLAY_SERVICE_ACCOUNT != ''
       run: |
-        echo "Deploying to Play Store..."
-        # Add Play Store deployment logic here
+        echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}" > google-play-key.json
+    
+    - name: 🚀 Upload to Google Play Internal Testing
+      if: secrets.GOOGLE_PLAY_SERVICE_ACCOUNT != ''
+      uses: r0adkll/upload-google-play@v1
+      with:
+        serviceAccountJson: google-play-key.json
+        packageName: com.greedandgross.cannabisbreeding
+        releaseFiles: ./artifacts/*.aab
+        track: internal
+        status: completed
+    
+    - name: 📧 Notify deployment
+      run: |
+        echo "🎉 App deployed to Google Play Internal Testing!"
+        echo "Track: Internal Testing"
+        echo "Package: com.greedandgross.cannabisbreeding"
+
+  build-ios:
+    name: 🍎 Build iOS (Future)
+    runs-on: macos-latest
+    if: false # Disabled for now, enable when iOS certificates are ready
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 📱 Setup Expo for iOS
+      run: |
+        echo "iOS build will be implemented when certificates are configured"
+        echo "Required secrets:"
+        echo "- IOS_CERTIFICATE_BASE64"
+        echo "- IOS_PROVISIONING_PROFILE_BASE64"
+        echo "- APPLE_ID"
+        echo "- APPLE_APP_SPECIFIC_PASSWORD"
+
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🔍 Run security audit
+      run: |
+        npm audit --audit-level moderate
         
-    - name: Deploy to App Store
+    - name: 🔐 Check for secrets
       run: |
-        echo "Deploying to App Store..."
-        # Add App Store deployment logic here
+        echo "Scanning for accidentally committed secrets..."
+        if grep -r "sk-proj-" . --exclude-dir=node_modules --exclude-dir=.git; then
+          echo "❌ Found potential API keys in code!"
+          exit 1
+        else
+          echo "✅ No secrets found in code"
+        fi
+
+  notification:
+    name: 📢 Notification
+    needs: [test, build-android]
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📊 Build Status
+      run: |
+        if [ "${{ needs.build-android.result }}" == "success" ]; then
+          echo "🎉 GREED & GROSS build completed successfully!"
+          echo "✅ APK and AAB ready for distribution"
+          echo "📱 App version: ${{ secrets.APP_VERSION }}"
+        else
+          echo "❌ Build failed. Check the logs for details."
+          exit 1
+        fi

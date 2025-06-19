@@ -1,0 +1,10 @@
+{
+  "public_sdk_key": "$REVENUECAT_APPLE_KEY",
+  "debug_logs_enabled": true,
+  "observer_mode": false,
+  "platform_config": {
+    "ios": {
+      "default_behavior": "purchase_tester"
+    }
+  }
+}
