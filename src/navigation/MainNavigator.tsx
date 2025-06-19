@@ -15,7 +15,7 @@ export type MainTabParamList = {
   Settings: undefined;
 };
 
-const Tab = createBottomTabNavigator<MainTabParamList>();
+const Tab = createBottomTabNavigator();
 
 export default function MainNavigator() {
   return (

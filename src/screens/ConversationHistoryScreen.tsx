@@ -27,6 +27,7 @@ import { ConversationEntry } from '@/services/memoryService';
 import * as Haptics from 'expo-haptics';
 
 interface ConversationItemProps {
+  key?: string | number;
   conversation: ConversationEntry;
   onPress: () => void;
 }

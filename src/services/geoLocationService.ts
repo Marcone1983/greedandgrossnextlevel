@@ -1,13 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface LocationData {
-  country: string;
-  countryCode: string;
-  region: string;
-  regionCode: string;
-  city: string;
+  country?: string;
+  countryCode?: string;
+  region?: string;
+  regionCode?: string;
+  city?: string;
   zipCode?: string;
-  timezone: string;
+  timezone?: string;
   latitude?: number;
   longitude?: number;
   isp?: string;
@@ -464,9 +464,9 @@ class GeoLocationService {
     }
     
     return {
-      country: location.countryCode,
-      region: location.regionCode,
-      timezone: location.timezone
+      country: location.countryCode || 'Unknown',
+      region: location.regionCode || 'Unknown',
+      timezone: location.timezone || 'UTC'
     };
   }
 
@@ -490,7 +490,7 @@ class GeoLocationService {
       'PT', 'RO', 'RS', 'RU', 'SE', 'SI', 'SK', 'SM', 'UA', 'VA'
     ];
     
-    return location ? europeanCountries.includes(location.countryCode) : false;
+    return location ? europeanCountries.includes(location.countryCode || '') : false;
   }
 
   // GDPR COMPLIANCE

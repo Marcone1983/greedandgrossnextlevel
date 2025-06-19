@@ -29,12 +29,20 @@ export interface UserMemoryProfile {
   growingType?: 'indoor' | 'outdoor' | 'both';
   conversationStyle: 'detailed' | 'brief' | 'technical';
   lastUpdated: Date;
+  privacySettings?: {
+    enableMemory?: boolean;
+    encryptSensitive?: boolean;
+    allowAnalytics?: boolean;
+    retentionDays?: number;
+  };
 }
 
 export interface MemorySettings {
   enabled: boolean;
+  enableMemory?: boolean;
   retentionDays: number;
   encryptSensitiveData: boolean;
+  encryptSensitive?: boolean;
   allowAnalytics: boolean;
   autoSessionSave: boolean;
 }
@@ -129,7 +137,7 @@ class MemoryService {
   }
 
   // CONTEXT RECONSTRUCTION
-  async getConversationContext(userId: string, limit: number = 20): Promise<{
+  async getConversationContext(userId: string, limitCount: number = 20): Promise<{
     recentConversations: ConversationEntry[];
     userProfile: UserMemoryProfile;
     contextSummary: string;
@@ -141,7 +149,7 @@ class MemoryService {
         collection(this.db, 'conversations'),
         where('userId', '==', userId),
         orderBy('timestamp', 'desc'),
-        limit(limit)
+        limit(limitCount)
       );
       
       const snapshot = await getDocs(conversationsQuery);

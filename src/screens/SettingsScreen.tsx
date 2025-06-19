@@ -34,7 +34,7 @@ import { useConversationMemory } from '@/hooks/useConversationMemory';
 
 interface SettingsSectionProps {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 interface SettingsItemProps {
@@ -312,11 +312,11 @@ Thank you!
   const handleEncryptionToggle = async () => {
     try {
       await updatePrivacySettings({ 
-        encryptSensitive: !memoryProfile?.privacySettings.encryptSensitive 
+        encryptSensitive: !memoryProfile?.privacySettings?.encryptSensitive 
       });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       logAnalytics('encryption_setting_changed', { 
-        enabled: !memoryProfile?.privacySettings.encryptSensitive 
+        enabled: !memoryProfile?.privacySettings?.encryptSensitive 
       });
     } catch (error) {
       toast.show({
@@ -540,7 +540,7 @@ Thank you!
                 subtitle="Encrypt conversations and personal preferences"
                 rightElement={
                   <Switch
-                    isChecked={memoryProfile?.privacySettings.encryptSensitive || false}
+                    isChecked={memoryProfile?.privacySettings?.encryptSensitive || false}
                     onToggle={handleEncryptionToggle}
                     colorScheme="primary"
                   />

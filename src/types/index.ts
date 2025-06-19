@@ -142,6 +142,48 @@ export interface AnalyticsEvent {
   sessionId: string;
 }
 
+export interface AnalyticsEventData {
+  // Navigation events
+  fromScreen?: string;
+  toScreen?: string;
+  
+  // User interaction events
+  strainName?: string;
+  searchQuery?: string;
+  simulationResult?: any;
+  subscriptionTier?: string;
+  settingsChanged?: string[];
+  memoryOperation?: string;
+  errorCode?: string;
+  performanceMetric?: number;
+  
+  // Tutorial/onboarding
+  step?: string;
+  tutorialName?: string;
+  
+  // Feature usage
+  featureName?: string;
+  
+  // Content events
+  contentType?: string;
+  
+  // Settings
+  setting?: string;
+  
+  // Timestamps for custom events
+  timestamp?: string;
+}
+
+export interface AnalyticsPerformanceData {
+  errorMessage?: string;
+  feature?: string;
+  loadTime?: number;
+  memoryUsage?: number;
+  crashData?: any;
+  screenTime?: number;
+  daysSinceLastUse?: number;
+}
+
 export interface AdminStats {
   totalUsers: number;
   activeUsers: number;

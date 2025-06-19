@@ -20,6 +20,8 @@ export interface UserInteraction {
     memoryOperation?: string;
     errorCode?: string;
     performanceMetric?: number;
+    // Additional metadata for complex analytics
+    [key: string]: any;
   };
   userAgent?: string;
   deviceInfo?: {
@@ -56,6 +58,9 @@ export interface SystemMetric {
     loadTime?: number;
     memoryUsage?: number;
     crashData?: any;
+    context?: string;
+    // Additional metadata
+    [key: string]: any;
   };
 }
 
@@ -116,13 +121,13 @@ class AnalyticsCollector {
     }
 
     // Firebase Analytics event
-    logEvent(this.analytics, eventType, {
+    logEvent(this.analytics, eventType as any, {
       screen_name: screen,
       action: action,
       user_id: this.userId,
       session_id: this.sessionId,
       ...metadata
-    });
+    } as any);
   }
 
   // CONVERSION TRACKING
@@ -469,7 +474,7 @@ class AnalyticsCollector {
 
       return {
         totalInteractions: interactions.length,
-        uniqueSessions: [...new Set(interactions.map(i => i.sessionId))].length,
+        uniqueSessions: [...new Set(interactions.map((i: any) => i.sessionId))].length,
         topActions: this.getTopActions(interactions),
         screenTime: this.calculateScreenTime(interactions)
       };

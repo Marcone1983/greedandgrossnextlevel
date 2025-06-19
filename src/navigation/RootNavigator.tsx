@@ -18,7 +18,7 @@ export type RootStackParamList = {
   ConversationHistory: undefined;
 };
 
-const Stack = createStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator();
 
 export default function RootNavigator() {
   const [isLoading, setIsLoading] = useState(true);

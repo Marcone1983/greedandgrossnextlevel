@@ -39,7 +39,7 @@ export default function GlobalChatScreen() {
   const [message, setMessage] = useState('');
   const [isConnecting, setIsConnecting] = useState(true);
   const socketRef = useRef<any>(null);
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<any>(null);
   
   const dispatch = useDispatch();
   const navigation = useNavigation();

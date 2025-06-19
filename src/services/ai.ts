@@ -3,7 +3,7 @@ import { CrossRequest, CrossResult, Strain } from '@/types';
 import { checkCachedCross, saveCachedCross } from './firebase';
 import { generateStrainId } from '@/utils/helpers';
 import { OPENAI_API_KEY } from '@env';
-import memoryService from './memoryService';
+import { memoryService } from './memoryService';
 
 const OPENAI_MODEL = 'gpt-4o-mini';
 

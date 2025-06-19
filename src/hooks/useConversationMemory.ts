@@ -28,6 +28,16 @@ interface UseConversationMemoryReturn extends ConversationMemoryState {
   getContextForAI: () => string;
   updateMemorySettings: (settings: Partial<MemorySettings>) => Promise<void>;
   getMemorySettings: () => Promise<MemorySettings>;
+  // Missing properties that are used in components
+  saveConversation: (query: string, aiResponse: string, strainsMentioned?: string[]) => Promise<void>;
+  getContextPrompt: () => string;
+  getSuggestedPrompts: () => string[];
+  memoryEnabled: boolean;
+  conversationCount: number;
+  memoryProfile: UserMemoryProfile;
+  updatePrivacySettings: (settings: Partial<MemorySettings>) => Promise<void>;
+  clearHistory: () => Promise<void>;
+  exportData: () => Promise<any>;
   clearAllMemory: () => Promise<void>;
   exportUserData: () => Promise<any>;
   startNewSession: () => Promise<void>;
@@ -285,6 +295,35 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     };
   }, [state.isEnabled, user?.id]);
 
+  // Implement missing methods that are used in components
+  const saveConversation = useCallback(async (
+    query: string, 
+    aiResponse: string, 
+    strainsMentioned: string[] = []
+  ) => {
+    await recordConversation(query, aiResponse, { strainsHentioned: strainsMentioned });
+  }, [recordConversation]);
+
+  const getContextPrompt = useCallback((): string => {
+    return getContextForAI();
+  }, [getContextForAI]);
+
+  const getSuggestedPrompts = useCallback((): string[] => {
+    return state.suggestedPrompts;
+  }, [state.suggestedPrompts]);
+
+  const clearHistory = useCallback(async () => {
+    await clearAllMemory();
+  }, [clearAllMemory]);
+
+  const exportData = useCallback(async () => {
+    return await exportUserData();
+  }, [exportUserData]);
+
+  const updatePrivacySettings = useCallback(async (settings: Partial<MemorySettings>) => {
+    await updateMemorySettings(settings);
+  }, [updateMemorySettings]);
+
   return {
     ...state,
     recordConversation,
@@ -296,7 +335,17 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     exportUserData,
     startNewSession,
     getSuggestedPrompt,
-    getMemoryStatus
+    getMemoryStatus,
+    // Missing properties implementation
+    saveConversation,
+    getContextPrompt,
+    getSuggestedPrompts,
+    memoryEnabled: state.isEnabled,
+    conversationCount: state.analytics.totalConversations,
+    memoryProfile: state.userProfile,
+    updatePrivacySettings,
+    clearHistory,
+    exportData
   };
 }
 

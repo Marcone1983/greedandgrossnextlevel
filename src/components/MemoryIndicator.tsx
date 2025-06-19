@@ -23,6 +23,8 @@ import * as Haptics from 'expo-haptics';
 interface MemoryIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  showDetails?: boolean;
+  position?: string;
   onPress?: () => void;
 }
 

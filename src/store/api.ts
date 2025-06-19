@@ -20,27 +20,27 @@ export const api = createApi({
   tagTypes: ['Strain', 'Chat', 'Stats'],
   endpoints: (builder) => ({
     // Strain endpoints
-    getPopularStrains: builder.query<Strain[], void>({
+    getPopularStrains: builder.query({
       query: () => '/strains/popular',
       providesTags: ['Strain'],
     }),
-    searchStrains: builder.query<Strain[], string>({
+    searchStrains: builder.query({
       query: (search) => `/strains/search?q=${encodeURIComponent(search)}`,
       providesTags: ['Strain'],
     }),
     
     // Chat endpoints
-    getRecentMessages: builder.query<ChatMessage[], void>({
+    getRecentMessages: builder.query({
       query: () => '/chat/recent',
       providesTags: ['Chat'],
     }),
     
     // Admin endpoints
-    getAdminStats: builder.query<AdminStats, void>({
+    getAdminStats: builder.query({
       query: () => '/admin/stats',
       providesTags: ['Stats'],
     }),
-    downloadDatabase: builder.mutation<Blob, { format: 'json' | 'csv' }>({
+    downloadDatabase: builder.mutation({
       query: ({ format }) => ({
         url: `/admin/export?format=${format}`,
         method: 'GET',

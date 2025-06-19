@@ -45,7 +45,7 @@ export default function LabChatScreen() {
   const [showStrainSelector, setShowStrainSelector] = useState(false);
   const [selectedParents, setSelectedParents] = useState<{ parentA?: string; parentB?: string }>({});
   
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef = useRef<any>(null);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const toast = useToast();
@@ -64,7 +64,7 @@ export default function LabChatScreen() {
 
   useEffect(() => {
     const contextPrompt = memoryEnabled ? getContextPrompt() : '';
-    const isReturningUser = contextSummary?.conversationPattern !== 'New user';
+    const isReturningUser = contextSummary && contextSummary.length > 0;
     
     const welcomeMessage: ChatMessage = {
       id: '1',

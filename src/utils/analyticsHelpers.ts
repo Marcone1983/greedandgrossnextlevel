@@ -1,4 +1,4 @@
-import { analyticsCollector } from '@/services/analyticsCollector';
+import { analyticsCollector, UserInteraction } from '@/services/analyticsCollector';
 
 /**
  * Analytics Helper Functions
@@ -16,10 +16,7 @@ export const trackScreenTransition = async (
     toScreen,
     'screen_transition',
     {
-      fromScreen,
-      toScreen,
-      navigationMethod,
-      timestamp: new Date().toISOString()
+      fromScreen
     }
   );
 };
@@ -36,12 +33,13 @@ export const trackOnboardingStep = async (
     'OnboardingScreen',
     completed ? 'onboarding_step_completed' : 'onboarding_step_viewed',
     {
-      step,
-      stepName,
-      completed,
-      timeSpent,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        step: step.toString(),
+        completed,
+        timeSpent,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -56,11 +54,13 @@ export const trackFeatureDiscovery = async (
     'FeatureDiscovery',
     'feature_discovered',
     {
-      featureName,
-      discoveryMethod,
-      firstTime,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        featureName,
+        discoveryMethod,
+        firstTime,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -78,7 +78,7 @@ export const trackUserEngagement = async (
       interactionCount,
       engagementScore: calculateEngagementScore(sessionDuration, interactionCount),
       timestamp: new Date().toISOString()
-    }
+    } as any
   );
 };
 
@@ -102,10 +102,12 @@ export const trackStrainInteraction = async (
     `strain_${interactionType}`,
     {
       strainName,
-      interactionType,
-      ...metadata,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        interactionType,
+        ...metadata,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -128,11 +130,13 @@ export const trackDetailedBreedingSimulation = async (
     'BreedingScreen',
     'detailed_simulation',
     {
-      parents: [parent1, parent2],
-      result: result.name,
-      ...simulationMetrics,
-      timestamp: new Date().toISOString()
-    }
+      simulationResult: {
+        parents: [parent1, parent2],
+        result: result.name,
+        ...simulationMetrics,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -155,11 +159,13 @@ export const trackSearchBehavior = async (
     'SearchScreen',
     'search_behavior',
     {
-      query,
-      resultCount: results.length,
-      ...userBehavior,
-      timestamp: new Date().toISOString()
-    }
+      searchQuery: query,
+      metadata: {
+        resultCount: results.length,
+        ...userBehavior,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -176,14 +182,16 @@ export const trackTutorialProgress = async (
     'TutorialScreen',
     completed ? 'tutorial_completed' : skipped ? 'tutorial_skipped' : 'tutorial_progress',
     {
-      tutorialName,
-      currentStep,
-      totalSteps,
-      progress: (currentStep / totalSteps) * 100,
-      completed,
-      skipped,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        tutorialName,
+        currentStep,
+        totalSteps,
+        progress: (currentStep / totalSteps) * 100,
+        completed,
+        skipped,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -199,12 +207,14 @@ export const trackSocialSharing = async (
     'SocialShare',
     success ? 'share_success' : 'share_failed',
     {
-      contentType,
-      contentId,
-      platform,
-      success,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        contentType,
+        contentId,
+        platform,
+        success,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -220,11 +230,13 @@ export const trackSettingsChange = async (
     screen,
     'setting_modified',
     {
-      setting,
-      oldValue,
-      newValue,
-      timestamp: new Date().toISOString()
-    }
+      settingsChanged: [setting],
+      metadata: {
+        oldValue,
+        newValue,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -246,7 +258,7 @@ export const trackDetailedError = async (
     userId: context.userId,
     errorStack: error.stack,
     timestamp: new Date().toISOString()
-  });
+  } as any);
 };
 
 // A/B test tracking
@@ -261,12 +273,14 @@ export const trackABTest = async (
     'ABTest',
     `ab_test_${action}`,
     {
-      testName,
-      variant,
-      action,
-      ...metadata,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        testName,
+        variant,
+        action,
+        ...metadata,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -282,12 +296,14 @@ export const trackPushNotification = async (
     'PushNotification',
     `notification_${action}`,
     {
-      notificationId,
-      notificationType,
-      action,
-      ...metadata,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        notificationId,
+        notificationType,
+        action,
+        ...metadata,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -347,15 +363,17 @@ export const trackConversionFunnel = async (
     'ConversionFunnel',
     completed ? 'funnel_completed' : 'funnel_step',
     {
-      funnelName,
-      step,
-      stepNumber,
-      totalSteps,
-      progress: (stepNumber / totalSteps) * 100,
-      completed,
-      ...metadata,
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        funnelName,
+        step,
+        stepNumber,
+        totalSteps,
+        progress: (stepNumber / totalSteps) * 100,
+        completed,
+        ...metadata,
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -371,11 +389,13 @@ export const trackUserRetention = async (
     daysSinceInstall,
     {
       daysSinceLastUse,
-      sessionNumber,
-      returningUser,
-      retentionCohort: getRetentionCohort(daysSinceInstall),
-      timestamp: new Date().toISOString()
-    }
+      metadata: {
+        sessionNumber,
+        returningUser,
+        retentionCohort: getRetentionCohort(daysSinceInstall),
+        timestamp: new Date().toISOString()
+      }
+    } as any
   );
 };
 
@@ -391,7 +411,7 @@ const getRetentionCohort = (daysSinceInstall: number): string => {
 // Batch analytics operations for better performance
 export class AnalyticsBatcher {
   private batch: Array<() => Promise<void>> = [];
-  private batchTimeout: NodeJS.Timeout | null = null;
+  private batchTimeout: any = null;
   private readonly BATCH_SIZE = 10;
   private readonly BATCH_TIMEOUT = 5000; // 5 seconds
 
@@ -427,11 +447,16 @@ export class AnalyticsBatcher {
 // Global analytics batcher instance
 export const analyticsBatcher = new AnalyticsBatcher();
 
-// Auto-flush on app state changes
-if (typeof window !== 'undefined') {
-  window.addEventListener('beforeunload', () => {
-    analyticsBatcher.flush();
-  });
+// Auto-flush on app state changes (React Native compatible)
+try {
+  if (typeof window !== 'undefined' && window.addEventListener) {
+    window.addEventListener('beforeunload', () => {
+      analyticsBatcher.flush();
+    });
+  }
+} catch (error) {
+  // Handle React Native environment where window might not be available
+  console.debug('Window not available, skipping beforeunload listener');
 }
 
 // React Native app state handler would go here

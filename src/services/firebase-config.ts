@@ -261,7 +261,7 @@ export async function getTerpeneProfile(terpeneName: string): Promise<any | null
 export async function getBreedingTips(category?: string, difficulty?: string): Promise<any[]> {
   try {
     const baseCollection = collection(db, COLLECTIONS.BREEDING_TIPS);
-    const constraints = [];
+    const constraints: any[] = [];
     
     if (category) {
       constraints.push(where('category', '==', category));
