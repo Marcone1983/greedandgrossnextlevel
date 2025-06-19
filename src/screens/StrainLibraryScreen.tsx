@@ -52,14 +52,6 @@ export default function StrainLibraryScreen() {
   const { user } = useSelector((state: RootState) => state.auth);
   const { filters } = useSelector((state: RootState) => state.strain);
 
-  useEffect(() => {
-    loadStrains();
-  }, [loadStrains]);
-
-  useEffect(() => {
-    filterStrains();
-  }, [filterStrains, searchQuery, filters, strains]);
-
   const loadStrains = useCallback(async () => {
     try {
       const savedStrains = await getStrains();
@@ -111,6 +103,14 @@ export default function StrainLibraryScreen() {
 
     setFilteredStrains(filtered);
   }, [strains, searchQuery, filters]);
+
+  useEffect(() => {
+    loadStrains();
+  }, [loadStrains]);
+
+  useEffect(() => {
+    filterStrains();
+  }, [filterStrains, searchQuery, filters, strains]);
 
   const handleSearch = debounce((text: string) => {
     setSearchQuery(text);
