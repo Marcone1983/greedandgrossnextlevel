@@ -399,11 +399,17 @@ class AnalyticsCollector {
 
   private async getLocationInfo(): Promise<UserInteraction['location']> {
     try {
+      const { geoLocationService } = await import('./geoLocationService');
+      const locationData = await geoLocationService.getLocationForAnalytics();
+      
+      return {
+        country: locationData.country,
+        timezone: locationData.timezone
+      };
+    } catch {
       return {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
-    } catch {
-      return {};
     }
   }
 
