@@ -1,0 +1,91 @@
+name: 📱 Expo Preview Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  expo-preview:
+    name: 🚀 Build Expo Preview
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📦 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🛠️ Setup Node.js 16
+      uses: actions/setup-node@v4
+      with:
+        node-version: '16.x'
+        cache: 'npm'
+    
+    - name: 📥 Install dependencies
+      run: |
+        npm install --legacy-peer-deps
+        npm install -g @expo/cli@latest
+    
+    - name: 🔐 Setup environment
+      env:
+        FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        REVENUECAT_API_KEY_ANDROID: ${{ secrets.REVENUECAT_API_KEY_ANDROID }}
+      run: |
+        cat > .env << EOF
+        FIREBASE_API_KEY=${FIREBASE_API_KEY}
+        FIREBASE_AUTH_DOMAIN=greed-and-gross-app.firebaseapp.com
+        FIREBASE_PROJECT_ID=greed-and-gross-app
+        FIREBASE_STORAGE_BUCKET=greed-and-gross-app.appspot.com
+        FIREBASE_MESSAGING_SENDER_ID=123456789012
+        FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
+        OPENAI_API_KEY=${OPENAI_API_KEY}
+        OPENAI_MODEL=gpt-4o-mini
+        REVENUECAT_API_KEY_ANDROID=${REVENUECAT_API_KEY_ANDROID}
+        REVENUECAT_API_KEY_IOS=appl_demo_key
+        EOF
+    
+    - name: 🏗️ Expo prebuild
+      run: npx expo prebuild --platform android --clear
+    
+    - name: 📱 Start Expo dev server (background)
+      run: |
+        npx expo start --web --port 3000 &
+        sleep 30
+        echo "Dev server started!"
+    
+    - name: 📸 Take screenshot
+      run: |
+        npm install -g puppeteer
+        node -e "
+        const puppeteer = require('puppeteer');
+        (async () => {
+          const browser = await puppeteer.launch();
+          const page = await browser.newPage();
+          await page.goto('http://localhost:3000');
+          await page.waitForTimeout(5000);
+          await page.screenshot({path: 'app-preview.png', fullPage: true});
+          await browser.close();
+        })();
+        "
+      continue-on-error: true
+    
+    - name: 📤 Upload preview
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-preview
+        path: |
+          app-preview.png
+          web-build/
+        retention-days: 7
+    
+    - name: 💬 Comment preview link
+      uses: actions/github-script@v6
+      if: github.event_name == 'push'
+      with:
+        script: |
+          github.rest.repos.createCommitComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: context.sha,
+            body: '🚀 **GREED & GROSS App Preview Ready!**\n\n📱 Download APK: [Build Artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n🌐 Web Preview: Coming soon!\n\n🧬🌿 Logo GG ready to see!'
+          })

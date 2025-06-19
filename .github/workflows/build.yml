@@ -1,0 +1,107 @@
+name: 🚀 Build GREED & GROSS App
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📦 Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: 🛠️ Setup Node.js 16
+      uses: actions/setup-node@v4
+      with:
+        node-version: '16'
+        cache: 'npm'
+    
+    - name: 🔧 Install dependencies
+      run: npm install --legacy-peer-deps
+    
+    - name: 📱 Setup Expo CLI
+      run: npm install -g @expo/cli@latest
+    
+    - name: 🏗️ Setup EAS CLI
+      run: npm install -g eas-cli
+    
+    - name: 🔐 Configure environment
+      run: |
+        echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" >> .env
+        echo "FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}" >> .env
+        echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
+        echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env
+        echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env
+        echo "FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}" >> .env
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+        echo "OPENAI_MODEL=gpt-4o-mini" >> .env
+        echo "REVENUECAT_API_KEY_IOS=${{ secrets.REVENUECAT_API_KEY_IOS }}" >> .env
+        echo "REVENUECAT_API_KEY_ANDROID=${{ secrets.REVENUECAT_API_KEY_ANDROID }}" >> .env
+    
+    - name: 🎯 Type check
+      run: npm run type-check
+      continue-on-error: true
+    
+    - name: 🧪 Run tests
+      run: npm test
+      continue-on-error: true
+    
+    - name: 📱 Build APK with EAS
+      run: |
+        echo "${{ secrets.EXPO_TOKEN }}" | npx eas-cli login --non-interactive
+        npx eas-cli build --platform android --profile preview --non-interactive --wait
+      env:
+        EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    
+    - name: 📤 Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: greed-gross-app.apk
+        path: "*.apk"
+        retention-days: 30
+    
+    - name: 🌐 Build web version
+      run: npx expo export:web
+      continue-on-error: true
+    
+    - name: 🚀 Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./web-build
+        cname: greedandgross.app
+
+  preview:
+    name: 🌐 Web Preview
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: 📦 Checkout
+      uses: actions/checkout@v4
+    
+    - name: 🛠️ Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '16'
+        cache: 'npm'
+    
+    - name: 📥 Install dependencies
+      run: npm install --legacy-peer-deps
+    
+    - name: 🌐 Build for web
+      run: npx expo export:web
+    
+    - name: 🔗 Deploy preview
+      uses: netlify/actions/cli@master
+      with:
+        args: deploy --dir=web-build --prod
+      env:
+        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

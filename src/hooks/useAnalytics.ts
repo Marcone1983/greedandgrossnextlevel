@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { analyticsCollector } from '@/services/analyticsCollector';
@@ -190,7 +190,7 @@ export function withAnalytics<T extends {}>(
       analytics.trackScreen(screenName);
     }, [analytics]);
 
-    return <WrappedComponent {...props} />;
+    return React.createElement(WrappedComponent, props);
   };
 }
 
