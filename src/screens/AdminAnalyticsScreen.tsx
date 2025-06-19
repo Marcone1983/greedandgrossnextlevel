@@ -65,7 +65,11 @@ export default function AdminAnalyticsScreen() {
     try {
       setIsLoading(true);
       const data = await analyticsEngine.generateDashboardAnalytics('admin', selectedTimeRange);
-      setDashboard(data);
+      setDashboard({
+        ...data,
+        generatedAt: new Date(),
+        timeRange: selectedTimeRange
+      });
     } catch (error) {
       toast.show({
         title: 'Errore',

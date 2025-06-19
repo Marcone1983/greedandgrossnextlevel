@@ -541,7 +541,7 @@ export default function ConversationHistoryScreen() {
 
                 {/* Tags */}
                 {(selectedConversation.strainsHentioned?.length > 0 || 
-                  selectedConversation.effectsRequested?.length > 0) && (
+                  (selectedConversation.effectsRequested && selectedConversation.effectsRequested.length > 0)) && (
                   <VStack space={3}>
                     <Text fontSize="md" fontWeight="semibold">
                       Tags:
@@ -560,7 +560,7 @@ export default function ConversationHistoryScreen() {
                       </VStack>
                     )}
                     
-                    {selectedConversation.effectsRequested?.length > 0 && (
+                    {selectedConversation.effectsRequested && selectedConversation.effectsRequested.length > 0 && (
                       <VStack space={2}>
                         <Text fontSize="sm" color="gray.600">Effetti richiesti:</Text>
                         <HStack flexWrap="wrap" space={1}>
