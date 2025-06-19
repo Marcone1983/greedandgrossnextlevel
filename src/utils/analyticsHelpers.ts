@@ -456,7 +456,7 @@ try {
   }
 } catch (error) {
   // Handle React Native environment where window might not be available
-  console.debug('Window not available, skipping beforeunload listener');
+  // Window not available, skipping beforeunload listener
 }
 
 // React Native app state handler would go here

@@ -9,7 +9,6 @@ declare module '@expo/vector-icons' {
   export const Feather: any;
   export const FontAwesome5: any;
   export const Foundation: any;
-  export const MaterialCommunityIcons: any;
   export const Octicons: any;
   export const SimpleLineIcons: any;
   export const Zocial: any;
@@ -280,7 +279,7 @@ declare module '@reduxjs/toolkit' {
   export const createAsyncThunk: any;
   export const createReducer: any;
   export const createAction: any;
-  export type PayloadAction<T = any> = any;
+  export type PayloadAction<T> = any;
 }
 
 declare module '@reduxjs/toolkit/query' {
@@ -307,9 +306,9 @@ declare module 'expo-notifications' {
 }
 
 // Global variables
-declare var __DEV__: boolean;
-declare var FileReader: any;
-declare var window: any;
+declare const __DEV__: boolean;
+declare const FileReader: any;
+declare const window: any;
 
 declare module 'lottie-react-native' {
   export default any;
@@ -337,11 +336,11 @@ declare module 'native-base' {
 }
 
 // Jest globals
-declare var expect: any;
-declare var test: any;
-declare var describe: any;
-declare var beforeEach: any;
-declare var afterEach: any;
-declare var beforeAll: any;
-declare var afterAll: any;
-declare var it: any;
+declare const expect: any;
+declare const test: any;
+declare const describe: any;
+declare const beforeEach: any;
+declare const afterEach: any;
+declare const beforeAll: any;
+declare const afterAll: any;
+declare const it: any;

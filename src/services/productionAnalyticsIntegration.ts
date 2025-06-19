@@ -46,7 +46,7 @@ export class ProductionAnalytics {
       // Start location detection if enabled
       await geoLocationService.getCurrentLocation();
       
-      console.log('Production Analytics initialized successfully');
+      // Production Analytics initialized successfully
     } catch (error) {
       console.error('Failed to initialize Production Analytics:', error);
     }

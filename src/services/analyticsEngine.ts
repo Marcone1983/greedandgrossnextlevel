@@ -1,6 +1,4 @@
-import { getFirestore, collection, query, where, orderBy, limit, getDocs, Timestamp, startAfter, documentId } from 'firebase/firestore';
-import { analyticsCollector, UserInteraction, ConversionEvent, SystemMetric } from './analyticsCollector';
-import { memoryService } from './memoryService';
+import { getFirestore, collection, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 
 export interface AnalyticsInsight {
   id: string;
@@ -48,15 +46,15 @@ export interface RevenueAnalytics {
 
 export interface BreedingAnalytics {
   totalSimulations: number;
-  popularCrosses: Array<{parents: string[], count: number, avgRating?: number}>;
-  trendingStrains: Array<{name: string, mentions: number, trend: 'up' | 'down'}>;
+  popularCrosses: {parents: string[], count: number, avgRating?: number}[];
+  trendingStrains: {name: string, mentions: number, trend: 'up' | 'down'}[];
   userEngagement: {
     avgSimulationsPerUser: number;
     retentionBySimulationCount: Record<number, number>;
   };
   geneticPatterns: {
-    mostSuccessfulCrosses: Array<{cross: string, successRate: number}>;
-    preferredTraits: Array<{trait: string, frequency: number}>;
+    mostSuccessfulCrosses: {cross: string, successRate: number}[];
+    preferredTraits: {trait: string, frequency: number}[];
   };
 }
 
@@ -945,7 +943,7 @@ class AnalyticsEngine {
       : 0;
   }
 
-  private calculateFunnelDropOff(userJourneys: Record<string, any[]>): Array<{
+  private calculateFunnelDropOff(userJourneys: Record<string, any[]>): []{
     screen: string;
     usersEntered: number;
     usersRetained: number;
@@ -1042,7 +1040,7 @@ class AnalyticsEngine {
   }
 
   // ADVANCED SQL-STYLE AGGREGATION QUERIES
-  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<Array<{
+  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<[]{
     strainName: string;
     totalRequests: number;
     uniqueUsers: number;
