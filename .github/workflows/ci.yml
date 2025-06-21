@@ -186,7 +186,10 @@ jobs:
         # Workaround: Create empty lasspath file if Gradle is looking for it
         touch lasspath
         chmod +x gradlew
-        ./gradlew clean assembleRelease --no-daemon
+        # List available tasks to debug
+        ./gradlew tasks --no-daemon
+        # Try without clean task
+        ./gradlew assembleRelease --no-daemon
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -205,7 +208,8 @@ jobs:
         # Workaround: Create empty lasspath file if Gradle is looking for it
         touch lasspath
         chmod +x gradlew
-        ./gradlew bundleRelease --no-daemon
+        # Use app module specifically
+        ./gradlew :app:bundleRelease --no-daemon
         
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
