@@ -180,7 +180,7 @@ class AdminDashboardAPI {
         executionTime: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('API Error:', error);
+      // API Error
       return this.errorResponse(
         error instanceof Error ? error.message : 'Internal server error',
         500,
@@ -458,10 +458,10 @@ class AdminDashboardAPI {
     const authHeader = headers.authorization || headers.Authorization;
     if (!authHeader) return false;
 
-    // In production, this would validate JWT tokens
-    // For now, we'll check for a simple bearer token
+    // Admin authentication must use Firebase Admin SDK with custom claims
+    // This is a placeholder that always returns false for security
     const token = authHeader.replace('Bearer ', '');
-    return token === 'greed-gross-admin-token-2024'; // This should be environment variable
+    return false; // Always reject until proper Firebase Auth is implemented
   }
 
   private checkRateLimit(headers: any, limit: number): boolean {

@@ -41,6 +41,7 @@ export function validateEmail(email: string): boolean {
 }
 
 export function validateAdminSecret(secret: string): boolean {
-  // Must be exactly 7 taps or the secret phrase
-  return secret === 'tap7times' || secret === 'greedandgross2024';
+  // Admin validation is now handled through Firebase Admin SDK
+  // This function is deprecated and should not be used in production
+  return false;
 }
