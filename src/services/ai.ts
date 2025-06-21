@@ -111,7 +111,8 @@ export async function performCrossBreeding(
     // Generate strain image based on AI description
     try {
       // Create image prompt based on the actual AI response
-      const imagePrompt = `Cannabis strain ${strain.name}: ${strain.type} type, ` +
+      const imagePrompt =
+        `Cannabis strain ${strain.name}: ${strain.type} type, ` +
         `${strain.genetics.phenotypes.join(', ')}, ` +
         `${strain.flavors.join(', ')} aromas, ` +
         `${aiResponse.visualDescription || strain.genetics.dominantTraits.join(', ')}, ` +
