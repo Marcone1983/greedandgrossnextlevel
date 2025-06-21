@@ -175,6 +175,13 @@ jobs:
         GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
         EOF
     
+    - name: 🔧 Prepare Gradle build
+      run: |
+        cd android
+        # Create lasspath file that Gradle seems to look for
+        touch lasspath
+        chmod +x gradlew
+        
     - name: 🏗️ Build APK
       uses: gradle/gradle-build-action@v2
       with:
