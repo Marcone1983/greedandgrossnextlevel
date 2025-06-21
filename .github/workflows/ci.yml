@@ -88,6 +88,8 @@ jobs:
     
     - name: 🐘 Setup Gradle
       uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: 8.5
     
     - name: 📱 Setup Expo CLI
       run: npm install -g @expo/cli@latest eas-cli@latest
@@ -184,14 +186,8 @@ jobs:
       if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
       working-directory: ./android
       run: |
-        echo "Current directory:"
-        pwd
-        echo "Creating lasspath workaround..."
-        echo "// Empty settings file workaround" > lasspath
-        echo "Directory contents:"
-        ls -la
-        echo "Running build:"
-        ./gradlew clean assembleRelease --no-daemon --stacktrace
+        echo "Building APK with Gradle..."
+        gradle clean assembleRelease --stacktrace
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -204,10 +200,8 @@ jobs:
       if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
       working-directory: ./android
       run: |
-        echo "Creating lasspath workaround..."
-        echo "// Empty settings file workaround" > lasspath
-        echo "Running AAB build:"
-        ./gradlew bundleRelease --no-daemon --stacktrace
+        echo "Building AAB with Gradle..."
+        gradle bundleRelease --stacktrace
         
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
