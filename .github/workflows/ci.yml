@@ -184,7 +184,9 @@ jobs:
       if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
       run: |
         cd android
+        echo "📁 Android directory contents:"
         ls -la
+        echo "📄 Settings.gradle content:"
         cat settings.gradle
         echo "🔍 Checking for google-services.json..."
         ls -la app/google-services.json || echo "❌ google-services.json not found"
@@ -193,7 +195,7 @@ jobs:
         echo "🔍 Checking React Native setup..."
         ls -la ../node_modules/@react-native-community/cli-platform-android || echo "React Native Android CLI not found"
         echo "🔍 Running Gradle build..."
-        ./gradlew clean assembleRelease --no-daemon --stacktrace --max-workers=4
+        ./gradlew clean assembleRelease --no-daemon --stacktrace
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -211,7 +213,7 @@ jobs:
         echo "🔍 Checking available Gradle tasks..."
         ./gradlew tasks --all | grep -i bundle || echo "No bundle tasks found"
         echo "🔍 Running Gradle bundle..."
-        ./gradlew bundleRelease --no-daemon --stacktrace --max-workers=4
+        ./gradlew bundleRelease --no-daemon --stacktrace
         
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
