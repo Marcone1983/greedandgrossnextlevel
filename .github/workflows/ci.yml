@@ -185,16 +185,18 @@ jobs:
         ls -la gradle/wrapper/
         echo "=== Current directory ==="
         pwd
+        # Workaround: Create empty lasspath file BEFORE any gradle command
+        touch lasspath
+        chmod +x gradlew
         echo "=== Available gradle tasks ==="
         ./gradlew tasks --no-daemon || true
         # Clean CMake cache to avoid version conflicts
         rm -rf app/.cxx
         rm -rf app/build
-        # Workaround: Create empty lasspath file if Gradle is looking for it
+        # Recreate lasspath after cleaning (might be removed)
         touch lasspath
-        chmod +x gradlew
         # Try building with app module prefix
-        ./gradlew :app:assembleRelease --no-daemon --warning-mode all
+        ./gradlew :app:assembleRelease --no-daemon --warning-mode=all
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -207,12 +209,14 @@ jobs:
       run: |
         echo "Building AAB with Gradle..."
         cd android
+        # Workaround: Create empty lasspath file BEFORE any gradle command
+        touch lasspath
+        chmod +x gradlew
         # Clean CMake cache to avoid version conflicts
         rm -rf app/.cxx
         rm -rf app/build
-        # Workaround: Create empty lasspath file if Gradle is looking for it
+        # Recreate lasspath after cleaning (might be removed)
         touch lasspath
-        chmod +x gradlew
         # Use app module specifically
         ./gradlew :app:bundleRelease --no-daemon
         
