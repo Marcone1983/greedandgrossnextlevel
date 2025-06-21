@@ -182,18 +182,16 @@ jobs:
     
     - name: 🏗️ Build APK
       if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
+      working-directory: ./android
       run: |
-        cd android
-        echo "📁 Android directory contents:"
-        ls -la
-        echo "📄 Settings.gradle content:"
-        cat settings.gradle
-        echo "🔍 Checking for google-services.json..."
-        ls -la app/google-services.json || echo "❌ google-services.json not found"
-        echo "Running Gradle build..."
+        echo "Current directory:"
         pwd
+        echo "Directory contents:"
+        ls -la
+        echo "Gradle wrapper permissions:"
         ls -la gradlew
-        ./gradlew clean assembleRelease --no-daemon --stacktrace || echo "Build failed with exit code $?"
+        echo "Running build:"
+        ./gradlew clean assembleRelease --no-daemon --stacktrace
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -204,11 +202,10 @@ jobs:
     
     - name: 🏗️ Build AAB (App Bundle)
       if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
+      working-directory: ./android
       run: |
-        cd android
-        echo "Running Gradle bundle build..."
-        pwd
-        ./gradlew bundleRelease --no-daemon --stacktrace || echo "Build failed with exit code $?"
+        echo "Running AAB build:"
+        ./gradlew bundleRelease --no-daemon --stacktrace
         
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
