@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'android'
+rootProject.name = 'GreedGross'
 include ':app'
 
 dependencyResolutionManagement {

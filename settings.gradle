@@ -1,0 +1,3 @@
+rootProject.name = 'greedandgrossnextlevel'
+include ':android'
+project(':android').projectDir = new File('android')
