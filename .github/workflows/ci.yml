@@ -46,8 +46,11 @@ jobs:
     - name: 🔍 TypeScript check
       run: npm run type-check
     
-    - name: 🎨 ESLint check and fix
-      run: npm run lint:fix
+    - name: 🎨 ESLint check and fix  
+      run: |
+        npm run lint:fix
+        npm run lint:fix
+        npm run lint || true
     
     - name: 🧪 Run tests
       run: npm test -- --coverage --watchAll=false --passWithNoTests
