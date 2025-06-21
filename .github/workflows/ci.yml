@@ -185,6 +185,9 @@ jobs:
       run: |
         echo "Building APK with Gradle..."
         cd android
+        # Clean CMake cache to avoid version conflicts
+        rm -rf app/.cxx
+        rm -rf app/build
         # Workaround: Create empty lasspath file if Gradle is looking for it
         touch lasspath
         chmod +x gradlew
@@ -202,6 +205,9 @@ jobs:
       run: |
         echo "Building AAB with Gradle..."
         cd android
+        # Clean CMake cache to avoid version conflicts
+        rm -rf app/.cxx
+        rm -rf app/build
         # Workaround: Create empty lasspath file if Gradle is looking for it
         touch lasspath
         chmod +x gradlew
