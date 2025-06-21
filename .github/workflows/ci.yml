@@ -185,7 +185,7 @@ jobs:
     - name: 🏗️ Build APK
       run: |
         cd GreedGross
-        ./gradlew :app:assembleRelease --no-daemon
+        ./gradlew assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -200,7 +200,7 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        ./gradlew :app:bundleRelease --no-daemon
+        ./gradlew bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
