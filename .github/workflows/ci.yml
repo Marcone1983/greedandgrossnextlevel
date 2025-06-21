@@ -84,7 +84,7 @@ jobs:
     - name: 🐘 Setup Gradle
       uses: gradle/gradle-build-action@v2
       with:
-        gradle-version: 8.10.2
+        gradle-version: wrapper
     
     - name: 📱 Setup React Native CLI
       run: npm install -g @react-native-community/cli
@@ -92,16 +92,19 @@ jobs:
     - name: 🔧 Install dependencies
       run: |
         npm install --legacy-peer-deps
-        # Debug: Check what's in node_modules
-        echo "=== Checking if React Native CLI is installed ==="
-        ls -la node_modules/@react-native-community/cli-platform-android/ || echo "NOT FOUND"
-        # Create symlink so GreedGross can find node_modules
+        # Debug: Check React Native installation
+        echo "=== Checking React Native installation ==="
+        ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT FOUND"
+        ls -la node_modules/react-native/ || echo "react-native NOT FOUND"
+        # Create symlink from GreedGross to node_modules
         cd GreedGross
+        rm -f node_modules
         ln -sf ../node_modules node_modules
-        # Verify symlink
-        echo "=== Verifying symlink ==="
-        ls -la node_modules/ | head -5
-        ls -la node_modules/@react-native-community/cli-platform-android/ || echo "NOT ACCESSIBLE via symlink"
+        # Verify symlink works
+        echo "=== Verifying symlink from GreedGross ==="
+        pwd
+        ls -la | grep node_modules
+        ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT ACCESSIBLE"
     
     - name: 🔐 Create environment file
       run: |
@@ -208,9 +211,9 @@ jobs:
     - name: 🏗️ Build APK
       run: |
         cd GreedGross
-        # Use gradle from gradle-build-action installation
-        gradle --version
-        gradle assembleRelease --no-daemon
+        # Use the gradle wrapper
+        ./gradlew --version
+        ./gradlew :app:assembleRelease --no-daemon --info
         
     - name: 📦 Process APK
       run: |
@@ -225,7 +228,7 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        gradle bundleRelease --no-daemon
+        ./gradlew :app:bundleRelease --no-daemon --info
         
     - name: 📦 Process AAB
       run: |

@@ -8,7 +8,7 @@ project.ext.react = [
     entryFile: "index.js",
     bundleAssetName: "index.android.bundle",
     root: "../../",
-    cliPath: "node_modules/react-native/cli.js"
+    cliPath: "../node_modules/react-native/cli.js"
 ]
 
 // React Native 0.79.0 uses the gradle plugin to handle native modules automatically
@@ -147,7 +147,7 @@ dependencies {
     }
 
     if (enableHermes) {
-        def hermesPath = "node_modules/hermes-engine/android/";
+        def hermesPath = "../node_modules/hermes-engine/android/";
         debugImplementation files(hermesPath + "hermes-debug.aar")
         releaseImplementation files(hermesPath + "hermes-release.aar")
     } else {
