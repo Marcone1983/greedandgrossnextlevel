@@ -186,10 +186,10 @@ jobs:
       run: |
         echo "Current directory:"
         pwd
+        echo "Creating lasspath workaround..."
+        cp settings.gradle lasspath
         echo "Directory contents:"
         ls -la
-        echo "Gradle wrapper permissions:"
-        ls -la gradlew
         echo "Running build:"
         ./gradlew clean assembleRelease --no-daemon --stacktrace
         
@@ -204,6 +204,8 @@ jobs:
       if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
       working-directory: ./android
       run: |
+        echo "Creating lasspath workaround..."
+        cp settings.gradle lasspath
         echo "Running AAB build:"
         ./gradlew bundleRelease --no-daemon --stacktrace
         
