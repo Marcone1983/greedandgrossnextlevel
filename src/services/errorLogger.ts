@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { firestore } from '@/config/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import firestore from '@react-native-firebase/firestore';
 
 export enum LogLevel {
   DEBUG = 'debug',
@@ -50,7 +49,7 @@ class ErrorLogger {
           }
         : undefined,
       timestamp: new Date(),
-      userId: this.userId,
+      userId: this.userId || undefined,
       metadata,
     };
 
@@ -109,7 +108,7 @@ class ErrorLogger {
         platform: 'react-native',
       };
 
-      await addDoc(collection(firestore, 'error_logs'), errorLog);
+      await firestore().collection('error_logs').add(errorLog);
     } catch (error) {
       // Silently fail - we don't want logging errors to break the app
     }
