@@ -36,13 +36,12 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
     
-    - name: 📱 Setup Expo CLI
-      run: npm install -g @expo/cli@latest
+    - name: 📱 Setup React Native CLI
+      run: npm install -g @react-native-community/cli
     
     - name: 🔧 Install dependencies
       run: |
         npm install --legacy-peer-deps
-        npx expo install --fix
     
     - name: 🔍 TypeScript check
       run: npm run type-check
@@ -91,13 +90,12 @@ jobs:
       with:
         gradle-version: 8.5
     
-    - name: 📱 Setup Expo CLI
-      run: npm install -g @expo/cli@latest eas-cli@latest
+    - name: 📱 Setup React Native CLI
+      run: npm install -g @react-native-community/cli
     
     - name: 🔧 Install dependencies
       run: |
         npm install --legacy-peer-deps
-        npx expo install --fix
     
     - name: 🔧 Fix Gradle Wrapper
       run: ./scripts/fix-gradle-wrapper.sh
