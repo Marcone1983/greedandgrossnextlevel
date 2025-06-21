@@ -95,6 +95,8 @@ jobs:
     
     - name: 🐘 Setup Gradle
       uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: 8.10.2
     
     - name: 🔐 Create environment file
       run: |
@@ -190,11 +192,11 @@ jobs:
         ln -sf ../../node_modules ../node_modules || true
         
     - name: 🏗️ Build APK
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: wrapper
-        build-root-directory: GreedGross
-        arguments: assembleRelease --no-daemon
+      run: |
+        cd GreedGross
+        # Use gradle from gradle-build-action installation
+        gradle --version
+        gradle assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -207,11 +209,9 @@ jobs:
         mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
     
     - name: 🏗️ Build AAB (App Bundle)
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: wrapper
-        build-root-directory: GreedGross
-        arguments: bundleRelease --no-daemon
+      run: |
+        cd GreedGross
+        gradle bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
