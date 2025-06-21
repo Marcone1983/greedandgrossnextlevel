@@ -192,21 +192,22 @@ jobs:
         echo "=== Checking node_modules location ==="
         pwd
         ls -la
-        ls -la node_modules/@react-native-community/cli-platform-android/ || echo "node_modules not found in root"
+        ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not found in root"
         
         cd GreedGross
         # Make gradlew executable
         chmod +x gradlew
         # Create gradle.properties if needed
         touch gradle.properties
-        # Create empty lasspath in multiple locations
-        touch lasspath
-        touch ../lasspath
         
         # Debug: Check if node_modules is accessible from here
         echo "=== From GreedGross directory ==="
         pwd
-        ls -la ../node_modules/@react-native-community/cli-platform-android/ || echo "node_modules not accessible from GreedGross"
+        ls -la ../node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not accessible from GreedGross"
+        
+        # Check settings.gradle exists
+        echo "=== Checking settings.gradle ==="
+        cat settings.gradle
         
     - name: 🏗️ Build APK
       run: |
