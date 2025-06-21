@@ -185,6 +185,8 @@ jobs:
       run: |
         echo "Building APK with Gradle..."
         cd android
+        # Workaround: Create empty lasspath file if Gradle is looking for it
+        touch lasspath
         chmod +x gradlew
         ./gradlew clean assembleRelease --no-daemon
         
@@ -200,6 +202,8 @@ jobs:
       run: |
         echo "Building AAB with Gradle..."
         cd android
+        # Workaround: Create empty lasspath file if Gradle is looking for it
+        touch lasspath
         chmod +x gradlew
         ./gradlew bundleRelease --no-daemon
         
