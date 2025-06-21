@@ -214,7 +214,18 @@ jobs:
         cd GreedGross
         # Use the gradle wrapper
         ./gradlew --version
-        ./gradlew :app:assembleRelease --no-daemon --info
+        
+        # Debug: List available projects
+        echo "=== Available Gradle projects ==="
+        ./gradlew projects
+        
+        # Debug: Check if app directory exists
+        echo "=== Checking app directory ==="
+        ls -la app/
+        
+        # Try different task formats
+        echo "=== Trying to build APK ==="
+        ./gradlew assembleRelease --no-daemon --info
         
     - name: 📦 Process APK
       run: |
@@ -229,7 +240,7 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        ./gradlew :app:bundleRelease --no-daemon --info
+        ./gradlew bundleRelease --no-daemon --info
         
     - name: 📦 Process AAB
       run: |

@@ -110,6 +110,9 @@ firebase-debug.log
 *.swp
 *.swo
 
+# Gradle
+lasspath
+
 # OS generated files
 Thumbs.db
 
