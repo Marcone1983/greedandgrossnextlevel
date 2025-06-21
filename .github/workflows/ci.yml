@@ -210,20 +210,23 @@ jobs:
     - name: 🏗️ Build APK
       run: |
         cd GreedGross
-        # Use the gradle wrapper with explicit settings file
-        ./gradlew --version -c settings.gradle
+        # Remove any gradle init scripts that might interfere
+        rm -rf ~/.gradle/init.d/
+        
+        # Use the gradle wrapper
+        ./gradlew --version
         
         # Debug: List available projects
         echo "=== Available Gradle projects ==="
-        ./gradlew projects -c settings.gradle
+        ./gradlew projects
         
         # Debug: Check if app directory exists
         echo "=== Checking app directory ==="
         ls -la app/
         
-        # Try different task formats
-        echo "=== Trying to build APK ==="
-        ./gradlew assembleRelease --no-daemon --info -c settings.gradle
+        # Build APK
+        echo "=== Building APK ==="
+        ./gradlew assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -238,7 +241,7 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        ./gradlew bundleRelease --no-daemon --info -c settings.gradle
+        ./gradlew bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
