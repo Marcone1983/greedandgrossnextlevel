@@ -62,7 +62,7 @@ export async function saveUserToFirebase(user: User) {
       joinDate: Timestamp.fromDate(user.joinDate),
     });
   } catch (error) {
-    console.error('Error saving user:', error);
+    // Error saving user
     throw error;
   }
 }
@@ -80,7 +80,7 @@ export async function getUserFromFirebase(userId: string): Promise<User | null> 
     }
     return null;
   } catch (error) {
-    console.error('Error getting user:', error);
+    // Error getting user
     return null;
   }
 }
@@ -93,7 +93,7 @@ export async function updateUserStats(userId: string, stats: Partial<User['stats
       lastActive: Timestamp.now(),
     });
   } catch (error) {
-    console.error('Error updating user stats:', error);
+    // Error updating user stats
   }
 }
 
@@ -122,7 +122,7 @@ export async function checkCachedCross(parentA: string, parentB: string): Promis
 
     return null;
   } catch (error) {
-    console.error('Error checking cache:', error);
+    // Error checking cache
     return null;
   }
 }
@@ -142,7 +142,7 @@ export async function saveCachedCross(strain: Strain) {
 
     logAnalytics('cache_save', { strainName: strain.name, cacheId });
   } catch (error) {
-    console.error('Error saving to cache:', error);
+    // Error saving to cache
   }
 }
 
@@ -160,7 +160,7 @@ export async function getPopularStrains(limitCount: number = 10): Promise<any[]>
 
     return [];
   } catch (error) {
-    console.error('Error getting popular strains:', error);
+    // Error getting popular strains
     return [];
   }
 }
@@ -177,7 +177,7 @@ export async function updateStrainPopularity(strainName: string) {
       [`${strainKey}.last_requested`]: Timestamp.now(),
     });
   } catch (error) {
-    console.error('Error updating strain popularity:', error);
+    // Error updating strain popularity
   }
 }
 
@@ -189,7 +189,7 @@ export async function sendChatMessage(message: ChatMessage) {
       timestamp: Timestamp.fromDate(message.timestamp),
     });
   } catch (error) {
-    console.error('Error sending message:', error);
+    // Error sending message
     throw error;
   }
 }
@@ -210,7 +210,7 @@ export async function getRecentMessages(limitCount: number = 50): Promise<ChatMe
       }))
       .reverse() as ChatMessage[];
   } catch (error) {
-    console.error('Error getting messages:', error);
+    // Error getting messages
     return [];
   }
 }
@@ -240,7 +240,7 @@ export async function getTerpeneProfiles(): Promise<any[]> {
       ...doc.data(),
     }));
   } catch (error) {
-    console.error('Error getting terpene profiles:', error);
+    // Error getting terpene profiles
     return [];
   }
 }
@@ -255,7 +255,7 @@ export async function getTerpeneProfile(terpeneName: string): Promise<any | null
     }
     return null;
   } catch (error) {
-    console.error('Error getting terpene profile:', error);
+    // Error getting terpene profile
     return null;
   }
 }
@@ -281,7 +281,7 @@ export async function getBreedingTips(category?: string, difficulty?: string): P
       ...doc.data(),
     }));
   } catch (error) {
-    console.error('Error getting breeding tips:', error);
+    // Error getting breeding tips
     return [];
   }
 }
@@ -306,7 +306,7 @@ export function logAnalytics(event: string, data: Record<string, any> = {}) {
       timestamp: Timestamp.fromDate(analyticsDoc.timestamp),
     });
   } catch (error) {
-    console.error('Error logging analytics:', error);
+    // Error logging analytics
   }
 }
 
@@ -369,7 +369,7 @@ export async function getSystemStats() {
 
     return stats;
   } catch (error) {
-    console.error('Error getting system stats:', error);
+    // Error getting system stats
     throw error;
   }
 }
@@ -417,7 +417,7 @@ export async function exportDatabase(format: 'json' | 'csv' = 'json') {
       return csvContent;
     }
   } catch (error) {
-    console.error('Error exporting database:', error);
+    // Error exporting database
     throw error;
   }
 }
@@ -446,6 +446,6 @@ export async function updateSystemHealth(metrics: {
       last_updated: Timestamp.now(),
     });
   } catch (error) {
-    console.error('Error updating system health:', error);
+    // Error updating system health
   }
 }

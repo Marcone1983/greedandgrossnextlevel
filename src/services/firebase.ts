@@ -1,3 +1,4 @@
+import { errorLogger } from './errorLogger';
 import { initializeApp } from 'firebase/app';
 import {
   getFirestore,
@@ -52,7 +53,7 @@ export async function saveUserToFirebase(user: User) {
       lastActive: Timestamp.now(),
     });
   } catch (error) {
-    console.error('Error saving user:', error);
+    errorLogger.error('Error saving user', error, 'firebase.saveUserToFirebase');
   }
 }
 
@@ -64,7 +65,7 @@ export async function getUserFromFirebase(userId: string): Promise<User | null> 
     }
     return null;
   } catch (error) {
-    console.error('Error getting user:', error);
+    errorLogger.error('Error getting user', error, 'firebase.getUserFromFirebase');
     return null;
   }
 }
@@ -83,7 +84,7 @@ export async function checkCachedCross(parentA: string, parentB: string): Promis
 
     return null;
   } catch (error) {
-    console.error('Error checking cache:', error);
+    errorLogger.error('Error checking cache', error, 'firebase.checkCrossCache');
     return null;
   }
 }
@@ -99,7 +100,7 @@ export async function saveCachedCross(strain: Strain) {
 
     logAnalytics('cache_save', { strainName: strain.name });
   } catch (error) {
-    console.error('Error saving to cache:', error);
+    errorLogger.error('Error saving to cache', error, 'firebase.saveCrossToCache');
   }
 }
 
@@ -115,7 +116,7 @@ export async function getPopularStrains(limit: number = 10): Promise<Strain[]> {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => doc.data() as Strain);
   } catch (error) {
-    console.error('Error getting popular strains:', error);
+    errorLogger.error('Error getting popular strains', error, 'firebase.getPopularStrains');
     return [];
   }
 }
@@ -136,7 +137,7 @@ export function logAnalytics(event: string, data: Record<string, any> = {}) {
 
     setDoc(doc(collection(db, ANALYTICS_COLLECTION)), analyticsDoc);
   } catch (error) {
-    console.error('Error logging analytics:', error);
+    errorLogger.error('Error logging analytics', error, 'firebase.logAnalytics');
   }
 }
 
@@ -179,7 +180,7 @@ export async function getAdminStats() {
       },
     };
   } catch (error) {
-    console.error('Error getting admin stats:', error);
+    errorLogger.error('Error getting admin stats', error, 'firebase.getAdminStats');
     throw error;
   }
 }

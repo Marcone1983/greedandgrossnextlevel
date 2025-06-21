@@ -62,7 +62,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
       try {
         await analyticsCollector.trackUserInteraction(eventType as any, screen, action, metadata);
       } catch (error) {
-        console.error('Error tracking event:', error);
+        // Error tracking event
       }
     },
     [trackUserInteractions]
@@ -85,7 +85,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
       try {
         await analyticsCollector.trackBreedingSimulation(parent1, parent2, result, user?.id);
       } catch (error) {
-        console.error('Error tracking breeding simulation:', error);
+        // Error tracking breeding simulation
       }
     },
     [user?.id]
@@ -96,7 +96,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
     try {
       await analyticsCollector.trackSearch(query, results, screen);
     } catch (error) {
-      console.error('Error tracking search:', error);
+      // Error tracking search
     }
   }, []);
 
@@ -105,7 +105,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
     try {
       await analyticsCollector.trackSubscriptionEvent(event as any, tier, metadata);
     } catch (error) {
-      console.error('Error tracking subscription event:', error);
+      // Error tracking subscription event
     }
   }, []);
 
@@ -117,7 +117,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
       try {
         await analyticsCollector.trackError(error, context, metadata);
       } catch (err) {
-        console.error('Error tracking error:', err);
+        // Error tracking error
       }
     },
     [trackErrors]
@@ -128,7 +128,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
     try {
       await analyticsCollector.trackPerformance(metric, value, context);
     } catch (error) {
-      console.error('Error tracking performance:', error);
+      // Error tracking performance
     }
   }, []);
 
@@ -140,7 +140,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
       try {
         await analyticsCollector.trackMemoryOperation(operation as any, metadata);
       } catch (error) {
-        console.error('Error tracking memory operation:', error);
+        // Error tracking memory operation
       }
     },
     [enableMemoryTracking]

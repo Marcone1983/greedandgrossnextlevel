@@ -1,4 +1,5 @@
 import { analyticsCollector } from '@/services/analyticsCollector';
+import { errorLogger } from '@/services/errorLogger';
 
 /**
  * Analytics Helper Functions
@@ -294,7 +295,10 @@ export class PerformanceTracker {
   async endTiming(operation: string, context?: string): Promise<number> {
     const startTime = this.startTimes.get(operation);
     if (!startTime) {
-      console.warn(`No start time found for operation: ${operation}`);
+      errorLogger.warn(
+        `No start time found for operation: ${operation}`,
+        'PerformanceTracker.endTiming'
+      );
       return 0;
     }
 
@@ -411,7 +415,7 @@ export class AnalyticsBatcher {
     try {
       await Promise.all(currentBatch.map(fn => fn()));
     } catch (error) {
-      console.error('Error flushing analytics batch:', error);
+      // Error flushing analytics batch
     }
   }
 }

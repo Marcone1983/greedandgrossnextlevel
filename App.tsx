@@ -14,6 +14,7 @@ import { initializeServices } from '@/services/initialization';
 import RootNavigator from '@/navigation/RootNavigator';
 import { toastConfig } from '@/utils/toastConfig';
 import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
+import { errorLogger } from '@/services/errorLogger';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,7 +34,7 @@ export default function App() {
 
         await initializeServices();
       } catch (e) {
-        console.warn(e);
+        errorLogger.error('Failed to prepare app', e, 'App.prepare');
       } finally {
         setAppIsReady(true);
         await SplashScreen.hideAsync();

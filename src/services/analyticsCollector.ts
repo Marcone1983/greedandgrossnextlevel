@@ -193,7 +193,7 @@ class AnalyticsCollector {
         user_id: this.userId,
       });
     } catch (error) {
-      console.error('Error tracking conversion:', error);
+      // Error tracking conversion
     }
   }
 
@@ -216,7 +216,7 @@ class AnalyticsCollector {
         timestamp: Timestamp.fromDate(metric.timestamp),
       });
     } catch (error) {
-      console.error('Error tracking system metric:', error);
+      // Error tracking system metric
     }
   }
 
@@ -263,7 +263,7 @@ class AnalyticsCollector {
 
       await addDoc(collection(this.db, 'breeding_patterns'), pattern);
     } catch (error) {
-      console.error('Error tracking breeding pattern:', error);
+      // Error tracking breeding pattern
     }
   }
 
@@ -294,7 +294,7 @@ class AnalyticsCollector {
 
       await addDoc(collection(this.db, 'search_patterns'), searchData);
     } catch (error) {
-      console.error('Error tracking search pattern:', error);
+      // Error tracking search pattern
     }
   }
 
@@ -369,7 +369,7 @@ class AnalyticsCollector {
 
       await addDoc(collection(this.db, 'user_sessions'), sessionData);
     } catch (error) {
-      console.error('Error tracking user session:', error);
+      // Error tracking user session
     }
   }
 
@@ -398,7 +398,7 @@ class AnalyticsCollector {
 
       await Promise.all(promises);
     } catch (error) {
-      console.error('Error flushing analytics batch:', error);
+      // Error flushing analytics batch
       // Re-add failed items to queue
       this.batchQueue.unshift(...batch);
     }
@@ -454,13 +454,7 @@ class AnalyticsCollector {
 
   // ERROR TRACKING SETUP
   private setupErrorTracking(): void {
-    const originalConsoleError = console.error;
-    console.error = (...args) => {
-      if (args[0] instanceof Error) {
-        this.trackError(args[0], 'console_error');
-      }
-      originalConsoleError(...args);
-    };
+    // Error tracking setup removed to avoid console overrides
   }
 
   // ANALYTICS SETTINGS
@@ -505,7 +499,7 @@ class AnalyticsCollector {
         screenTime: this.calculateScreenTime(interactions),
       };
     } catch (error) {
-      console.error('Error getting session analytics:', error);
+      // Error getting session analytics
       return null;
     }
   }

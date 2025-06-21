@@ -1,3 +1,4 @@
+import { errorLogger } from '@/services/errorLogger';
 import React, { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import {
@@ -86,7 +87,7 @@ export default function AdminDocumentManager() {
         setDocumentContent('');
       }
     } catch (error) {
-      console.error('Error loading document:', error);
+      errorLogger.error('Error loading document', error, 'AdminDocumentManager.loadDocument');
       setDocumentContent('');
     } finally {
       setIsLoading(false);
@@ -250,7 +251,7 @@ export default function AdminDocumentManager() {
           }));
         },
         error => {
-          console.error('Upload error:', error);
+          errorLogger.error('Upload error', error, 'AdminDocumentManager.uploadDocument');
           setUploadProgress(prev => ({
             ...prev,
             [progressKey]: {
@@ -288,7 +289,7 @@ export default function AdminDocumentManager() {
         }
       );
     } catch (error) {
-      console.error('Upload error:', error);
+      errorLogger.error('Upload error', error, 'AdminDocumentManager.uploadDocument');
       setUploadProgress(prev => ({
         ...prev,
         [progressKey]: {

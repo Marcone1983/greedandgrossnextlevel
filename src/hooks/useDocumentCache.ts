@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import storage from '@react-native-firebase/storage';
+import { errorLogger } from '@/services/errorLogger';
 
 interface DocumentCacheState {
   document: string | null;
@@ -50,7 +51,9 @@ export function useDocumentCache(documentType: DocumentType, language: string): 
 
       return parsedCache.content;
     } catch (error) {
-      console.warn('Error reading from document cache:', error);
+      errorLogger.warn('Error reading from document cache', 'useDocumentCache.getFromCache', {
+        error: error instanceof Error ? error.message : String(error),
+      });
       return null;
     }
   };
@@ -66,7 +69,9 @@ export function useDocumentCache(documentType: DocumentType, language: string): 
 
       await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheData));
     } catch (error) {
-      console.warn('Error saving to document cache:', error);
+      errorLogger.warn('Error saving to document cache', 'useDocumentCache.saveToCache', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   };
 
@@ -88,7 +93,11 @@ export function useDocumentCache(documentType: DocumentType, language: string): 
       } catch (primaryError) {
         // If requested language fails, try English fallback
         if (lang !== 'en') {
-          console.warn(`Document not found in ${lang}, trying English fallback`);
+          errorLogger.warn(
+            `Document not found in ${lang}, trying English fallback`,
+            'useDocumentCache.downloadFromFirebase',
+            { documentType: type, language: lang }
+          );
           path = `legal/en/${type}.html`;
           ref = storage().ref(path);
 
@@ -105,7 +114,12 @@ export function useDocumentCache(documentType: DocumentType, language: string): 
         throw primaryError;
       }
     } catch (error) {
-      console.error('Error downloading document from Firebase:', error);
+      errorLogger.error(
+        'Error downloading document from Firebase',
+        error,
+        'useDocumentCache.downloadFromFirebase',
+        { documentType: type, language: lang }
+      );
       throw new Error(
         `Failed to download document: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
@@ -133,7 +147,10 @@ export function useDocumentCache(documentType: DocumentType, language: string): 
 
       setDocument(downloadedDocument);
     } catch (err) {
-      console.error('Error loading document:', err);
+      errorLogger.error('Error loading document', err, 'useDocumentCache.loadDocument', {
+        documentType,
+        language,
+      });
       setError(err instanceof Error ? err : new Error('Unknown error'));
 
       // Try to get any cached version as fallback
@@ -144,7 +161,9 @@ export function useDocumentCache(documentType: DocumentType, language: string): 
           return;
         }
       } catch (fallbackError) {
-        console.warn('Fallback cache failed:', fallbackError);
+        errorLogger.warn('Fallback cache failed', 'useDocumentCache.loadDocument', {
+          error: fallbackError instanceof Error ? fallbackError.message : String(fallbackError),
+        });
       }
     } finally {
       setLoading(false);

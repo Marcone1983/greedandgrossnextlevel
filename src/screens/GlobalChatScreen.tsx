@@ -1,3 +1,4 @@
+import { errorLogger } from '@/services/errorLogger';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -100,7 +101,7 @@ export default function GlobalChatScreen() {
       });
 
       socketRef.current.on('error', (error: any) => {
-        console.error('Socket error:', error);
+        errorLogger.error('Socket error', error, 'GlobalChatScreen.socket');
         toast.show({
           description: 'Errore di connessione',
           colorScheme: 'error',

@@ -1,3 +1,4 @@
+import { errorLogger } from '@/services/errorLogger';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -154,7 +155,11 @@ ${user?.tier === 'free' ? 'ðŸ”¬ Hai 1 incrocio gratuito disponibile oggi.' : 'ðŸ
 
           await saveConversation(inputText, aiResponseContent, strainsMentioned);
         } catch (memoryError) {
-          console.error('Failed to save conversation to memory:', memoryError);
+          errorLogger.error(
+            'Failed to save conversation to memory',
+            memoryError,
+            'LabChatScreen.sendMessage'
+          );
           // Don't show error to user as this is a background operation
         }
       }

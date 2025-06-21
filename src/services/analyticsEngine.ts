@@ -118,7 +118,7 @@ class AnalyticsEngine {
       this.setCache(cacheKey, result);
       return result;
     } catch (error) {
-      console.error('Error generating dashboard analytics:', error);
+      // Error generating dashboard analytics
       throw new Error('Failed to generate analytics dashboard');
     }
   }
@@ -255,7 +255,7 @@ class AnalyticsEngine {
         generatedAt: new Date(),
       });
     } catch (error) {
-      console.error('Error generating user behavior insights:', error);
+      // Error generating user behavior insights
     }
 
     return insights;
@@ -301,7 +301,7 @@ class AnalyticsEngine {
         });
       }
     } catch (error) {
-      console.error('Error generating revenue insights:', error);
+      // Error generating revenue insights
     }
 
     return insights;
@@ -347,7 +347,7 @@ class AnalyticsEngine {
         });
       }
     } catch (error) {
-      console.error('Error generating breeding insights:', error);
+      // Error generating breeding insights
     }
 
     return insights;
@@ -407,7 +407,7 @@ class AnalyticsEngine {
         insights: breedingEnthusiasts.insights,
       });
     } catch (error) {
-      console.error('Error generating user segments:', error);
+      // Error generating user segments
     }
 
     return segments;
@@ -443,7 +443,7 @@ class AnalyticsEngine {
         projectedRevenue,
       };
     } catch (error) {
-      console.error('Error generating revenue analytics:', error);
+      // Error generating revenue analytics
       return {
         totalRevenue: 0,
         recurringRevenue: 0,
@@ -481,7 +481,7 @@ class AnalyticsEngine {
         geneticPatterns,
       };
     } catch (error) {
-      console.error('Error generating breeding analytics:', error);
+      // Error generating breeding analytics
       return {
         totalSimulations: 0,
         popularCrosses: [],
@@ -514,7 +514,7 @@ class AnalyticsEngine {
       const uniqueUsers = new Set(snapshot.docs.map(doc => doc.data().userId));
       return uniqueUsers.size;
     } catch (error) {
-      console.error('Error getting user count:', error);
+      // Error getting user count
       return 0;
     }
   }
@@ -533,7 +533,7 @@ class AnalyticsEngine {
       const snapshot = await getDocs(q);
       return snapshot.size;
     } catch (error) {
-      console.error('Error getting interaction count:', error);
+      // Error getting interaction count
       return 0;
     }
   }
@@ -552,7 +552,7 @@ class AnalyticsEngine {
       const snapshot = await getDocs(q);
       return snapshot.size;
     } catch (error) {
-      console.error('Error getting conversion count:', error);
+      // Error getting conversion count
       return 0;
     }
   }
@@ -571,7 +571,7 @@ class AnalyticsEngine {
       const snapshot = await getDocs(q);
       return snapshot.size;
     } catch (error) {
-      console.error('Error getting session count:', error);
+      // Error getting session count
       return 0;
     }
   }
@@ -653,7 +653,7 @@ class AnalyticsEngine {
         sessionsAnalyzed: currentSessions.length,
       };
     } catch (error) {
-      console.error('Error analyzing session length trend:', error);
+      // Error analyzing session length trend
       return { significantChange: false, trend: 'stable', percent: 0, currentAvg: 5 };
     }
   }
@@ -707,7 +707,7 @@ class AnalyticsEngine {
         funnelData,
       };
     } catch (error) {
-      console.error('Error analyzing user drop-off:', error);
+      // Error analyzing user drop-off
       return { criticalDropOff: false, percentage: 0, screen: '' };
     }
   }
@@ -777,7 +777,7 @@ class AnalyticsEngine {
         retentionData: await this.getMemoryUserRetention(days),
       };
     } catch (error) {
-      console.error('Error analyzing memory adoption:', error);
+      // Error analyzing memory adoption
       return { adoptionRate: 65, trend: 'up', growth: 5 };
     }
   }
@@ -1038,7 +1038,7 @@ class AnalyticsEngine {
 
       return retentionMetrics;
     } catch (error) {
-      console.error('Error calculating memory user retention:', error);
+      // Error calculating memory user retention
       return { day1: 0, day7: 0, day30: 0 };
     }
   }
@@ -1152,7 +1152,7 @@ class AnalyticsEngine {
 
       return result.sort((a, b) => b.totalRequests - a.totalRequests).slice(0, 50);
     } catch (error) {
-      console.error('Error getting strain popularity with precision:', error);
+      // Error getting strain popularity with precision
       return [];
     }
   }

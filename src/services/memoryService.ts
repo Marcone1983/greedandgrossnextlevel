@@ -101,7 +101,7 @@ class MemoryService {
         JSON.stringify(sessionData)
       );
     } catch (error) {
-      console.error('Error saving session:', error);
+      // Error saving session
     }
   }
 
@@ -142,7 +142,7 @@ class MemoryService {
       // Update user profile
       await this.updateUserProfile(userId, conversation);
     } catch (error) {
-      console.error('Error recording conversation:', error);
+      // Error recording conversation
     }
   }
 
@@ -195,7 +195,7 @@ class MemoryService {
         suggestedPrompts,
       };
     } catch (error) {
-      console.error('Error getting conversation context:', error);
+      // Error getting conversation context
       return {
         recentConversations: [],
         userProfile: await this.createDefaultProfile(userId),
@@ -213,7 +213,7 @@ class MemoryService {
         return JSON.parse(profileData);
       }
     } catch (error) {
-      console.error('Error getting user profile:', error);
+      // Error getting user profile
     }
 
     return this.createDefaultProfile(userId);
@@ -250,7 +250,7 @@ class MemoryService {
 
       await AsyncStorage.setItem(`@greedgross:profile:${userId}`, JSON.stringify(profile));
     } catch (error) {
-      console.error('Error updating user profile:', error);
+      // Error updating user profile
     }
   }
 
@@ -462,7 +462,7 @@ class MemoryService {
       const bytes = CryptoJS.AES.decrypt(encryptedText, this.encryptionKey);
       return bytes.toString(CryptoJS.enc.Utf8);
     } catch (error) {
-      console.error('Decryption error:', error);
+      // Decryption error
       return encryptedText;
     }
   }
@@ -475,7 +475,7 @@ class MemoryService {
         return JSON.parse(settings);
       }
     } catch (error) {
-      console.error('Error getting memory settings:', error);
+      // Error getting memory settings
     }
 
     return {
@@ -497,7 +497,7 @@ class MemoryService {
         JSON.stringify(newSettings)
       );
     } catch (error) {
-      console.error('Error updating memory settings:', error);
+      // Error updating memory settings
     }
   }
 
@@ -520,7 +520,7 @@ class MemoryService {
         settings,
       };
     } catch (error) {
-      console.error('Error exporting user data:', error);
+      // Error exporting user data
       throw new Error('Failed to export user data');
     }
   }
@@ -544,7 +544,7 @@ class MemoryService {
       // Clear session data
       this.sessionConversations = [];
     } catch (error) {
-      console.error('Error deleting user data:', error);
+      // Error deleting user data
       throw new Error('Failed to delete user data');
     }
   }
@@ -585,7 +585,7 @@ class MemoryService {
         weeklyActivity: this.getWeeklyActivity(conversations),
       };
     } catch (error) {
-      console.error('Error getting conversation analytics:', error);
+      // Error getting conversation analytics
       return {
         totalConversations: 0,
         averageSessionLength: 0,

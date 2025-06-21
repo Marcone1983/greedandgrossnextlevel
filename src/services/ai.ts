@@ -1,3 +1,4 @@
+import { errorLogger } from './errorLogger';
 import axios from 'axios';
 import { CrossRequest, CrossResult, Strain } from '@/types';
 import { checkCachedCross, saveCachedCross } from './firebase';
@@ -107,6 +108,40 @@ export async function performCrossBreeding(
       popularity: 0,
     };
 
+    // Generate strain image based on AI description
+    try {
+      // Create image prompt based on the actual AI response
+      const imagePrompt = `Cannabis strain ${strain.name}: ${strain.type} type, ` +
+        `${strain.genetics.phenotypes.join(', ')}, ` +
+        `${strain.flavors.join(', ')} aromas, ` +
+        `${aiResponse.visualDescription || strain.genetics.dominantTraits.join(', ')}, ` +
+        `professional cannabis photography, macro detail, trichomes visible`;
+
+      const imageResponse = await axios.post(
+        'https://api.openai.com/v1/images/generations',
+        {
+          model: 'dall-e-3',
+          prompt: imagePrompt,
+          n: 1,
+          size: '1024x1024',
+          quality: 'standard',
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      strain.imageUrl = imageResponse.data.data[0].url;
+    } catch (imageError) {
+      errorLogger.warn('Failed to generate strain image', 'AIService.generateImage', {
+        error: imageError instanceof Error ? imageError.message : String(imageError),
+      });
+      // Continue without image - it's not critical
+    }
+
     // Save to cache
     await saveCachedCross(strain);
 
@@ -122,7 +157,7 @@ export async function performCrossBreeding(
       timestamp: new Date(),
     };
   } catch (error) {
-    console.error('AI Cross Error:', error);
+    errorLogger.error('AI Cross Error', error, 'AIService.crossStrains');
 
     // Fallback response
     return {

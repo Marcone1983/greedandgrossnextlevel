@@ -116,7 +116,7 @@ class CSVExportService {
         size: fileSize,
       };
     } catch (error) {
-      console.error('Export error:', error);
+      // Export error
       return {
         success: false,
         exportId,
@@ -723,7 +723,7 @@ class CSVExportService {
         try {
           await this.exportAnalyticsReport(exportType as any, options);
         } catch (error) {
-          console.error('Scheduled export failed:', error);
+          // Scheduled export failed
         }
       }, delay);
     }

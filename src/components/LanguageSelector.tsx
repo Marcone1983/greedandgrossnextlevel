@@ -1,3 +1,4 @@
+import { errorLogger } from '@/services/errorLogger';
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
 import {
@@ -78,7 +79,7 @@ export default function LanguageSelector({
                 [{ text: t('common.done') }]
               );
             } catch (error) {
-              console.error('Error changing language:', error);
+              errorLogger.error('Error changing language', error, 'LanguageSelector');
               Alert.alert(t('common.error'), t('errors.unknownError'));
             } finally {
               setIsChanging(false);

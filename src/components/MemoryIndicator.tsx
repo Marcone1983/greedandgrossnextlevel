@@ -1,3 +1,4 @@
+import { errorLogger } from '@/services/errorLogger';
 import React, { useState } from 'react';
 import {
   VStack,
@@ -145,7 +146,9 @@ export default function MemoryIndicator({
     try {
       const data = await exportUserData();
       // In a real app, this would trigger a file download
-      console.log('Exported data:', data);
+      errorLogger.info('Exported memory data', 'MemoryIndicator.exportData', {
+        dataSize: JSON.stringify(data).length,
+      });
 
       toast.show({
         title: 'Dati esportati',

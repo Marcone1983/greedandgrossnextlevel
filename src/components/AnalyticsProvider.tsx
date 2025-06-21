@@ -1,3 +1,4 @@
+import { errorLogger } from '@/services/errorLogger';
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
@@ -33,7 +34,11 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
       const enabled = await analyticsCollector.getAnalyticsSettings();
       setIsEnabled(enabled);
     } catch (error) {
-      console.error('Error loading analytics settings:', error);
+      errorLogger.error(
+        'Error loading analytics settings',
+        error,
+        'AnalyticsProvider.loadSettings'
+      );
     }
   };
 
@@ -42,7 +47,11 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
       await analyticsCollector.updateAnalyticsSettings(enabled);
       setIsEnabled(enabled);
     } catch (error) {
-      console.error('Error updating analytics settings:', error);
+      errorLogger.error(
+        'Error updating analytics settings',
+        error,
+        'AnalyticsProvider.updateSettings'
+      );
     }
   };
 

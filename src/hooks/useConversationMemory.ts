@@ -121,7 +121,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
         analytics,
       }));
     } catch (error) {
-      console.error('Error loading conversation context:', error);
+      // Error loading conversation context
       setState(prev => ({ ...prev, isLoaded: true, isEnabled: false }));
     }
   }, [user?.id]);
@@ -137,7 +137,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
         // Reload context to update state
         await loadConversationContext();
       } catch (error) {
-        console.error('Error recording conversation:', error);
+        // Error recording conversation
       }
     },
     [user?.id, state.isEnabled, loadConversationContext]
@@ -175,7 +175,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
           setState(prev => ({ ...prev, isEnabled: settings.enabled! }));
         }
       } catch (error) {
-        console.error('Error updating memory settings:', error);
+        // Error updating memory settings
       }
     },
     [user?.id]
@@ -231,7 +231,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
         },
       }));
     } catch (error) {
-      console.error('Error clearing memory:', error);
+      // Error clearing memory
       throw error;
     }
   }, [user?.id]);
@@ -243,7 +243,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     try {
       return await memoryService.exportUserData(user.id);
     } catch (error) {
-      console.error('Error exporting user data:', error);
+      // Error exporting user data
       throw error;
     }
   }, [user?.id]);
@@ -254,7 +254,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
       const sessionId = await memoryService.startNewSession();
       setState(prev => ({ ...prev, currentSession: sessionId }));
     } catch (error) {
-      console.error('Error starting new session:', error);
+      // Error starting new session
     }
   }, []);
 

@@ -1,3 +1,4 @@
+import { errorLogger } from '@/services/errorLogger';
 import React, { useState, useEffect } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import {
@@ -155,7 +156,11 @@ export default function SettingsScreen() {
         setNotificationSettings(JSON.parse(settings));
       }
     } catch (error) {
-      console.error('Error loading notification settings:', error);
+      errorLogger.error(
+        'Error loading notification settings',
+        error,
+        'SettingsScreen.loadNotificationSettings'
+      );
     }
   };
 
@@ -164,7 +169,11 @@ export default function SettingsScreen() {
       await AsyncStorage.setItem('@greedgross:notifications', JSON.stringify(newSettings));
       setNotificationSettings(newSettings);
     } catch (error) {
-      console.error('Error saving notification settings:', error);
+      errorLogger.error(
+        'Error saving notification settings',
+        error,
+        'SettingsScreen.saveNotificationSettings'
+      );
       toast.show({
         title: t('errors.storageError'),
         colorScheme: 'error',

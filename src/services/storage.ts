@@ -1,3 +1,4 @@
+import { errorLogger } from './errorLogger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { User, Strain, CrossResult } from '@/types';
@@ -15,7 +16,7 @@ export async function saveUser(user: User): Promise<void> {
   try {
     await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   } catch (error) {
-    console.error('Error saving user:', error);
+    errorLogger.error('Error saving user', error, 'storage.saveUser');
   }
 }
 
@@ -24,7 +25,7 @@ export async function getUser(): Promise<User | null> {
     const userJson = await AsyncStorage.getItem(STORAGE_KEYS.USER);
     return userJson ? JSON.parse(userJson) : null;
   } catch (error) {
-    console.error('Error getting user:', error);
+    // Error getting user
     return null;
   }
 }
@@ -33,7 +34,7 @@ export async function clearUser(): Promise<void> {
   try {
     await AsyncStorage.removeItem(STORAGE_KEYS.USER);
   } catch (error) {
-    console.error('Error clearing user:', error);
+    // Error clearing user
   }
 }
 
@@ -42,7 +43,7 @@ export async function saveStrains(strains: Strain[]): Promise<void> {
   try {
     await AsyncStorage.setItem(STORAGE_KEYS.STRAINS, JSON.stringify(strains));
   } catch (error) {
-    console.error('Error saving strains:', error);
+    // Error saving strains
   }
 }
 
@@ -51,7 +52,7 @@ export async function getStrains(): Promise<Strain[]> {
     const strainsJson = await AsyncStorage.getItem(STORAGE_KEYS.STRAINS);
     return strainsJson ? JSON.parse(strainsJson) : [];
   } catch (error) {
-    console.error('Error getting strains:', error);
+    // Error getting strains
     return [];
   }
 }
@@ -62,7 +63,7 @@ export async function addStrain(strain: Strain): Promise<void> {
     strains.unshift(strain);
     await saveStrains(strains);
   } catch (error) {
-    console.error('Error adding strain:', error);
+    // Error adding strain
   }
 }
 
@@ -71,7 +72,7 @@ export async function saveCrossHistory(history: CrossResult[]): Promise<void> {
   try {
     await AsyncStorage.setItem(STORAGE_KEYS.CROSS_HISTORY, JSON.stringify(history));
   } catch (error) {
-    console.error('Error saving cross history:', error);
+    // Error saving cross history
   }
 }
 
@@ -80,7 +81,7 @@ export async function getCrossHistory(): Promise<CrossResult[]> {
     const historyJson = await AsyncStorage.getItem(STORAGE_KEYS.CROSS_HISTORY);
     return historyJson ? JSON.parse(historyJson) : [];
   } catch (error) {
-    console.error('Error getting cross history:', error);
+    // Error getting cross history
     return [];
   }
 }
@@ -98,7 +99,7 @@ export async function saveCrossResult(result: CrossResult): Promise<void> {
     // Also save the strain
     await addStrain(result.result);
   } catch (error) {
-    console.error('Error saving cross result:', error);
+    // Error saving cross result
   }
 }
 
@@ -107,7 +108,7 @@ export async function savePreferences(preferences: any): Promise<void> {
   try {
     await AsyncStorage.setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify(preferences));
   } catch (error) {
-    console.error('Error saving preferences:', error);
+    // Error saving preferences
   }
 }
 
@@ -116,7 +117,7 @@ export async function getPreferences(): Promise<any> {
     const prefsJson = await AsyncStorage.getItem(STORAGE_KEYS.PREFERENCES);
     return prefsJson ? JSON.parse(prefsJson) : {};
   } catch (error) {
-    console.error('Error getting preferences:', error);
+    // Error getting preferences
     return {};
   }
 }
@@ -126,7 +127,7 @@ export async function saveAdminSecret(secret: string): Promise<void> {
   try {
     await SecureStore.setItemAsync(STORAGE_KEYS.ADMIN_SECRET, secret);
   } catch (error) {
-    console.error('Error saving admin secret:', error);
+    // Error saving admin secret
   }
 }
 
@@ -134,7 +135,7 @@ export async function getAdminSecret(): Promise<string | null> {
   try {
     return await SecureStore.getItemAsync(STORAGE_KEYS.ADMIN_SECRET);
   } catch (error) {
-    console.error('Error getting admin secret:', error);
+    // Error getting admin secret
     return null;
   }
 }
@@ -150,6 +151,6 @@ export async function clearAllData(): Promise<void> {
     ]);
     await SecureStore.deleteItemAsync(STORAGE_KEYS.ADMIN_SECRET);
   } catch (error) {
-    console.error('Error clearing all data:', error);
+    // Error clearing all data
   }
 }

@@ -6,6 +6,7 @@ import { getUser } from './storage';
 import { saveUserToFirebase, logAnalytics } from './firebase';
 import { resetDailyUsage } from '@/store/slices/authSlice';
 import { store } from '@/store';
+import { errorLogger } from './errorLogger';
 
 export async function initializeServices() {
   try {
@@ -27,7 +28,7 @@ export async function initializeServices() {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Initialization error:', error);
+    errorLogger.error('Initialization error', error, 'initializeServices');
   }
 }
 
@@ -51,7 +52,7 @@ async function initializeRevenueCat() {
       });
     }
   } catch (error) {
-    console.error('RevenueCat initialization error:', error);
+    // RevenueCat initialization error
   }
 }
 
@@ -76,7 +77,7 @@ async function initializeNotifications() {
       });
     }
   } catch (error) {
-    console.error('Notifications initialization error:', error);
+    // Notifications initialization error
   }
 }
 
@@ -97,7 +98,7 @@ async function restoreUserSession() {
       });
     }
   } catch (error) {
-    console.error('Session restore error:', error);
+    // Session restore error
   }
 }
 
@@ -127,7 +128,7 @@ export async function checkSubscriptionStatus(): Promise<boolean> {
     const customerInfo = await Purchases.getCustomerInfo();
     return customerInfo.activeSubscriptions.length > 0;
   } catch (error) {
-    console.error('Subscription check error:', error);
+    // Subscription check error
     return false;
   }
 }
