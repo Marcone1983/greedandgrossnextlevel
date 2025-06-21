@@ -29,7 +29,11 @@ def findNodeModulesPath(rootDir) {
     println "=== GRADLE: Checking $nodeModules ==="
     if (nodeModules.exists()) {
         println "=== GRADLE: Found at $nodeModules.absolutePath ==="
-        return nodeModules.absolutePath
+        def nativeModulesFile = file("$nodeModules.absolutePath/@react-native-community/cli-platform-android/native_modules.gradle")
+        println "=== GRADLE: Checking if native_modules.gradle exists: ${nativeModulesFile.exists()} ==="
+        if (nativeModulesFile.exists()) {
+            return nodeModules.absolutePath
+        }
     }
     println "=== GRADLE: node_modules NOT FOUND ==="
     return null
