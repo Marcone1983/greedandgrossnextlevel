@@ -306,6 +306,8 @@ class GeoLocationService {
         }
 
         const regionStats = regionData.get(region);
+        if (!regionStats) return; // Skip if somehow undefined
+        
         regionStats.userCount++;
         regionStats.totalSessionDuration += data.sessionDuration || 0;
         regionStats.sessionCount++;
@@ -429,6 +431,8 @@ class GeoLocationService {
         }
         
         const stats = countryData.get(country);
+        if (!stats) return; // Skip if somehow undefined
+        
         stats.userCount++;
         stats.revenue += data.revenue || 0;
         
@@ -448,7 +452,10 @@ class GeoLocationService {
           previousCountryData.set(country, { userCount: 0 });
         }
         
-        previousCountryData.get(country).userCount++;
+        const prevStats = previousCountryData.get(country);
+        if (prevStats) {
+          prevStats.userCount++;
+        }
       });
 
       // Convert to array and calculate growth rates
