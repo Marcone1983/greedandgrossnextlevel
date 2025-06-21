@@ -186,7 +186,7 @@ jobs:
       run: |
         echo "Building APK with Gradle..."
         chmod +x gradlew
-        bash ./gradlew clean assembleRelease
+        ./gradlew clean assembleRelease --no-daemon
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -201,7 +201,7 @@ jobs:
       run: |
         echo "Building AAB with Gradle..."
         chmod +x gradlew
-        bash ./gradlew bundleRelease
+        ./gradlew bundleRelease --no-daemon
         
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
