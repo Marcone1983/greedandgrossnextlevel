@@ -1,5 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirestore, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
 
 export interface LocationData {
   country?: string;
@@ -285,14 +293,14 @@ class GeoLocationService {
         useCases: Map<string, number>;
         seasonalData: { spring: number; summer: number; autumn: number; winter: number };
       }
-      
+
       const regionData = new Map<string, RegionStats>();
 
       // Aggregate data by region
-      snapshot.forEach((doc) => {
+      snapshot.forEach(doc => {
         const data = doc.data();
         const region = data.location?.region || 'Unknown';
-        
+
         if (!regionData.has(region)) {
           regionData.set(region, {
             userCount: 0,
@@ -307,28 +315,29 @@ class GeoLocationService {
 
         const regionStats = regionData.get(region);
         if (!regionStats) return; // Skip if somehow undefined
-        
+
         regionStats.userCount++;
         regionStats.totalSessionDuration += data.sessionDuration || 0;
         regionStats.sessionCount++;
-        
+
         if (data.converted) regionStats.conversions++;
-        
+
         // Track strains
         if (data.strains) {
           data.strains.forEach((strain: string) => {
             regionStats.strains.set(strain, (regionStats.strains.get(strain) || 0) + 1);
           });
         }
-        
+
         // Track use cases
         if (data.useCase) {
           regionStats.useCases.set(data.useCase, (regionStats.useCases.get(data.useCase) || 0) + 1);
         }
-        
+
         // Track seasonal data
         const month = new Date(data.timestamp).getMonth();
-        const season = month < 3 ? 'winter' : month < 6 ? 'spring' : month < 9 ? 'summer' : 'autumn';
+        const season =
+          month < 3 ? 'winter' : month < 6 ? 'spring' : month < 9 ? 'summer' : 'autumn';
         regionStats.seasonalData[season]++;
       });
 
@@ -339,17 +348,18 @@ class GeoLocationService {
           .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
           .slice(0, 3)
           .map(([strain]: [string, number]) => strain);
-          
+
         const topUseCases = Array.from(stats.useCases.entries())
           .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
           .slice(0, 3)
           .map(([useCase]: [string, number]) => useCase);
-          
+
         insights.push({
           region,
           userCount: stats.userCount,
           popularStrains,
-          averageSessionDuration: stats.sessionCount > 0 ? stats.totalSessionDuration / stats.sessionCount : 0,
+          averageSessionDuration:
+            stats.sessionCount > 0 ? stats.totalSessionDuration / stats.sessionCount : 0,
           conversionRate: stats.userCount > 0 ? (stats.conversions / stats.userCount) * 100 : 0,
           topUseCases,
           seasonalTrends: stats.seasonalData,
@@ -389,7 +399,7 @@ class GeoLocationService {
         where('timestamp', '<=', now),
         orderBy('timestamp', 'desc')
       );
-      
+
       // Get previous period data for growth calculation
       const previousQ = query(
         currentPeriodRef,
@@ -400,7 +410,7 @@ class GeoLocationService {
 
       const [currentSnapshot, previousSnapshot] = await Promise.all([
         getDocs(currentQ),
-        getDocs(previousQ)
+        getDocs(previousQ),
       ]);
 
       interface CountryStats {
@@ -410,16 +420,16 @@ class GeoLocationService {
         revenue: number;
         strains: Map<string, number>;
       }
-      
+
       const countryData = new Map<string, CountryStats>();
       const previousCountryData = new Map<string, { userCount: number }>();
 
       // Process current period
-      currentSnapshot.forEach((doc) => {
+      currentSnapshot.forEach(doc => {
         const data = doc.data();
         const country = data.location?.country || 'Unknown';
         const countryCode = data.location?.countryCode || 'XX';
-        
+
         if (!countryData.has(country)) {
           countryData.set(country, {
             country,
@@ -429,13 +439,13 @@ class GeoLocationService {
             strains: new Map<string, number>(),
           });
         }
-        
+
         const stats = countryData.get(country);
         if (!stats) return; // Skip if somehow undefined
-        
+
         stats.userCount++;
         stats.revenue += data.revenue || 0;
-        
+
         if (data.strains) {
           data.strains.forEach((strain: string) => {
             stats.strains.set(strain, (stats.strains.get(strain) || 0) + 1);
@@ -444,14 +454,14 @@ class GeoLocationService {
       });
 
       // Process previous period for growth rate
-      previousSnapshot.forEach((doc) => {
+      previousSnapshot.forEach(doc => {
         const data = doc.data();
         const country = data.location?.country || 'Unknown';
-        
+
         if (!previousCountryData.has(country)) {
           previousCountryData.set(country, { userCount: 0 });
         }
-        
+
         const prevStats = previousCountryData.get(country);
         if (prevStats) {
           prevStats.userCount++;
@@ -462,15 +472,14 @@ class GeoLocationService {
       const popularityData: any[] = [];
       countryData.forEach((stats, country) => {
         const previousCount = previousCountryData.get(country)?.userCount || 0;
-        const growthRate = previousCount > 0 
-          ? ((stats.userCount - previousCount) / previousCount) * 100 
-          : 100;
-          
+        const growthRate =
+          previousCount > 0 ? ((stats.userCount - previousCount) / previousCount) * 100 : 100;
+
         const topStrains = Array.from(stats.strains.entries())
           .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
           .slice(0, 3)
           .map(([strain]: [string, number]) => strain);
-          
+
         popularityData.push({
           country: stats.country,
           countryCode: stats.countryCode,
