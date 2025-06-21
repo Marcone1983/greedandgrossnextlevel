@@ -276,7 +276,17 @@ class GeoLocationService {
       );
 
       const snapshot = await getDocs(q);
-      const regionData = new Map<string, any>();
+      interface RegionStats {
+        userCount: number;
+        strains: Map<string, number>;
+        totalSessionDuration: number;
+        sessionCount: number;
+        conversions: number;
+        useCases: Map<string, number>;
+        seasonalData: { spring: number; summer: number; autumn: number; winter: number };
+      }
+      
+      const regionData = new Map<string, RegionStats>();
 
       // Aggregate data by region
       snapshot.forEach((doc) => {
@@ -324,14 +334,14 @@ class GeoLocationService {
       const insights: GeographicInsight[] = [];
       regionData.forEach((stats, region) => {
         const popularStrains = Array.from(stats.strains.entries())
-          .sort((a, b) => b[1] - a[1])
+          .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
           .slice(0, 3)
-          .map(([strain]) => strain);
+          .map(([strain]: [string, number]) => strain);
           
         const topUseCases = Array.from(stats.useCases.entries())
-          .sort((a, b) => b[1] - a[1])
+          .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
           .slice(0, 3)
-          .map(([useCase]) => useCase);
+          .map(([useCase]: [string, number]) => useCase);
           
         insights.push({
           region,
@@ -391,8 +401,16 @@ class GeoLocationService {
         getDocs(previousQ)
       ]);
 
-      const countryData = new Map<string, any>();
-      const previousCountryData = new Map<string, any>();
+      interface CountryStats {
+        country: string;
+        countryCode: string;
+        userCount: number;
+        revenue: number;
+        strains: Map<string, number>;
+      }
+      
+      const countryData = new Map<string, CountryStats>();
+      const previousCountryData = new Map<string, { userCount: number }>();
 
       // Process current period
       currentSnapshot.forEach((doc) => {
@@ -442,9 +460,9 @@ class GeoLocationService {
           : 100;
           
         const topStrains = Array.from(stats.strains.entries())
-          .sort((a, b) => b[1] - a[1])
+          .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
           .slice(0, 3)
-          .map(([strain]) => strain);
+          .map(([strain]: [string, number]) => strain);
           
         popularityData.push({
           country: stats.country,
@@ -471,7 +489,7 @@ class GeoLocationService {
         return JSON.parse(prefs);
       }
     } catch (error) {
-      console.error('Error getting location preferences:', error);
+      // Error getting location preferences
     }
 
     return {
@@ -499,7 +517,7 @@ class GeoLocationService {
         await this.clearLocationCache();
       }
     } catch (error) {
-      console.error('Error updating location preferences:', error);
+      // Error updating location preferences
     }
   }
 
@@ -516,7 +534,7 @@ class GeoLocationService {
         }
       }
     } catch (error) {
-      console.error('Error loading cached location:', error);
+      // Error loading cached location
     }
   }
 
@@ -527,7 +545,7 @@ class GeoLocationService {
         await AsyncStorage.setItem('@greedgross:cached-location', JSON.stringify(location));
       }
     } catch (error) {
-      console.error('Error saving location cache:', error);
+      // Error saving location cache
     }
   }
 
@@ -536,7 +554,7 @@ class GeoLocationService {
       await AsyncStorage.removeItem('@greedgross:cached-location');
       this.cachedLocation = null;
     } catch (error) {
-      console.error('Error clearing location cache:', error);
+      // Error clearing location cache
     }
   }
 
@@ -674,7 +692,7 @@ class GeoLocationService {
       this.isLocationEnabled = false;
       this.stopLocationDetection();
     } catch (error) {
-      console.error('Error deleting location data:', error);
+      // Error deleting location data
       throw new Error('Failed to delete location data');
     }
   }
