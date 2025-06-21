@@ -187,7 +187,7 @@ jobs:
       with:
         gradle-version: wrapper
         build-root-directory: GreedGross
-        arguments: :app:assembleRelease --no-daemon
+        arguments: assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -204,7 +204,7 @@ jobs:
       with:
         gradle-version: wrapper
         build-root-directory: GreedGross
-        arguments: :app:bundleRelease --no-daemon
+        arguments: bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
