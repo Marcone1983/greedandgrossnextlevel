@@ -185,7 +185,7 @@ jobs:
       working-directory: ./android
       run: |
         echo "Building APK with Gradle..."
-        gradle clean assembleRelease --stacktrace
+        ./gradlew clean assembleRelease --stacktrace
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
@@ -199,7 +199,7 @@ jobs:
       working-directory: ./android
       run: |
         echo "Building AAB with Gradle..."
-        gradle bundleRelease --stacktrace
+        ./gradlew bundleRelease --stacktrace
         
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
