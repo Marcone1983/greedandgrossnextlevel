@@ -1,7 +1,10 @@
 module.exports = {
-  extends: ['expo'],
+  extends: [
+    '@react-native-community',
+    '@typescript-eslint/recommended',
+  ],
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'react', 'react-native'],
   rules: {
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     'no-console': ['warn', { allow: ['warn', 'error'] }],
