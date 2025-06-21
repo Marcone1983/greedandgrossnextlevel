@@ -180,6 +180,12 @@ jobs:
     
     - name: 🔧 Prepare Gradle build
       run: |
+        # First check where node_modules actually is
+        echo "=== Checking node_modules location ==="
+        pwd
+        ls -la
+        ls -la node_modules/@react-native-community/cli-platform-android/ || echo "node_modules not found in root"
+        
         cd GreedGross
         # Make gradlew executable
         chmod +x gradlew
@@ -188,8 +194,11 @@ jobs:
         # Create empty lasspath in multiple locations
         touch lasspath
         touch ../lasspath
-        # Create symlink to node_modules for React Native plugin
-        ln -sf ../../node_modules ../node_modules || true
+        
+        # Debug: Check if node_modules is accessible from here
+        echo "=== From GreedGross directory ==="
+        pwd
+        ls -la ../node_modules/@react-native-community/cli-platform-android/ || echo "node_modules not accessible from GreedGross"
         
     - name: 🏗️ Build APK
       run: |

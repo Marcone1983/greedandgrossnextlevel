@@ -8,7 +8,22 @@ pluginManagement {
 
 rootProject.name = 'GreedGross'
 
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+def nodeModulesPath = findNodeModulesPath(settings.rootDir)
+if (nodeModulesPath != null) {
+    apply from: file("$nodeModulesPath/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
+}
+
+def findNodeModulesPath(rootDir) {
+    def nodeModules = file("$rootDir/../node_modules")
+    if (nodeModules.exists()) {
+        return nodeModules.absolutePath
+    }
+    nodeModules = file("$rootDir/node_modules")
+    if (nodeModules.exists()) {
+        return nodeModules.absolutePath
+    }
+    return null
+}
 include ':app'
 
 dependencyResolutionManagement {

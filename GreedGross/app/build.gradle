@@ -3,12 +3,26 @@ apply plugin: "com.facebook.react"
 
 import com.android.build.OutputFile
 
+def findNodeModulesPath(rootDir) {
+    def nodeModules = file("$rootDir/../node_modules")
+    if (nodeModules.exists()) {
+        return nodeModules.absolutePath
+    }
+    nodeModules = file("$rootDir/../../node_modules")
+    if (nodeModules.exists()) {
+        return nodeModules.absolutePath
+    }
+    return null
+}
+
+def nodeModulesDir = findNodeModulesPath(rootProject.projectDir)
+
 project.ext.react = [
     enableHermes: true,
     entryFile: "index.js",
     bundleAssetName: "index.android.bundle",
-    root: "../../",
-    cliPath: "../../node_modules/react-native/cli.js"
+    root: nodeModulesDir != null ? new File(nodeModulesDir).parent : "../../",
+    cliPath: nodeModulesDir != null ? "$nodeModulesDir/react-native/cli.js" : "../../node_modules/react-native/cli.js"
 ]
 
 // React Native 0.79.0 uses the gradle plugin to handle native modules automatically
@@ -147,9 +161,11 @@ dependencies {
     }
 
     if (enableHermes) {
-        def hermesPath = "../../node_modules/hermes-engine/android/";
-        debugImplementation files(hermesPath + "hermes-debug.aar")
-        releaseImplementation files(hermesPath + "hermes-release.aar")
+        if (nodeModulesDir != null) {
+            def hermesPath = "$nodeModulesDir/hermes-engine/android/";
+            debugImplementation files(hermesPath + "hermes-debug.aar")
+            releaseImplementation files(hermesPath + "hermes-release.aar")
+        }
     } else {
         implementation jscFlavor
     }
@@ -174,7 +190,9 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+if (nodeModulesDir != null) {
+    apply from: file("$nodeModulesDir/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+}
 
 // Apply Google Services plugin
 apply plugin: 'com.google.gms.google-services'
