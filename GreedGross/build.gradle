@@ -29,3 +29,12 @@ allprojects {
         maven { url "https://www.jitpack.io" }
     }
 }
+
+// Root tasks that delegate to app module
+task assembleRelease {
+    dependsOn ':app:assembleRelease'
+}
+
+task bundleRelease {
+    dependsOn ':app:bundleRelease'
+}
