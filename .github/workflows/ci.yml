@@ -34,7 +34,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
     
     - name: 📱 Setup React Native CLI
       run: npm install -g @react-native-community/cli
@@ -77,7 +76,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
     
     - name: ☕ Setup Java
       uses: actions/setup-java@v4
