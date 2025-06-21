@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getFirestore, collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
 export interface LocationData {
   country?: string;
@@ -81,7 +82,7 @@ class GeoLocationService {
         this.startLocationDetection();
       }
     } catch (error) {
-      console.error('Error initializing location services:', error);
+      // Silent error - location services initialization failed
     }
   }
 
@@ -118,7 +119,7 @@ class GeoLocationService {
       // Final fallback to timezone only
       return this.getTimezoneOnlyLocation();
     } catch (error) {
-      console.error('Error getting current location:', error);
+      // Silent error - location fetch failed
       return this.getTimezoneOnlyLocation();
     }
   }
@@ -151,7 +152,7 @@ class GeoLocationService {
           }
         }
       } catch (error) {
-        console.warn(`Failed to get location from ${service.name}:`, error);
+        // Silent warning - IP service failed
         continue;
       }
     }
@@ -242,7 +243,7 @@ class GeoLocationService {
         try {
           await this.getCurrentLocation(true);
         } catch (error) {
-          console.error('Error in location watch:', error);
+          // Silent error - location watch failed
         }
       },
       15 * 60 * 1000
@@ -257,43 +258,95 @@ class GeoLocationService {
   }
 
   // GEOGRAPHIC ANALYTICS
-  async getGeographicInsights(_days: number = 30): Promise<GeographicInsight[]> {
+  async getGeographicInsights(days: number = 30): Promise<GeographicInsight[]> {
     try {
-      // This would query Firebase for geographic data
-      // For now, we'll return mock data that demonstrates the structure
+      const firestore = getFirestore();
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
 
-      const mockInsights: GeographicInsight[] = [
-        {
-          region: 'Europe',
-          userCount: 1250,
-          popularStrains: ['Blue Dream', 'White Widow', 'Northern Lights'],
-          averageSessionDuration: 8.5,
-          conversionRate: 4.2,
-          topUseCases: ['creativity', 'relaxation', 'medical'],
-          seasonalTrends: { spring: 85, summer: 120, autumn: 95, winter: 110 },
-        },
-        {
-          region: 'North America',
-          userCount: 2100,
-          popularStrains: ['OG Kush', 'Sour Diesel', 'Girl Scout Cookies'],
-          averageSessionDuration: 12.3,
-          conversionRate: 6.8,
-          topUseCases: ['recreational', 'medical', 'breeding'],
-          seasonalTrends: { spring: 180, summer: 220, autumn: 195, winter: 205 },
-        },
-        {
-          region: 'Asia Pacific',
-          userCount: 450,
-          popularStrains: ['Jack Herer', 'Granddaddy Purple', 'AK-47'],
-          averageSessionDuration: 6.2,
-          conversionRate: 2.1,
-          topUseCases: ['education', 'medical', 'research'],
-        },
-      ];
+      // Query Firebase for user analytics by region
+      const analyticsRef = collection(firestore, 'user_analytics');
+      const q = query(
+        analyticsRef,
+        where('timestamp', '>=', startDate),
+        where('timestamp', '<=', endDate),
+        orderBy('timestamp', 'desc'),
+        limit(1000)
+      );
 
-      return mockInsights;
+      const snapshot = await getDocs(q);
+      const regionData = new Map<string, any>();
+
+      // Aggregate data by region
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        const region = data.location?.region || 'Unknown';
+        
+        if (!regionData.has(region)) {
+          regionData.set(region, {
+            userCount: 0,
+            strains: new Map<string, number>(),
+            totalSessionDuration: 0,
+            sessionCount: 0,
+            conversions: 0,
+            useCases: new Map<string, number>(),
+            seasonalData: { spring: 0, summer: 0, autumn: 0, winter: 0 },
+          });
+        }
+
+        const regionStats = regionData.get(region);
+        regionStats.userCount++;
+        regionStats.totalSessionDuration += data.sessionDuration || 0;
+        regionStats.sessionCount++;
+        
+        if (data.converted) regionStats.conversions++;
+        
+        // Track strains
+        if (data.strains) {
+          data.strains.forEach((strain: string) => {
+            regionStats.strains.set(strain, (regionStats.strains.get(strain) || 0) + 1);
+          });
+        }
+        
+        // Track use cases
+        if (data.useCase) {
+          regionStats.useCases.set(data.useCase, (regionStats.useCases.get(data.useCase) || 0) + 1);
+        }
+        
+        // Track seasonal data
+        const month = new Date(data.timestamp).getMonth();
+        const season = month < 3 ? 'winter' : month < 6 ? 'spring' : month < 9 ? 'summer' : 'autumn';
+        regionStats.seasonalData[season]++;
+      });
+
+      // Convert to GeographicInsight array
+      const insights: GeographicInsight[] = [];
+      regionData.forEach((stats, region) => {
+        const popularStrains = Array.from(stats.strains.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([strain]) => strain);
+          
+        const topUseCases = Array.from(stats.useCases.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([useCase]) => useCase);
+          
+        insights.push({
+          region,
+          userCount: stats.userCount,
+          popularStrains,
+          averageSessionDuration: stats.sessionCount > 0 ? stats.totalSessionDuration / stats.sessionCount : 0,
+          conversionRate: stats.userCount > 0 ? (stats.conversions / stats.userCount) * 100 : 0,
+          topUseCases,
+          seasonalTrends: stats.seasonalData,
+        });
+      });
+
+      return insights.sort((a, b) => b.userCount - a.userCount);
     } catch (error) {
-      console.error('Error getting geographic insights:', error);
+      // Silent fail - return empty array
       return [];
     }
   }
@@ -308,41 +361,106 @@ class GeoLocationService {
       topStrains: string[];
     }[]
   > {
-    // Mock data for country popularity
-    return [
-      {
-        country: 'United States',
-        countryCode: 'US',
-        userCount: 1850,
-        growthRate: 15.3,
-        averageRevenue: 12.5,
-        topStrains: ['OG Kush', 'Sour Diesel', 'Girl Scout Cookies'],
-      },
-      {
-        country: 'Canada',
-        countryCode: 'CA',
-        userCount: 890,
-        growthRate: 22.1,
-        averageRevenue: 18.75,
-        topStrains: ['Blue Dream', 'White Widow', 'Purple Haze'],
-      },
-      {
-        country: 'Germany',
-        countryCode: 'DE',
-        userCount: 456,
-        growthRate: 8.7,
-        averageRevenue: 9.8,
-        topStrains: ['Northern Lights', 'Skunk #1', 'Amnesia Haze'],
-      },
-      {
-        country: 'Netherlands',
-        countryCode: 'NL',
-        userCount: 234,
-        growthRate: 5.2,
-        averageRevenue: 14.25,
-        topStrains: ['White Widow', 'Super Silver Haze', 'Jack Herer'],
-      },
-    ];
+    try {
+      const firestore = getFirestore();
+      const now = new Date();
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(now.getDate() - 60);
+
+      // Get current period data
+      const currentPeriodRef = collection(firestore, 'user_analytics');
+      const currentQ = query(
+        currentPeriodRef,
+        where('timestamp', '>=', thirtyDaysAgo),
+        where('timestamp', '<=', now),
+        orderBy('timestamp', 'desc')
+      );
+      
+      // Get previous period data for growth calculation
+      const previousQ = query(
+        currentPeriodRef,
+        where('timestamp', '>=', sixtyDaysAgo),
+        where('timestamp', '<', thirtyDaysAgo),
+        orderBy('timestamp', 'desc')
+      );
+
+      const [currentSnapshot, previousSnapshot] = await Promise.all([
+        getDocs(currentQ),
+        getDocs(previousQ)
+      ]);
+
+      const countryData = new Map<string, any>();
+      const previousCountryData = new Map<string, any>();
+
+      // Process current period
+      currentSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const country = data.location?.country || 'Unknown';
+        const countryCode = data.location?.countryCode || 'XX';
+        
+        if (!countryData.has(country)) {
+          countryData.set(country, {
+            country,
+            countryCode,
+            userCount: 0,
+            revenue: 0,
+            strains: new Map<string, number>(),
+          });
+        }
+        
+        const stats = countryData.get(country);
+        stats.userCount++;
+        stats.revenue += data.revenue || 0;
+        
+        if (data.strains) {
+          data.strains.forEach((strain: string) => {
+            stats.strains.set(strain, (stats.strains.get(strain) || 0) + 1);
+          });
+        }
+      });
+
+      // Process previous period for growth rate
+      previousSnapshot.forEach((doc) => {
+        const data = doc.data();
+        const country = data.location?.country || 'Unknown';
+        
+        if (!previousCountryData.has(country)) {
+          previousCountryData.set(country, { userCount: 0 });
+        }
+        
+        previousCountryData.get(country).userCount++;
+      });
+
+      // Convert to array and calculate growth rates
+      const popularityData: any[] = [];
+      countryData.forEach((stats, country) => {
+        const previousCount = previousCountryData.get(country)?.userCount || 0;
+        const growthRate = previousCount > 0 
+          ? ((stats.userCount - previousCount) / previousCount) * 100 
+          : 100;
+          
+        const topStrains = Array.from(stats.strains.entries())
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([strain]) => strain);
+          
+        popularityData.push({
+          country: stats.country,
+          countryCode: stats.countryCode,
+          userCount: stats.userCount,
+          growthRate: Math.round(growthRate * 10) / 10,
+          averageRevenue: stats.userCount > 0 ? stats.revenue / stats.userCount : 0,
+          topStrains,
+        });
+      });
+
+      return popularityData.sort((a, b) => b.userCount - a.userCount).slice(0, 20);
+    } catch (error) {
+      // Silent fail - return empty array
+      return [];
+    }
   }
 
   // LOCATION PREFERENCES
