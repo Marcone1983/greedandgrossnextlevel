@@ -1,6 +1,3 @@
-rootProject.name = 'GreedGross'
-include ':app'
-
 pluginManagement {
     repositories {
         google()
@@ -8,6 +5,9 @@ pluginManagement {
         mavenCentral()
     }
 }
+
+rootProject.name = 'GreedGross'
+include ':app'
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
