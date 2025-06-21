@@ -7,10 +7,10 @@ echo "🔧 Fixing Gradle Wrapper..."
 # Remove invalid jar
 rm -f android/gradle/wrapper/gradle-wrapper.jar
 
-# Download correct gradle-wrapper.jar for version 8.5
+# Download correct gradle-wrapper.jar for version 8.10.2 (matching gradle-wrapper.properties)
 echo "📥 Downloading gradle-wrapper.jar..."
 curl -L -o android/gradle/wrapper/gradle-wrapper.jar \
-  https://github.com/gradle/gradle/raw/v8.5.0/gradle/wrapper/gradle-wrapper.jar
+  https://github.com/gradle/gradle/raw/v8.10.2/gradle/wrapper/gradle-wrapper.jar
 
 # Make gradlew executable
 chmod +x android/gradlew
