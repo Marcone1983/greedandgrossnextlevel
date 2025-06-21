@@ -183,11 +183,9 @@ jobs:
         chmod +x gradlew
         
     - name: 🏗️ Build APK
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: wrapper
-        build-root-directory: android
-        arguments: :app:assembleRelease --no-daemon
+      run: |
+        cd android
+        ./gradlew :app:assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -200,11 +198,9 @@ jobs:
         mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
     
     - name: 🏗️ Build AAB (App Bundle)
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: wrapper
-        build-root-directory: android
-        arguments: :app:bundleRelease --no-daemon
+      run: |
+        cd android
+        ./gradlew :app:bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
