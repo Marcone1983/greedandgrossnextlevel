@@ -31,6 +31,14 @@ def enableProguardInReleaseBuilds = true
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+/**
+ * Return the New Architecture enabled property
+ */
+def isNewArchitectureEnabled() {
+    // Legge dal gradle.properties
+    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     compileSdkVersion rootProject.ext.compileSdkVersion
