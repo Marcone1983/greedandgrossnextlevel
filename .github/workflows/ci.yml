@@ -117,7 +117,7 @@ jobs:
     
     - name: 🔥 Create google-services.json
       run: |
-        cat > android/app/google-services.json << EOF
+        cat > GreedGross/app/google-services.json << EOF
         {
           "project_info": {
             "project_number": "${{ secrets.FIREBASE_PROJECT_NUMBER }}",
@@ -162,13 +162,13 @@ jobs:
     - name: 🔑 Setup Android Keystore
       run: |
         # Create keystore from base64
-        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/greed-gross-release-key.keystore
+        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > GreedGross/app/greed-gross-release-key.keystore
         
         # Verify keystore exists
-        ls -la android/app/greed-gross-release-key.keystore
+        ls -la GreedGross/app/greed-gross-release-key.keystore
         
         # Add keystore config to gradle.properties
-        cat >> android/gradle.properties << EOF
+        cat >> GreedGross/gradle.properties << EOF
         GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
         GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
@@ -177,7 +177,7 @@ jobs:
     
     - name: 🔧 Prepare Gradle build
       run: |
-        cd android
+        cd GreedGross
         # Create lasspath file that Gradle seems to look for
         touch lasspath
         chmod +x gradlew
@@ -186,11 +186,12 @@ jobs:
       uses: gradle/gradle-build-action@v2
       with:
         gradle-version: wrapper
-        arguments: android:assembleRelease --no-daemon
+        build-root-directory: GreedGross
+        arguments: :app:assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
-        cd android
+        cd GreedGross
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
         
@@ -202,11 +203,12 @@ jobs:
       uses: gradle/gradle-build-action@v2
       with:
         gradle-version: wrapper
-        arguments: android:bundleRelease --no-daemon
+        build-root-directory: GreedGross
+        arguments: :app:bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
-        cd android
+        cd GreedGross
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
         
@@ -216,16 +218,16 @@ jobs:
     
     - name: 📊 APK/AAB Analysis
       run: |
-        if [ -f android/app/build/outputs/apk/release/greed-gross-*.apk ]; then
+        if [ -f GreedGross/app/build/outputs/apk/release/greed-gross-*.apk ]; then
           echo "🎉 APK Build Success!"
-          APK_SIZE=$(du -h android/app/build/outputs/apk/release/greed-gross-*.apk | cut -f1)
+          APK_SIZE=$(du -h GreedGross/app/build/outputs/apk/release/greed-gross-*.apk | cut -f1)
           echo "📦 APK Size: $APK_SIZE"
           echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
         fi
         
-        if [ -f android/app/build/outputs/bundle/release/greed-gross-*.aab ]; then
+        if [ -f GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab ]; then
           echo "🎉 AAB Build Success!"
-          AAB_SIZE=$(du -h android/app/build/outputs/bundle/release/greed-gross-*.aab | cut -f1)
+          AAB_SIZE=$(du -h GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab | cut -f1)
           echo "📦 AAB Size: $AAB_SIZE"
           echo "AAB_SIZE=$AAB_SIZE" >> $GITHUB_ENV
         fi
@@ -234,14 +236,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: greed-gross-apk
-        path: android/app/build/outputs/apk/release/greed-gross-*.apk
+        path: GreedGross/app/build/outputs/apk/release/greed-gross-*.apk
         retention-days: 30
     
     - name: 📤 Upload AAB Artifact
       uses: actions/upload-artifact@v4
       with:
         name: greed-gross-aab
-        path: android/app/build/outputs/bundle/release/greed-gross-*.aab
+        path: GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab
         retention-days: 30
     
     - name: 📝 Build Summary
