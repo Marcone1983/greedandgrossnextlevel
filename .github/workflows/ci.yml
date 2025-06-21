@@ -187,7 +187,7 @@ jobs:
       with:
         gradle-version: wrapper
         build-root-directory: android
-        arguments: assembleRelease --no-daemon
+        arguments: app:assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -204,7 +204,7 @@ jobs:
       with:
         gradle-version: wrapper
         build-root-directory: android
-        arguments: bundleRelease --no-daemon
+        arguments: app:bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
