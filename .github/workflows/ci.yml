@@ -182,9 +182,9 @@ jobs:
     
     - name: 🏗️ Build APK
       if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
-      working-directory: ./android
       run: |
         echo "Building APK with Gradle..."
+        cd android
         chmod +x gradlew
         ./gradlew clean assembleRelease --no-daemon
         
@@ -197,9 +197,9 @@ jobs:
     
     - name: 🏗️ Build AAB (App Bundle)
       if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
-      working-directory: ./android
       run: |
         echo "Building AAB with Gradle..."
+        cd android
         chmod +x gradlew
         ./gradlew bundleRelease --no-daemon
         
