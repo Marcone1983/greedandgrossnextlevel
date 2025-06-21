@@ -93,8 +93,7 @@ jobs:
       run: |
         npm install --legacy-peer-deps
     
-    - name: 🔧 Fix Gradle Wrapper
-      run: ./scripts/fix-gradle-wrapper.sh
+    # Skip fix-gradle-wrapper.sh - let gradle-build-action handle it
     
     - name: 🔐 Create environment file
       run: |
@@ -177,28 +176,15 @@ jobs:
         EOF
     
     - name: 🏗️ Build APK
-      run: |
-        echo "Building APK with Gradle..."
-        cd android
-        # Ensure gradlew is executable
-        chmod +x gradlew
-        # Create lasspath file if needed (Gradle seems to look for it)
-        touch lasspath || true
-        # Debug: Check gradle wrapper files
-        echo "=== Checking gradle wrapper files ==="
-        ls -la gradle/wrapper/
-        echo "=== Current directory ==="
-        pwd
-        echo "=== Available gradle tasks ==="
-        ./gradlew tasks --no-daemon 2>&1 || true
-        # Clean CMake cache to avoid version conflicts
-        rm -rf app/.cxx
-        rm -rf app/build
-        # Recreate lasspath after cleaning (might be removed)
-        touch lasspath || true
-        # Try building with app module prefix
-        ./gradlew :app:assembleRelease --no-daemon --warning-mode=all
+      uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: wrapper
+        build-root-directory: android
+        arguments: :app:assembleRelease --no-daemon --warning-mode=all
         
+    - name: 📦 Process APK
+      run: |
+        cd android
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
         
@@ -207,21 +193,15 @@ jobs:
         mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
     
     - name: 🏗️ Build AAB (App Bundle)
-      run: |
-        echo "Building AAB with Gradle..."
-        cd android
-        # Ensure gradlew is executable
-        chmod +x gradlew
-        # Create lasspath file if needed (Gradle seems to look for it)
-        touch lasspath || true
-        # Clean CMake cache to avoid version conflicts
-        rm -rf app/.cxx
-        rm -rf app/build
-        # Recreate lasspath after cleaning (might be removed)
-        touch lasspath || true
-        # Use app module specifically
-        ./gradlew :app:bundleRelease --no-daemon --warning-mode=all
+      uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: wrapper
+        build-root-directory: android
+        arguments: :app:bundleRelease --no-daemon --warning-mode=all
         
+    - name: 📦 Process AAB
+      run: |
+        cd android
         # Verify AAB was created
         ls -la app/build/outputs/bundle/release/
         
