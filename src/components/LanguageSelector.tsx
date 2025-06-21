@@ -24,9 +24,9 @@ interface LanguageSelectorProps {
   onLanguageChange?: (language: SupportedLanguage) => void;
 }
 
-export default function LanguageSelector({ 
-  currentLanguage, 
-  onLanguageChange 
+export default function LanguageSelector({
+  currentLanguage,
+  onLanguageChange,
 }: LanguageSelectorProps) {
   const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,8 +49,8 @@ export default function LanguageSelector({
 
     Alert.alert(
       t('settings.language.changeLanguage'),
-      t('settings.language.confirmChange', { 
-        language: LANGUAGES[selectedLanguage].nativeName 
+      t('settings.language.confirmChange', {
+        language: LANGUAGES[selectedLanguage].nativeName,
       }),
       [
         {
@@ -65,12 +65,12 @@ export default function LanguageSelector({
           onPress: async () => {
             setIsChanging(true);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            
+
             try {
               await changeLanguage(selectedLanguage);
               onLanguageChange?.(selectedLanguage);
               setIsModalOpen(false);
-              
+
               // Show reload message
               Alert.alert(
                 t('settings.language.changeLanguage'),
@@ -92,20 +92,20 @@ export default function LanguageSelector({
   const renderLanguageItem = ({ item }: { item: SupportedLanguage }) => {
     const language = LANGUAGES[item];
     const isSelected = selectedLanguage === item;
-    
+
     return (
       <Pressable
         onPress={() => handleLanguageSelect(item)}
-        bg={isSelected ? colors.primary + '20' : 'transparent'}
+        bg={isSelected ? `${colors.primary}20` : 'transparent'}
         p={4}
         borderRadius="md"
-        _pressed={{ bg: colors.primary + '10' }}
+        _pressed={{ bg: `${colors.primary}10` }}
       >
         <HStack alignItems="center" space={3}>
           <Text fontSize="xl">{language.flag}</Text>
           <VStack flex={1}>
-            <Text 
-              fontSize="md" 
+            <Text
+              fontSize="md"
               fontWeight={isSelected ? 'semibold' : 'normal'}
               color={isSelected ? colors.primary : undefined}
             >
@@ -115,14 +115,7 @@ export default function LanguageSelector({
               {language.name}
             </Text>
           </VStack>
-          {isSelected && (
-            <Icon 
-              as={MaterialIcons} 
-              name="check" 
-              size="sm" 
-              color={colors.primary} 
-            />
-          )}
+          {isSelected && <Icon as={MaterialIcons} name="check" size="sm" color={colors.primary} />}
         </HStack>
       </Pressable>
     );
@@ -137,7 +130,7 @@ export default function LanguageSelector({
         borderColor={borderColor}
         borderRadius="lg"
         p={4}
-        _pressed={{ bg: colors.primary + '10' }}
+        _pressed={{ bg: `${colors.primary}10` }}
       >
         <HStack alignItems="center" justifyContent="space-between">
           <HStack alignItems="center" space={3}>
@@ -155,11 +148,7 @@ export default function LanguageSelector({
         </HStack>
       </Pressable>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        size="lg"
-      >
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="lg">
         <Modal.Content bg={bgColor}>
           <Modal.CloseButton />
           <Modal.Header>
@@ -167,20 +156,20 @@ export default function LanguageSelector({
               {t('settings.language.title')}
             </Text>
           </Modal.Header>
-          
+
           <Modal.Body>
             <Text fontSize="sm" color="gray.500" mb={4}>
               {t('settings.language.description')}
             </Text>
-            
+
             <FlatList
               data={Object.keys(LANGUAGES) as SupportedLanguage[]}
               renderItem={renderLanguageItem}
-              keyExtractor={(item) => item}
+              keyExtractor={item => item}
               showsVerticalScrollIndicator={false}
             />
           </Modal.Body>
-          
+
           <Modal.Footer>
             <Button.Group space={2}>
               <Button

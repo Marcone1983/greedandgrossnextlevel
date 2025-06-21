@@ -40,13 +40,15 @@ export default function GlobalChatScreen() {
   const [isConnecting, setIsConnecting] = useState(true);
   const socketRef = useRef<any>(null);
   const flatListRef = useRef<any>(null);
-  
+
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const toast = useToast();
-  
+
   const { user } = useSelector((state: RootState) => state.auth);
-  const { globalMessages, isConnected, onlineUsers } = useSelector((state: RootState) => state.chat);
+  const { globalMessages, isConnected, onlineUsers } = useSelector(
+    (state: RootState) => state.chat
+  );
 
   useEffect(() => {
     connectToChat();
@@ -67,7 +69,7 @@ export default function GlobalChatScreen() {
       socketRef.current.on('connect', () => {
         setIsConnecting(false);
         dispatch(setConnected(true));
-        
+
         // Join with user info
         socketRef.current.emit('join', {
           userId: user?.id,
@@ -142,11 +144,7 @@ export default function GlobalChatScreen() {
   const renderMessage = ({ item }: { item: ChatMessage }) => (
     <View style={styles.messageContainer}>
       {item.userId !== user?.id && (
-        <Avatar
-          bg={colors.primary}
-          size="sm"
-          style={styles.avatar}
-        >
+        <Avatar bg={colors.primary} size="sm" style={styles.avatar}>
           {item.username.charAt(0).toUpperCase()}
         </Avatar>
       )}
@@ -163,10 +161,7 @@ export default function GlobalChatScreen() {
             )}
           </HStack>
         )}
-        <ChatBubble
-          message={item}
-          isAI={false}
-        />
+        <ChatBubble message={item} isAI={false} />
       </VStack>
     </View>
   );
@@ -186,10 +181,7 @@ export default function GlobalChatScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={gradients.dark}
-        style={styles.headerGradient}
-      >
+      <LinearGradient colors={gradients.dark} style={styles.headerGradient}>
         <HStack alignItems="center" justifyContent="space-between" px={4} py={2}>
           <HStack alignItems="center" space={2}>
             <Icon as={MaterialIcons} name="forum" size={6} color={colors.primary} />
@@ -203,11 +195,7 @@ export default function GlobalChatScreen() {
             </VStack>
           </HStack>
           <HStack space={2}>
-            <Badge 
-              colorScheme={isConnected ? 'success' : 'error'} 
-              variant="subtle"
-              size="sm"
-            >
+            <Badge colorScheme={isConnected ? 'success' : 'error'} variant="subtle" size="sm">
               {isConnected ? 'Online' : 'Offline'}
             </Badge>
             <Badge colorScheme="primary" variant="subtle">
@@ -220,7 +208,7 @@ export default function GlobalChatScreen() {
       <FlatList
         ref={flatListRef}
         data={globalMessages}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         renderItem={renderMessage}
         contentContainerStyle={styles.messagesList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
@@ -247,14 +235,7 @@ export default function GlobalChatScreen() {
       >
         <VStack style={styles.inputContainer}>
           {!isConnected && (
-            <HStack
-              bg="warning.100"
-              p={2}
-              borderRadius={8}
-              alignItems="center"
-              space={2}
-              mb={2}
-            >
+            <HStack bg="warning.100" p={2} borderRadius={8} alignItems="center" space={2} mb={2}>
               <Icon as={MaterialIcons} name="warning" color="warning.600" />
               <Text color="warning.600" fontSize="sm">
                 Connessione persa. Riconnessione in corso...

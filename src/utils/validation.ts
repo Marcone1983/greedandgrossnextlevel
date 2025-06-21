@@ -2,7 +2,7 @@ export function validateUsername(username: string): boolean {
   if (!username || username.length < 3 || username.length > 20) {
     return false;
   }
-  
+
   // Only alphanumeric characters and underscores
   const usernameRegex = /^[a-zA-Z0-9_]+$/;
   return usernameRegex.test(username);
@@ -12,7 +12,7 @@ export function validateStrainName(name: string): boolean {
   if (!name || name.length < 2 || name.length > 50) {
     return false;
   }
-  
+
   // Allow letters, numbers, spaces, and common special characters
   const strainRegex = /^[a-zA-Z0-9\s\-#]+$/;
   return strainRegex.test(name);

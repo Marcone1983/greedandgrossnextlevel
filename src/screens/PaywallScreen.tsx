@@ -1,21 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Modal,
-} from 'react-native';
-import {
-  VStack,
-  HStack,
-  Text,
-  Icon,
-  Badge,
-  Button,
-  Spinner,
-  useToast,
-} from 'native-base';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { VStack, HStack, Text, Icon, Badge, Button, Spinner, useToast } from 'native-base';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -59,7 +44,7 @@ const FEATURES = {
   },
   premium_features: {
     title: 'Funzioni Premium',
-    description: 'Accedi a tutte le funzioni avanzate dell\'app',
+    description: "Accedi a tutte le funzioni avanzate dell'app",
     icon: 'workspace-premium',
   },
 };
@@ -67,15 +52,15 @@ const FEATURES = {
 export default function PaywallScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
-  
+
   const navigation = useNavigation();
   const route = useRoute();
   const dispatch = useDispatch();
   const toast = useToast();
-  
+
   const { user } = useSelector((state: RootState) => state.auth);
   const { feature } = route.params as RouteParams;
-  
+
   const featureData = FEATURES[feature as keyof typeof FEATURES] || FEATURES.premium_features;
 
   const plans = {
@@ -153,7 +138,7 @@ export default function PaywallScreen() {
 
     try {
       const success = await purchaseSubscription(plans[selectedPlan].id);
-      
+
       if (success) {
         dispatch(updateUser({ tier: 'premium' }));
         toast.show({
@@ -164,7 +149,7 @@ export default function PaywallScreen() {
       }
     } catch (error: any) {
       toast.show({
-        description: error.message || 'Errore durante l\'acquisto',
+        description: error.message || "Errore durante l'acquisto",
         colorScheme: 'error',
       });
     } finally {
@@ -174,10 +159,10 @@ export default function PaywallScreen() {
 
   const handleRestore = async () => {
     setIsLoading(true);
-    
+
     try {
       const restored = await restorePurchases();
-      
+
       if (restored) {
         dispatch(updateUser({ tier: 'premium' }));
         toast.show({
@@ -204,11 +189,7 @@ export default function PaywallScreen() {
   const PlanCard = ({ plan, isSelected, onSelect }: any) => (
     <TouchableOpacity
       onPress={onSelect}
-      style={[
-        styles.planCard,
-        isSelected && styles.selectedPlan,
-        shadows.md,
-      ]}
+      style={[styles.planCard, isSelected && styles.selectedPlan, shadows.md]}
     >
       <LinearGradient
         colors={isSelected ? gradients.primary : [colors.surface, colors.surface]}
@@ -217,17 +198,10 @@ export default function PaywallScreen() {
         <VStack space={2}>
           <HStack alignItems="center" justifyContent="space-between">
             <VStack>
-              <Text
-                fontSize="xl"
-                fontWeight="bold"
-                color={isSelected ? 'white' : colors.text}
-              >
+              <Text fontSize="xl" fontWeight="bold" color={isSelected ? 'white' : colors.text}>
                 {plan.price}
               </Text>
-              <Text
-                fontSize="sm"
-                color={isSelected ? 'white' : colors.textSecondary}
-              >
+              <Text fontSize="sm" color={isSelected ? 'white' : colors.textSecondary}>
                 per {plan.period}
               </Text>
             </VStack>
@@ -343,14 +317,9 @@ export default function PaywallScreen() {
                 isLoading={isLoading}
                 isLoadingText="Elaborazione..."
                 _loading={{ bg: colors.primary }}
-                leftIcon={
-                  <Icon as={MaterialIcons} name="workspace-premium" color="white" />
-                }
+                leftIcon={<Icon as={MaterialIcons} name="workspace-premium" color="white" />}
               >
-                <LinearGradient
-                  colors={gradients.primary}
-                  style={styles.buttonGradient}
-                >
+                <LinearGradient colors={gradients.primary} style={styles.buttonGradient}>
                   <Text color="white" fontWeight="bold" fontSize="lg">
                     Inizia Premium - {plans[selectedPlan].price}
                   </Text>

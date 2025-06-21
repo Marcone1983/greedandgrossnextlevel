@@ -28,15 +28,15 @@ interface MemoryIndicatorProps {
   onPress?: () => void;
 }
 
-export default function MemoryIndicator({ 
-  size = 'md', 
+export default function MemoryIndicator({
+  size = 'md',
   showLabel = false,
-  onPress 
+  onPress,
 }: MemoryIndicatorProps) {
   const { t } = useTranslation();
   const toast = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   const {
     isEnabled,
     memoryStrength,
@@ -45,7 +45,7 @@ export default function MemoryIndicator({
     updateMemorySettings,
     clearAllMemory,
     exportUserData,
-    getSuggestedPrompt
+    getSuggestedPrompt,
   } = useConversationMemory();
 
   const bgColor = useColorModeValue('white', colors.darkCard);
@@ -56,29 +56,41 @@ export default function MemoryIndicator({
   const getMemoryColor = () => {
     if (!isEnabled) return 'gray.400';
     switch (memoryStrength) {
-      case 'strong': return 'green.500';
-      case 'moderate': return 'yellow.500';
-      case 'weak': return 'red.500';
-      default: return 'gray.400';
+      case 'strong':
+        return 'green.500';
+      case 'moderate':
+        return 'yellow.500';
+      case 'weak':
+        return 'red.500';
+      default:
+        return 'gray.400';
     }
   };
 
   const getMemoryIcon = () => {
     if (!isEnabled) return 'memory';
     switch (memoryStrength) {
-      case 'strong': return 'psychology';
-      case 'moderate': return 'lightbulb';
-      case 'weak': return 'help-outline';
-      default: return 'memory';
+      case 'strong':
+        return 'psychology';
+      case 'moderate':
+        return 'lightbulb';
+      case 'weak':
+        return 'help-outline';
+      default:
+        return 'memory';
     }
   };
 
   const getStrengthPercentage = () => {
     switch (memoryStrength) {
-      case 'strong': return 85;
-      case 'moderate': return 60;
-      case 'weak': return 25;
-      default: return 0;
+      case 'strong':
+        return 85;
+      case 'moderate':
+        return 60;
+      case 'weak':
+        return 25;
+      default:
+        return 0;
     }
   };
 
@@ -95,7 +107,7 @@ export default function MemoryIndicator({
     try {
       await updateMemorySettings({ enabled: !isEnabled });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       toast.show({
         title: isEnabled ? 'Memory disabilitata' : 'Memory abilitata',
         colorScheme: isEnabled ? 'warning' : 'success',
@@ -114,7 +126,7 @@ export default function MemoryIndicator({
       await clearAllMemory();
       setIsModalOpen(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
+
       toast.show({
         title: 'Memory cancellata',
         description: 'Tutte le conversazioni sono state eliminate',
@@ -134,7 +146,7 @@ export default function MemoryIndicator({
       const data = await exportUserData();
       // In a real app, this would trigger a file download
       console.log('Exported data:', data);
-      
+
       toast.show({
         title: 'Dati esportati',
         description: 'I tuoi dati sono stati preparati per il download',
@@ -153,10 +165,7 @@ export default function MemoryIndicator({
 
   return (
     <>
-      <Pressable
-        onPress={handlePress}
-        _pressed={{ opacity: 0.7 }}
-      >
+      <Pressable onPress={handlePress} _pressed={{ opacity: 0.7 }}>
         <HStack alignItems="center" space={2}>
           <Icon
             as={MaterialIcons}
@@ -182,12 +191,7 @@ export default function MemoryIndicator({
           <Modal.CloseButton />
           <Modal.Header>
             <HStack alignItems="center" space={3}>
-              <Icon
-                as={MaterialIcons}
-                name="psychology"
-                size="md"
-                color={colors.primary}
-              />
+              <Icon as={MaterialIcons} name="psychology" size="md" color={colors.primary} />
               <Text fontSize="lg" fontWeight="bold">
                 Sistema Memory
               </Text>
@@ -201,7 +205,7 @@ export default function MemoryIndicator({
                 <Text fontSize="md" fontWeight="semibold">
                   Stato Memory
                 </Text>
-                
+
                 <HStack alignItems="center" justifyContent="space-between">
                   <Text>Memoria abilitata</Text>
                   <Switch
@@ -216,22 +220,28 @@ export default function MemoryIndicator({
                     <VStack space={2}>
                       <HStack justifyContent="space-between">
                         <Text fontSize="sm">Forza memoria:</Text>
-                        <Badge 
+                        <Badge
                           colorScheme={
-                            memoryStrength === 'strong' ? 'green' :
-                            memoryStrength === 'moderate' ? 'yellow' : 'red'
+                            memoryStrength === 'strong'
+                              ? 'green'
+                              : memoryStrength === 'moderate'
+                                ? 'yellow'
+                                : 'red'
                           }
                           variant="solid"
                         >
                           {memoryStrength.toUpperCase()}
                         </Badge>
                       </HStack>
-                      
+
                       <Progress
                         value={getStrengthPercentage()}
                         colorScheme={
-                          memoryStrength === 'strong' ? 'green' :
-                          memoryStrength === 'moderate' ? 'yellow' : 'red'
+                          memoryStrength === 'strong'
+                            ? 'green'
+                            : memoryStrength === 'moderate'
+                              ? 'yellow'
+                              : 'red'
                         }
                         size="sm"
                       />
@@ -244,23 +254,29 @@ export default function MemoryIndicator({
                       <Text fontSize="md" fontWeight="semibold">
                         Statistiche
                       </Text>
-                      
+
                       <HStack justifyContent="space-between">
-                        <Text fontSize="sm" color="gray.600">Conversazioni totali:</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Conversazioni totali:
+                        </Text>
                         <Text fontSize="sm" fontWeight="medium">
                           {analytics.totalConversations}
                         </Text>
                       </HStack>
-                      
+
                       <HStack justifyContent="space-between">
-                        <Text fontSize="sm" color="gray.600">Media sessione:</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Media sessione:
+                        </Text>
                         <Text fontSize="sm" fontWeight="medium">
                           {Math.round(analytics.averageSessionLength)} messaggi
                         </Text>
                       </HStack>
-                      
+
                       <HStack justifyContent="space-between">
-                        <Text fontSize="sm" color="gray.600">Ultima attività:</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Ultima attività:
+                        </Text>
                         <Text fontSize="sm" fontWeight="medium">
                           {memoryStatus.lastActivity}
                         </Text>
@@ -332,12 +348,8 @@ export default function MemoryIndicator({
                   </Button>
                 </HStack>
               )}
-              
-              <Button
-                w="100%"
-                variant="ghost"
-                onPress={() => setIsModalOpen(false)}
-              >
+
+              <Button w="100%" variant="ghost" onPress={() => setIsModalOpen(false)}>
                 Chiudi
               </Button>
             </VStack>

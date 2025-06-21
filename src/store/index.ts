@@ -16,7 +16,7 @@ export const store = configureStore({
     ui: uiReducer,
     [api.reducerPath]: api.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST'],

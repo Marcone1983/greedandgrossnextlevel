@@ -146,7 +146,7 @@ export interface AnalyticsEventData {
   // Navigation events
   fromScreen?: string;
   toScreen?: string;
-  
+
   // User interaction events
   strainName?: string;
   searchQuery?: string;
@@ -156,20 +156,20 @@ export interface AnalyticsEventData {
   memoryOperation?: string;
   errorCode?: string;
   performanceMetric?: number;
-  
+
   // Tutorial/onboarding
   step?: string;
   tutorialName?: string;
-  
+
   // Feature usage
   featureName?: string;
-  
+
   // Content events
   contentType?: string;
-  
+
   // Settings
   setting?: string;
-  
+
   // Timestamps for custom events
   timestamp?: string;
 }

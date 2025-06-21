@@ -1,21 +1,6 @@
 import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Modal,
-  TouchableOpacity,
-  FlatList,
-  TextInput,
-} from 'react-native';
-import {
-  VStack,
-  HStack,
-  Text,
-  IconButton,
-  Icon,
-  Badge,
-  Divider,
-} from 'native-base';
+import { View, StyleSheet, Modal, TouchableOpacity, FlatList, TextInput } from 'react-native';
+import { VStack, HStack, Text, IconButton, Icon, Badge, Divider } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, gradients } from '@/constants/theme';
@@ -27,11 +12,28 @@ interface StrainSelectorProps {
 }
 
 const POPULAR_STRAINS = [
-  'OG Kush', 'White Widow', 'AK-47', 'Northern Lights', 'Sour Diesel',
-  'Blue Dream', 'Girl Scout Cookies', 'Gorilla Glue #4', 'Purple Haze',
-  'Jack Herer', 'Granddaddy Purple', 'Green Crack', 'Amnesia Haze',
-  'Lemon Haze', 'Pineapple Express', 'Gelato', 'Wedding Cake',
-  'Zkittlez', 'Runtz', 'MAC', 'Cherry Pie', 'Strawberry Cough',
+  'OG Kush',
+  'White Widow',
+  'AK-47',
+  'Northern Lights',
+  'Sour Diesel',
+  'Blue Dream',
+  'Girl Scout Cookies',
+  'Gorilla Glue #4',
+  'Purple Haze',
+  'Jack Herer',
+  'Granddaddy Purple',
+  'Green Crack',
+  'Amnesia Haze',
+  'Lemon Haze',
+  'Pineapple Express',
+  'Gelato',
+  'Wedding Cake',
+  'Zkittlez',
+  'Runtz',
+  'MAC',
+  'Cherry Pie',
+  'Strawberry Cough',
 ];
 
 export default function StrainSelector({ onSelect, onClose }: StrainSelectorProps) {
@@ -64,7 +66,7 @@ export default function StrainSelector({ onSelect, onClose }: StrainSelectorProp
 
   const renderStrainItem = (item: string, isParentA: boolean) => (
     <TouchableOpacity
-      onPress={() => isParentA ? setSelectedA(item) : setSelectedB(item)}
+      onPress={() => (isParentA ? setSelectedA(item) : setSelectedB(item))}
       style={[
         styles.strainItem,
         (isParentA ? selectedA : selectedB) === item && styles.selectedStrain,
@@ -80,26 +82,15 @@ export default function StrainSelector({ onSelect, onClose }: StrainSelectorProp
   );
 
   return (
-    <Modal
-      visible
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <LinearGradient
-            colors={gradients.dark}
-            style={styles.header}
-          >
+          <LinearGradient colors={gradients.dark} style={styles.header}>
             <HStack alignItems="center" justifyContent="space-between">
               <Text fontSize="xl" fontWeight="bold" color={colors.text}>
                 Seleziona Genitori
               </Text>
-              <IconButton
-                icon={<Icon as={MaterialIcons} name="close" />}
-                onPress={onClose}
-              />
+              <IconButton icon={<Icon as={MaterialIcons} name="close" />} onPress={onClose} />
             </HStack>
           </LinearGradient>
 
@@ -114,7 +105,7 @@ export default function StrainSelector({ onSelect, onClose }: StrainSelectorProp
                 placeholder="Cerca strain..."
                 placeholderTextColor={colors.textSecondary}
                 value={searchA}
-                onChangeText={(text) => {
+                onChangeText={text => {
                   setSearchA(text);
                   handleSearchA(text);
                 }}
@@ -122,7 +113,7 @@ export default function StrainSelector({ onSelect, onClose }: StrainSelectorProp
               <View style={styles.listContainer}>
                 <FlatList
                   data={filteredStrainsA}
-                  keyExtractor={(item) => `a-${item}`}
+                  keyExtractor={item => `a-${item}`}
                   renderItem={({ item }) => renderStrainItem(item, true)}
                   showsVerticalScrollIndicator={false}
                 />
@@ -146,7 +137,7 @@ export default function StrainSelector({ onSelect, onClose }: StrainSelectorProp
                 placeholder="Cerca strain..."
                 placeholderTextColor={colors.textSecondary}
                 value={searchB}
-                onChangeText={(text) => {
+                onChangeText={text => {
                   setSearchB(text);
                   handleSearchB(text);
                 }}
@@ -154,7 +145,7 @@ export default function StrainSelector({ onSelect, onClose }: StrainSelectorProp
               <View style={styles.listContainer}>
                 <FlatList
                   data={filteredStrainsB}
-                  keyExtractor={(item) => `b-${item}`}
+                  keyExtractor={item => `b-${item}`}
                   renderItem={({ item }) => renderStrainItem(item, false)}
                   showsVerticalScrollIndicator={false}
                 />
@@ -168,10 +159,7 @@ export default function StrainSelector({ onSelect, onClose }: StrainSelectorProp
           </VStack>
 
           <HStack style={styles.footer} space={3}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelButton]}
-              onPress={onClose}
-            >
+            <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={onClose}>
               <Text color={colors.textSecondary}>Annulla</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -235,7 +223,7 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   selectedStrain: {
-    backgroundColor: colors.primary + '20',
+    backgroundColor: `${colors.primary}20`,
   },
   footer: {
     padding: 20,

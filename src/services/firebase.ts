@@ -74,13 +74,13 @@ export async function checkCachedCross(parentA: string, parentB: string): Promis
   try {
     const cacheId = generateCacheId(parentA, parentB);
     const cacheDoc = await getDoc(doc(db, CROSSES_CACHE_COLLECTION, cacheId));
-    
+
     if (cacheDoc.exists()) {
       const data = cacheDoc.data();
       logAnalytics('cache_hit', { parentA, parentB });
       return data.strain as Strain;
     }
-    
+
     return null;
   } catch (error) {
     console.error('Error checking cache:', error);
@@ -96,7 +96,7 @@ export async function saveCachedCross(strain: Strain) {
       timestamp: Timestamp.now(),
       hitCount: 1,
     });
-    
+
     logAnalytics('cache_save', { strainName: strain.name });
   } catch (error) {
     console.error('Error saving to cache:', error);
@@ -111,7 +111,7 @@ export async function getPopularStrains(limit: number = 10): Promise<Strain[]> {
       orderBy('popularity', 'desc'),
       firestoreLimit(limit)
     );
-    
+
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => doc.data() as Strain);
   } catch (error) {
@@ -124,7 +124,7 @@ export async function getPopularStrains(limit: number = 10): Promise<Strain[]> {
 export function logAnalytics(event: string, data: Record<string, any> = {}) {
   try {
     logEvent(analytics, event, data);
-    
+
     // Also save to Firestore for admin panel
     const analyticsDoc: AnalyticsEvent = {
       event,
@@ -133,7 +133,7 @@ export function logAnalytics(event: string, data: Record<string, any> = {}) {
       userId: data.userId || 'anonymous',
       sessionId: data.sessionId || generateSessionId(),
     };
-    
+
     setDoc(doc(collection(db, ANALYTICS_COLLECTION)), analyticsDoc);
   } catch (error) {
     console.error('Error logging analytics:', error);
@@ -145,11 +145,9 @@ export async function getAdminStats() {
   try {
     const usersSnapshot = await getDocs(collection(db, USERS_COLLECTION));
     const totalUsers = usersSnapshot.size;
-    
-    const premiumUsers = usersSnapshot.docs.filter(
-      doc => doc.data().tier === 'premium'
-    ).length;
-    
+
+    const premiumUsers = usersSnapshot.docs.filter(doc => doc.data().tier === 'premium').length;
+
     const last24h = Timestamp.fromMillis(Date.now() - 24 * 60 * 60 * 1000);
     const activeUsersQuery = query(
       collection(db, USERS_COLLECTION),
@@ -157,12 +155,12 @@ export async function getAdminStats() {
     );
     const activeUsersSnapshot = await getDocs(activeUsersQuery);
     const activeUsers = activeUsersSnapshot.size;
-    
+
     const crossesSnapshot = await getDocs(collection(db, CROSSES_CACHE_COLLECTION));
     const totalCrosses = crossesSnapshot.size;
-    
+
     const popularStrains = await getPopularStrains(5);
-    
+
     return {
       totalUsers,
       activeUsers,

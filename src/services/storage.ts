@@ -94,7 +94,7 @@ export async function saveCrossResult(result: CrossResult): Promise<void> {
       history.splice(50);
     }
     await saveCrossHistory(history);
-    
+
     // Also save the strain
     await addStrain(result.result);
   } catch (error) {

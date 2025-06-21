@@ -42,12 +42,20 @@ class CSVExportService {
 
   // MAIN EXPORT FUNCTION
   async exportAnalyticsReport(
-    exportType: 'overview' | 'insights' | 'users' | 'revenue' | 'breeding' | 'memory' | 'geographic' | 'complete',
+    exportType:
+      | 'overview'
+      | 'insights'
+      | 'users'
+      | 'revenue'
+      | 'breeding'
+      | 'memory'
+      | 'geographic'
+      | 'complete',
     options: Partial<ExportOptions> = {}
   ): Promise<CSVExportResult> {
     const _startTime = Date.now();
     const exportId = this.generateExportId();
-    
+
     try {
       const defaultOptions: ExportOptions = {
         format: 'csv',
@@ -58,11 +66,11 @@ class CSVExportService {
         includeMemoryData: false,
         includeGeographicData: true,
         anonymizeData: true,
-        compression: 'none'
+        compression: 'none',
       };
 
       const finalOptions = { ...defaultOptions, ...options };
-      
+
       // Generate the appropriate export based on type
       let csvData: string;
       let metadata: ExportMetadata;
@@ -105,7 +113,7 @@ class CSVExportService {
         exportId,
         filePath,
         metadata,
-        size: fileSize
+        size: fileSize,
       };
     } catch (error) {
       console.error('Export error:', error);
@@ -114,25 +122,28 @@ class CSVExportService {
         exportId,
         metadata: this.createErrorMetadata(exportId),
         size: 0,
-        error: error instanceof Error ? error.message : 'Unknown export error'
+        error: error instanceof Error ? error.message : 'Unknown export error',
       };
     }
   }
 
   // OVERVIEW REPORT
-  private async exportOverviewReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportOverviewReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', options.dateRange);
-    
+
     const headers = [
       'Metric',
       'Current_Value',
       'Previous_Value',
       'Growth_Percentage',
       'Trend',
-      'Date_Range_Days'
+      'Date_Range_Days',
     ];
 
     const rows = [
@@ -141,33 +152,49 @@ class CSVExportService {
         dashboard.overview.activeUsers.current.toString(),
         dashboard.overview.activeUsers.previous.toString(),
         dashboard.overview.activeUsers.growth.toString(),
-        dashboard.overview.activeUsers.growth > 0 ? 'up' : dashboard.overview.activeUsers.growth < 0 ? 'down' : 'stable',
-        options.dateRange.toString()
+        dashboard.overview.activeUsers.growth > 0
+          ? 'up'
+          : dashboard.overview.activeUsers.growth < 0
+            ? 'down'
+            : 'stable',
+        options.dateRange.toString(),
       ],
       [
         'Total Interactions',
         dashboard.overview.totalInteractions.current.toString(),
         dashboard.overview.totalInteractions.previous.toString(),
         dashboard.overview.totalInteractions.growth.toString(),
-        dashboard.overview.totalInteractions.growth > 0 ? 'up' : dashboard.overview.totalInteractions.growth < 0 ? 'down' : 'stable',
-        options.dateRange.toString()
+        dashboard.overview.totalInteractions.growth > 0
+          ? 'up'
+          : dashboard.overview.totalInteractions.growth < 0
+            ? 'down'
+            : 'stable',
+        options.dateRange.toString(),
       ],
       [
         'Conversions',
         dashboard.overview.conversions.current.toString(),
         dashboard.overview.conversions.previous.toString(),
         dashboard.overview.conversions.growth.toString(),
-        dashboard.overview.conversions.growth > 0 ? 'up' : dashboard.overview.conversions.growth < 0 ? 'down' : 'stable',
-        options.dateRange.toString()
+        dashboard.overview.conversions.growth > 0
+          ? 'up'
+          : dashboard.overview.conversions.growth < 0
+            ? 'down'
+            : 'stable',
+        options.dateRange.toString(),
       ],
       [
         'Total Revenue',
         dashboard.revenue.totalRevenue.toString(),
         (dashboard.revenue.totalRevenue - dashboard.revenue.newRevenue).toString(),
         dashboard.revenue.revenueGrowth.toString(),
-        dashboard.revenue.revenueGrowth > 0 ? 'up' : dashboard.revenue.revenueGrowth < 0 ? 'down' : 'stable',
-        options.dateRange.toString()
-      ]
+        dashboard.revenue.revenueGrowth > 0
+          ? 'up'
+          : dashboard.revenue.revenueGrowth < 0
+            ? 'down'
+            : 'stable',
+        options.dateRange.toString(),
+      ],
     ];
 
     const csvData = this.arrayToCSV([headers, ...rows]);
@@ -177,12 +204,15 @@ class CSVExportService {
   }
 
   // INSIGHTS REPORT
-  private async exportInsightsReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportInsightsReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', options.dateRange);
-    
+
     const headers = [
       'Insight_ID',
       'Type',
@@ -193,7 +223,7 @@ class CSVExportService {
       'Trend_Percentage',
       'Priority',
       'Actionable',
-      'Generated_At'
+      'Generated_At',
     ];
 
     const rows = dashboard.insights.map(insight => [
@@ -206,7 +236,7 @@ class CSVExportService {
       insight.trendPercent.toString(),
       insight.priority,
       insight.actionable.toString(),
-      insight.generatedAt.toISOString()
+      insight.generatedAt.toISOString(),
     ]);
 
     const csvData = this.arrayToCSV([headers, ...rows]);
@@ -216,12 +246,15 @@ class CSVExportService {
   }
 
   // USERS REPORT
-  private async exportUsersReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportUsersReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', options.dateRange);
-    
+
     const headers = [
       'Segment_ID',
       'Segment_Name',
@@ -232,7 +265,7 @@ class CSVExportService {
       'Subscription_Tiers',
       'Experience_Levels',
       'Usage_Frequency',
-      'Breeding_Activity'
+      'Breeding_Activity',
     ];
 
     const rows = dashboard.userSegments.map(segment => [
@@ -245,7 +278,7 @@ class CSVExportService {
       segment.criteria.subscriptionTier?.join(';') || '',
       segment.criteria.experienceLevel?.join(';') || '',
       segment.criteria.usageFrequency || '',
-      segment.criteria.breedingActivity || ''
+      segment.criteria.breedingActivity || '',
     ]);
 
     const csvData = this.arrayToCSV([headers, ...rows]);
@@ -255,19 +288,16 @@ class CSVExportService {
   }
 
   // REVENUE REPORT
-  private async exportRevenueReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportRevenueReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', options.dateRange);
-    
-    const headers = [
-      'Metric',
-      'Amount_EUR',
-      'Percentage_of_Total',
-      'Growth_Rate',
-      'Date_Range'
-    ];
+
+    const headers = ['Metric', 'Amount_EUR', 'Percentage_of_Total', 'Growth_Rate', 'Date_Range'];
 
     const totalRevenue = dashboard.revenue.totalRevenue;
     const rows = [
@@ -276,29 +306,29 @@ class CSVExportService {
         totalRevenue.toFixed(2),
         '100.00',
         dashboard.revenue.revenueGrowth.toFixed(2),
-        `${options.dateRange} days`
+        `${options.dateRange} days`,
       ],
       [
         'Recurring Revenue',
         dashboard.revenue.recurringRevenue.toFixed(2),
         ((dashboard.revenue.recurringRevenue / totalRevenue) * 100).toFixed(2),
         '',
-        `${options.dateRange} days`
+        `${options.dateRange} days`,
       ],
       [
         'New Revenue',
         dashboard.revenue.newRevenue.toFixed(2),
         ((dashboard.revenue.newRevenue / totalRevenue) * 100).toFixed(2),
         '',
-        `${options.dateRange} days`
+        `${options.dateRange} days`,
       ],
       [
         'Churn Revenue',
         dashboard.revenue.churnRevenue.toFixed(2),
         ((dashboard.revenue.churnRevenue / totalRevenue) * 100).toFixed(2),
         '',
-        `${options.dateRange} days`
-      ]
+        `${options.dateRange} days`,
+      ],
     ];
 
     // Add revenue by tier
@@ -308,7 +338,7 @@ class CSVExportService {
         amount.toFixed(2),
         ((amount / totalRevenue) * 100).toFixed(2),
         '',
-        `${options.dateRange} days`
+        `${options.dateRange} days`,
       ]);
     });
 
@@ -319,13 +349,18 @@ class CSVExportService {
   }
 
   // BREEDING REPORT
-  private async exportBreedingReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportBreedingReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', options.dateRange);
-    const strainPopularity = await analyticsEngine.getStrainPopularityWithPrecision(options.dateRange);
-    
+    const strainPopularity = await analyticsEngine.getStrainPopularityWithPrecision(
+      options.dateRange
+    );
+
     const headers = [
       'Strain_Name',
       'Total_Requests',
@@ -334,7 +369,7 @@ class CSVExportService {
       'Trend_Direction',
       'Growth_Percentage',
       'Category',
-      'Popularity_Rank'
+      'Popularity_Rank',
     ];
 
     const rows = strainPopularity.map((strain, index) => [
@@ -345,7 +380,7 @@ class CSVExportService {
       strain.trendDirection,
       strain.weekOverWeekGrowth.toString(),
       'Popular Strain',
-      (index + 1).toString()
+      (index + 1).toString(),
     ]);
 
     // Add popular crosses
@@ -358,7 +393,7 @@ class CSVExportService {
         '',
         '',
         'Popular Cross',
-        (index + 1).toString()
+        (index + 1).toString(),
       ]);
     });
 
@@ -369,26 +404,59 @@ class CSVExportService {
   }
 
   // MEMORY SYSTEM REPORT
-  private async exportMemoryReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportMemoryReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
     // This would require access to user memory data - for privacy, we'll export aggregated stats only
-    const headers = [
-      'Metric',
-      'Value',
-      'Description',
-      'Date_Range'
-    ];
+    const headers = ['Metric', 'Value', 'Description', 'Date_Range'];
 
     const rows = [
-      ['Memory Adoption Rate', '65%', 'Percentage of users with memory system enabled', `${options.dateRange} days`],
-      ['Average Conversations per User', '8.5', 'Mean number of conversations stored per user', `${options.dateRange} days`],
-      ['Memory Retention Day 1', '89%', 'Users still active 1 day after enabling memory', `${options.dateRange} days`],
-      ['Memory Retention Day 7', '67%', 'Users still active 7 days after enabling memory', `${options.dateRange} days`],
-      ['Memory Retention Day 30', '45%', 'Users still active 30 days after enabling memory', `${options.dateRange} days`],
-      ['Context Reconstruction Success', '94%', 'Percentage of successful context reconstructions', `${options.dateRange} days`],
-      ['Average Context Length', '156 chars', 'Mean length of generated context summaries', `${options.dateRange} days`]
+      [
+        'Memory Adoption Rate',
+        '65%',
+        'Percentage of users with memory system enabled',
+        `${options.dateRange} days`,
+      ],
+      [
+        'Average Conversations per User',
+        '8.5',
+        'Mean number of conversations stored per user',
+        `${options.dateRange} days`,
+      ],
+      [
+        'Memory Retention Day 1',
+        '89%',
+        'Users still active 1 day after enabling memory',
+        `${options.dateRange} days`,
+      ],
+      [
+        'Memory Retention Day 7',
+        '67%',
+        'Users still active 7 days after enabling memory',
+        `${options.dateRange} days`,
+      ],
+      [
+        'Memory Retention Day 30',
+        '45%',
+        'Users still active 30 days after enabling memory',
+        `${options.dateRange} days`,
+      ],
+      [
+        'Context Reconstruction Success',
+        '94%',
+        'Percentage of successful context reconstructions',
+        `${options.dateRange} days`,
+      ],
+      [
+        'Average Context Length',
+        '156 chars',
+        'Mean length of generated context summaries',
+        `${options.dateRange} days`,
+      ],
     ];
 
     const csvData = this.arrayToCSV([headers, ...rows]);
@@ -398,13 +466,16 @@ class CSVExportService {
   }
 
   // GEOGRAPHIC REPORT
-  private async exportGeographicReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportGeographicReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
     const geographicInsights = await geoLocationService.getGeographicInsights(options.dateRange);
     const countryPopularity = await geoLocationService.getCountryPopularity();
-    
+
     const headers = [
       'Region_Country',
       'User_Count',
@@ -414,7 +485,7 @@ class CSVExportService {
       'Conversion_Rate',
       'Top_Strains',
       'Top_Use_Cases',
-      'Type'
+      'Type',
     ];
 
     const rows: string[][] = [];
@@ -430,7 +501,7 @@ class CSVExportService {
         insight.conversionRate.toFixed(2),
         insight.popularStrains.join(';'),
         insight.topUseCases.join(';'),
-        'Regional Insight'
+        'Regional Insight',
       ]);
     });
 
@@ -445,7 +516,7 @@ class CSVExportService {
         '',
         country.topStrains.join(';'),
         '',
-        'Country Data'
+        'Country Data',
       ]);
     });
 
@@ -456,7 +527,10 @@ class CSVExportService {
   }
 
   // COMPLETE REPORT
-  private async exportCompleteReport(options: ExportOptions, exportId: string): Promise<{
+  private async exportCompleteReport(
+    options: ExportOptions,
+    exportId: string
+  ): Promise<{
     csvData: string;
     metadata: ExportMetadata;
   }> {
@@ -468,7 +542,7 @@ class CSVExportService {
       this.exportRevenueReport(options, exportId),
       this.exportBreedingReport(options, exportId),
       this.exportMemoryReport(options, exportId),
-      this.exportGeographicReport(options, exportId)
+      this.exportGeographicReport(options, exportId),
     ]);
 
     // Combine all CSV data with section headers
@@ -492,10 +566,10 @@ class CSVExportService {
       memory.csvData,
       '',
       '=== GEOGRAPHIC INSIGHTS ===',
-      geographic.csvData
+      geographic.csvData,
     ].join('\n');
 
-    const totalRecords = 
+    const totalRecords =
       overview.metadata.recordCount +
       insights.metadata.recordCount +
       users.metadata.recordCount +
@@ -511,17 +585,17 @@ class CSVExportService {
 
   // CSV UTILITY METHODS
   private arrayToCSV(data: string[][]): string {
-    return data.map(row => 
-      row.map(cell => this.escapeCSVField(cell)).join(this.CSV_DELIMITER)
-    ).join('\n');
+    return data
+      .map(row => row.map(cell => this.escapeCSVField(cell)).join(this.CSV_DELIMITER))
+      .join('\n');
   }
 
   private escapeCSVField(field: string): string {
     // Convert to string if not already
     const stringField = String(field || '');
-    
+
     // Check if field needs quoting
-    const needsQuoting = 
+    const needsQuoting =
       stringField.includes(this.CSV_DELIMITER) ||
       stringField.includes(this.CSV_QUOTE) ||
       stringField.includes('\n') ||
@@ -550,7 +624,7 @@ class CSVExportService {
       recordCount,
       columns,
       filters: { reportType },
-      generatedBy: 'GREED & GROSS Analytics Engine v1.0'
+      generatedBy: 'GREED & GROSS Analytics Engine v1.0',
     };
   }
 
@@ -562,7 +636,7 @@ class CSVExportService {
       recordCount: 0,
       columns: [],
       filters: {},
-      generatedBy: 'GREED & GROSS Analytics Engine v1.0'
+      generatedBy: 'GREED & GROSS Analytics Engine v1.0',
     };
   }
 
@@ -579,10 +653,10 @@ class CSVExportService {
     const extension = format === 'csv' ? 'csv' : format === 'json' ? 'json' : 'xlsx';
     const fileName = `${exportId}.${extension}`;
     const filePath = `/exports/${fileName}`;
-    
+
     // In real implementation:
     // await fs.writeFile(filePath, data, 'utf8');
-    
+
     return filePath;
   }
 
@@ -620,7 +694,7 @@ class CSVExportService {
         exportId,
         filePath,
         metadata,
-        size: Buffer.byteLength(csvData, 'utf8')
+        size: Buffer.byteLength(csvData, 'utf8'),
       };
     } catch (error) {
       return {
@@ -628,7 +702,7 @@ class CSVExportService {
         exportId,
         metadata: this.createErrorMetadata(exportId),
         size: 0,
-        error: error instanceof Error ? error.message : 'Batch export failed'
+        error: error instanceof Error ? error.message : 'Batch export failed',
       };
     }
   }
@@ -640,10 +714,10 @@ class CSVExportService {
     scheduleTime: Date
   ): Promise<{ scheduleId: string; scheduledFor: Date }> {
     const scheduleId = this.generateExportId();
-    
+
     // In production, this would use a job queue like Bull or Agenda
     const delay = scheduleTime.getTime() - Date.now();
-    
+
     if (delay > 0) {
       setTimeout(async () => {
         try {
@@ -656,7 +730,7 @@ class CSVExportService {
 
     return {
       scheduleId,
-      scheduledFor: scheduleTime
+      scheduledFor: scheduleTime,
     };
   }
 }

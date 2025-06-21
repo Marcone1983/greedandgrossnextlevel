@@ -74,11 +74,11 @@ function SettingsItem({
   isLast = false,
 }: SettingsItemProps) {
   const IconComponent = iconLib === 'MaterialIcons' ? MaterialIcons : MaterialCommunityIcons;
-  
+
   return (
     <Pressable
       onPress={onPress}
-      _pressed={{ bg: colors.primary + '10' }}
+      _pressed={{ bg: `${colors.primary}10` }}
       borderTopRadius={isFirst ? 'lg' : 0}
       borderBottomRadius={isLast ? 'lg' : 0}
     >
@@ -110,9 +110,9 @@ export default function SettingsScreen() {
   const dispatch = useDispatch();
   const toast = useToast();
   const { colorMode, toggleColorMode } = useColorMode();
-  
+
   const { user } = useSelector((state: RootState) => state.auth);
-  
+
   // Memory system integration
   const {
     memoryEnabled,
@@ -122,9 +122,9 @@ export default function SettingsScreen() {
     clearHistory,
     exportData,
   } = useConversationMemory();
-  
-  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(() => 
-    i18n.language as SupportedLanguage || 'en'
+
+  const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>(
+    () => (i18n.language as SupportedLanguage) || 'en'
   );
   const [notificationSettings, setNotificationSettings] = useState({
     push: true,
@@ -174,7 +174,7 @@ export default function SettingsScreen() {
 
   const handleNotificationToggle = async (key: keyof typeof notificationSettings) => {
     const newSettings = { ...notificationSettings, [key]: !notificationSettings[key] };
-    
+
     if (key === 'push') {
       // Request notification permissions if enabling
       if (!notificationSettings.push) {
@@ -189,10 +189,10 @@ export default function SettingsScreen() {
         }
       }
     }
-    
+
     await saveNotificationSettings(newSettings);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
+
     logAnalytics('notification_setting_changed', {
       setting: key,
       enabled: newSettings[key],
@@ -233,7 +233,9 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleDocumentPress = (type: 'privacy-policy' | 'terms-service' | 'disclaimer' | 'support-info') => {
+  const handleDocumentPress = (
+    type: 'privacy-policy' | 'terms-service' | 'disclaimer' | 'support-info'
+  ) => {
     setDocumentViewer({ isOpen: true, type });
     logAnalytics('legal_document_opened', { document_type: type });
   };
@@ -254,10 +256,10 @@ Issue Description:
 
 Thank you!
     `);
-    
+
     const mailtoUrl = `mailto:${email}?subject=${subject}&body=${body}`;
-    
-    Linking.canOpenURL(mailtoUrl).then((supported) => {
+
+    Linking.canOpenURL(mailtoUrl).then(supported => {
       if (supported) {
         Linking.openURL(mailtoUrl);
       } else {
@@ -268,7 +270,7 @@ Thank you!
         });
       }
     });
-    
+
     logAnalytics('support_contact_opened');
   };
 
@@ -311,12 +313,12 @@ Thank you!
 
   const handleEncryptionToggle = async () => {
     try {
-      await updatePrivacySettings({ 
-        encryptSensitive: !memoryProfile?.privacySettings?.encryptSensitive 
+      await updatePrivacySettings({
+        encryptSensitive: !memoryProfile?.privacySettings?.encryptSensitive,
       });
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      logAnalytics('encryption_setting_changed', { 
-        enabled: !memoryProfile?.privacySettings?.encryptSensitive 
+      logAnalytics('encryption_setting_changed', {
+        enabled: !memoryProfile?.privacySettings?.encryptSensitive,
       });
     } catch (error) {
       toast.show({
@@ -498,13 +500,11 @@ Thank you!
           <SettingsItem
             icon="palette"
             title={t('settings.appearance.theme')}
-            subtitle={isDarkMode ? t('settings.appearance.darkMode') : t('settings.appearance.lightMode')}
+            subtitle={
+              isDarkMode ? t('settings.appearance.darkMode') : t('settings.appearance.lightMode')
+            }
             rightElement={
-              <Switch
-                isChecked={isDarkMode}
-                onToggle={handleThemeToggle}
-                colorScheme="primary"
-              />
+              <Switch isChecked={isDarkMode} onToggle={handleThemeToggle} colorScheme="primary" />
             }
             showArrow={false}
             isFirst
@@ -517,9 +517,10 @@ Thank you!
           <SettingsItem
             icon="memory"
             title="Smart Memory"
-            subtitle={memoryEnabled 
-              ? `Active with ${conversationCount} conversations` 
-              : "Disabled - No conversation tracking"
+            subtitle={
+              memoryEnabled
+                ? `Active with ${conversationCount} conversations`
+                : 'Disabled - No conversation tracking'
             }
             rightElement={
               <Switch
@@ -531,7 +532,7 @@ Thank you!
             showArrow={false}
             isFirst
           />
-          
+
           {memoryEnabled && (
             <>
               <SettingsItem
@@ -547,21 +548,21 @@ Thank you!
                 }
                 showArrow={false}
               />
-              
+
               <SettingsItem
                 icon="history"
                 title="Conversation History"
                 subtitle={`View and manage ${conversationCount} conversations`}
                 onPress={handleConversationHistory}
               />
-              
+
               <SettingsItem
                 icon="download"
                 title="Export My Data"
                 subtitle="Download all your data (GDPR compliant)"
                 onPress={handleExportData}
               />
-              
+
               <SettingsItem
                 icon="delete-forever"
                 title="Clear All Memory"
@@ -571,7 +572,7 @@ Thank you!
               />
             </>
           )}
-          
+
           {!memoryEnabled && (
             <SettingsItem
               icon="info"

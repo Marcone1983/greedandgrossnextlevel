@@ -30,13 +30,13 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    toggleTheme: (state) => {
+    toggleTheme: state => {
       state.theme = state.theme === 'dark' ? 'light' : 'dark';
     },
     setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
       state.theme = action.payload;
     },
-    incrementAdminTaps: (state) => {
+    incrementAdminTaps: state => {
       const now = Date.now();
       if (now - state.lastTapTime > 1000) {
         // Reset if more than 1 second between taps
@@ -45,14 +45,14 @@ const uiSlice = createSlice({
         state.adminTaps++;
       }
       state.lastTapTime = now;
-      
+
       // Check for admin access
       if (state.adminTaps >= 7) {
         state.isAdminPanelVisible = true;
         state.adminTaps = 0;
       }
     },
-    resetAdminTaps: (state) => {
+    resetAdminTaps: state => {
       state.adminTaps = 0;
     },
     setAdminPanelVisible: (state, action: PayloadAction<boolean>) => {

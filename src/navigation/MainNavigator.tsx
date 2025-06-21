@@ -49,12 +49,7 @@ export default function MainNavigator() {
         options={{
           title: 'Laboratorio',
           tabBarIcon: ({ color, size }) => (
-            <Icon
-              as={MaterialIcons}
-              name="science"
-              size={size}
-              color={color}
-            />
+            <Icon as={MaterialIcons} name="science" size={size} color={color} />
           ),
         }}
       />
@@ -64,12 +59,7 @@ export default function MainNavigator() {
         options={{
           title: 'Community',
           tabBarIcon: ({ color, size }) => (
-            <Icon
-              as={MaterialIcons}
-              name="forum"
-              size={size}
-              color={color}
-            />
+            <Icon as={MaterialIcons} name="forum" size={size} color={color} />
           ),
         }}
       />
@@ -79,12 +69,7 @@ export default function MainNavigator() {
         options={{
           title: 'Libreria',
           tabBarIcon: ({ color, size }) => (
-            <Icon
-              as={MaterialCommunityIcons}
-              name="cannabis"
-              size={size}
-              color={color}
-            />
+            <Icon as={MaterialCommunityIcons} name="cannabis" size={size} color={color} />
           ),
         }}
       />
@@ -94,12 +79,7 @@ export default function MainNavigator() {
         options={{
           title: 'Impostazioni',
           tabBarIcon: ({ color, size }) => (
-            <Icon
-              as={MaterialIcons}
-              name="settings"
-              size={size}
-              color={color}
-            />
+            <Icon as={MaterialIcons} name="settings" size={size} color={color} />
           ),
         }}
       />

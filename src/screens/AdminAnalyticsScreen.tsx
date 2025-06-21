@@ -46,11 +46,13 @@ interface AnalyticsDashboard {
 export default function AdminAnalyticsScreen() {
   const { t } = useTranslation();
   const toast = useToast();
-  
+
   const [dashboard, setDashboard] = useState<AnalyticsDashboard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTimeRange, setSelectedTimeRange] = useState(30);
-  const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'revenue' | 'breeding' | 'performance'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'users' | 'revenue' | 'breeding' | 'performance'
+  >('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const bgColor = useColorModeValue('gray.50', colors.darkBackground);
@@ -69,7 +71,7 @@ export default function AdminAnalyticsScreen() {
       setDashboard({
         ...data,
         generatedAt: new Date(),
-        timeRange: selectedTimeRange
+        timeRange: selectedTimeRange,
       });
     } catch (error) {
       toast.show({
@@ -113,7 +115,7 @@ export default function AdminAnalyticsScreen() {
           { key: 'users', label: 'Utenti', icon: 'people' },
           { key: 'revenue', label: 'Ricavi', icon: 'attach-money' },
           { key: 'breeding', label: 'Breeding', icon: 'nature' },
-          { key: 'performance', label: 'Performance', icon: 'speed' }
+          { key: 'performance', label: 'Performance', icon: 'speed' },
         ].map(tab => (
           <Button
             key={tab.key}
@@ -137,17 +139,23 @@ export default function AdminAnalyticsScreen() {
       <VStack space={4}>
         {/* Key Metrics */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Metriche Principali</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Metriche Principali
+          </Text>
           <SimpleGrid columns={2} spacing={4}>
             <Box>
               <Text fontSize="2xl" fontWeight="bold" color={colors.primary}>
                 {dashboard.overview.activeUsers.current.toLocaleString()}
               </Text>
-              <Text fontSize="sm" color="gray.500">Utenti Attivi</Text>
+              <Text fontSize="sm" color="gray.500">
+                Utenti Attivi
+              </Text>
               <HStack alignItems="center" mt={1}>
                 <Icon
                   as={MaterialIcons}
-                  name={dashboard.overview.activeUsers.growth >= 0 ? 'trending-up' : 'trending-down'}
+                  name={
+                    dashboard.overview.activeUsers.growth >= 0 ? 'trending-up' : 'trending-down'
+                  }
                   size="xs"
                   color={dashboard.overview.activeUsers.growth >= 0 ? 'green.500' : 'red.500'}
                 />
@@ -165,7 +173,9 @@ export default function AdminAnalyticsScreen() {
               <Text fontSize="2xl" fontWeight="bold" color={colors.primary}>
                 {dashboard.overview.sessions.current.toLocaleString()}
               </Text>
-              <Text fontSize="sm" color="gray.500">Sessioni</Text>
+              <Text fontSize="sm" color="gray.500">
+                Sessioni
+              </Text>
               <HStack alignItems="center" mt={1}>
                 <Icon
                   as={MaterialIcons}
@@ -187,7 +197,9 @@ export default function AdminAnalyticsScreen() {
               <Text fontSize="2xl" fontWeight="bold" color={colors.primary}>
                 €{dashboard.revenue.totalRevenue.toLocaleString()}
               </Text>
-              <Text fontSize="sm" color="gray.500">Ricavi Totali</Text>
+              <Text fontSize="sm" color="gray.500">
+                Ricavi Totali
+              </Text>
               <HStack alignItems="center" mt={1}>
                 <Icon
                   as={MaterialIcons}
@@ -209,7 +221,9 @@ export default function AdminAnalyticsScreen() {
               <Text fontSize="2xl" fontWeight="bold" color={colors.primary}>
                 {dashboard.breeding.totalSimulations.toLocaleString()}
               </Text>
-              <Text fontSize="sm" color="gray.500">Simulazioni</Text>
+              <Text fontSize="sm" color="gray.500">
+                Simulazioni
+              </Text>
               <Text fontSize="xs" color="gray.500" mt={1}>
                 Breeding totali
               </Text>
@@ -219,7 +233,9 @@ export default function AdminAnalyticsScreen() {
 
         {/* Insights */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Insights Principali</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Insights Principali
+          </Text>
           <VStack space={3}>
             {dashboard.insights.slice(0, 5).map((insight, index) => (
               <Box key={insight.id} p={3} bg={insightBgColor} borderRadius="md">
@@ -228,8 +244,11 @@ export default function AdminAnalyticsScreen() {
                     <HStack alignItems="center" space={2}>
                       <Badge
                         colorScheme={
-                          insight.priority === 'high' ? 'red' :
-                          insight.priority === 'medium' ? 'orange' : 'gray'
+                          insight.priority === 'high'
+                            ? 'red'
+                            : insight.priority === 'medium'
+                              ? 'orange'
+                              : 'gray'
                         }
                         variant="solid"
                         size="sm"
@@ -252,20 +271,29 @@ export default function AdminAnalyticsScreen() {
                       <Icon
                         as={MaterialIcons}
                         name={
-                          insight.trend === 'up' ? 'trending-up' :
-                          insight.trend === 'down' ? 'trending-down' : 'trending-flat'
+                          insight.trend === 'up'
+                            ? 'trending-up'
+                            : insight.trend === 'down'
+                              ? 'trending-down'
+                              : 'trending-flat'
                         }
                         size="xs"
                         color={
-                          insight.trend === 'up' ? 'green.500' :
-                          insight.trend === 'down' ? 'red.500' : 'gray.500'
+                          insight.trend === 'up'
+                            ? 'green.500'
+                            : insight.trend === 'down'
+                              ? 'red.500'
+                              : 'gray.500'
                         }
                       />
                       <Text
                         fontSize="xs"
                         color={
-                          insight.trend === 'up' ? 'green.500' :
-                          insight.trend === 'down' ? 'red.500' : 'gray.500'
+                          insight.trend === 'up'
+                            ? 'green.500'
+                            : insight.trend === 'down'
+                              ? 'red.500'
+                              : 'gray.500'
                         }
                       >
                         {insight.trendPercent}%
@@ -280,10 +308,18 @@ export default function AdminAnalyticsScreen() {
 
         {/* User Segments */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Segmenti Utenti</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Segmenti Utenti
+          </Text>
           <VStack space={3}>
             {dashboard.userSegments.map((segment, index) => (
-              <Box key={segment.id} p={3} borderWidth={1} borderColor={borderColor} borderRadius="md">
+              <Box
+                key={segment.id}
+                p={3}
+                borderWidth={1}
+                borderColor={borderColor}
+                borderRadius="md"
+              >
                 <HStack justifyContent="space-between" alignItems="flex-start">
                   <VStack flex={1} space={1}>
                     <Text fontSize="md" fontWeight="semibold">
@@ -297,19 +333,25 @@ export default function AdminAnalyticsScreen() {
                         <Text fontSize="sm" fontWeight="bold" color={colors.primary}>
                           {segment.userCount}
                         </Text>
-                        <Text fontSize="xs" color="gray.500">Utenti</Text>
+                        <Text fontSize="xs" color="gray.500">
+                          Utenti
+                        </Text>
                       </VStack>
                       <VStack alignItems="center">
                         <Text fontSize="sm" fontWeight="bold" color={colors.primary}>
                           €{segment.averageRevenue.toFixed(2)}
                         </Text>
-                        <Text fontSize="xs" color="gray.500">ARPU</Text>
+                        <Text fontSize="xs" color="gray.500">
+                          ARPU
+                        </Text>
                       </VStack>
                       <VStack alignItems="center">
                         <Text fontSize="sm" fontWeight="bold" color={colors.primary}>
                           {segment.retentionRate}%
                         </Text>
-                        <Text fontSize="xs" color="gray.500">Retention</Text>
+                        <Text fontSize="xs" color="gray.500">
+                          Retention
+                        </Text>
                       </VStack>
                     </HStack>
                   </VStack>
@@ -327,16 +369,20 @@ export default function AdminAnalyticsScreen() {
 
     const userData = {
       labels: ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'],
-      datasets: [{
-        data: [20, 45, 28, 80, 99, 43, 78]
-      }]
+      datasets: [
+        {
+          data: [20, 45, 28, 80, 99, 43, 78],
+        },
+      ],
     };
 
     return (
       <VStack space={4}>
         {/* User Activity Chart */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Attività Utenti Settimanale</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Attività Utenti Settimanale
+          </Text>
           <LineChart
             data={userData}
             width={screenWidth - 80}
@@ -349,25 +395,27 @@ export default function AdminAnalyticsScreen() {
               color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
               style: {
-                borderRadius: 16
+                borderRadius: 16,
               },
               propsForDots: {
-                r: "6",
-                strokeWidth: "2",
-                stroke: "#ffa726"
-              }
+                r: '6',
+                strokeWidth: '2',
+                stroke: '#ffa726',
+              },
             }}
             bezier
             style={{
               marginVertical: 8,
-              borderRadius: 16
+              borderRadius: 16,
             }}
           />
         </Box>
 
         {/* User Segments Details */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Analisi Segmenti</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Analisi Segmenti
+          </Text>
           <VStack space={4}>
             {dashboard.userSegments.map((segment, index) => (
               <Box key={segment.id}>
@@ -404,50 +452,64 @@ export default function AdminAnalyticsScreen() {
   const renderRevenueTab = () => {
     if (!dashboard) return null;
 
-    const revenueByTier = Object.entries(dashboard.revenue.revenueByTier).map(([tier, revenue]) => ({
-      name: tier,
-      revenue: revenue as number,
-      color: tier === 'basic' ? '#FF6384' : tier === 'premium' ? '#36A2EB' : '#FFCE56',
-      legendFontColor: '#7F7F7F',
-      legendFontSize: 15
-    }));
+    const revenueByTier = Object.entries(dashboard.revenue.revenueByTier).map(
+      ([tier, revenue]) => ({
+        name: tier,
+        revenue: revenue as number,
+        color: tier === 'basic' ? '#FF6384' : tier === 'premium' ? '#36A2EB' : '#FFCE56',
+        legendFontColor: '#7F7F7F',
+        legendFontSize: 15,
+      })
+    );
 
     return (
       <VStack space={4}>
         {/* Revenue Overview */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Panoramica Ricavi</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Panoramica Ricavi
+          </Text>
           <SimpleGrid columns={2} spacing={4}>
             <VStack alignItems="center">
               <Text fontSize="xl" fontWeight="bold" color={colors.primary}>
                 €{dashboard.revenue.totalRevenue.toLocaleString()}
               </Text>
-              <Text fontSize="sm" color="gray.500">Ricavi Totali</Text>
+              <Text fontSize="sm" color="gray.500">
+                Ricavi Totali
+              </Text>
             </VStack>
             <VStack alignItems="center">
               <Text fontSize="xl" fontWeight="bold" color="green.500">
                 €{dashboard.revenue.recurringRevenue.toLocaleString()}
               </Text>
-              <Text fontSize="sm" color="gray.500">Ricavi Ricorrenti</Text>
+              <Text fontSize="sm" color="gray.500">
+                Ricavi Ricorrenti
+              </Text>
             </VStack>
             <VStack alignItems="center">
               <Text fontSize="xl" fontWeight="bold" color="blue.500">
                 €{dashboard.revenue.avgRevenuePerUser.toFixed(2)}
               </Text>
-              <Text fontSize="sm" color="gray.500">ARPU</Text>
+              <Text fontSize="sm" color="gray.500">
+                ARPU
+              </Text>
             </VStack>
             <VStack alignItems="center">
               <Text fontSize="xl" fontWeight="bold" color="orange.500">
                 {dashboard.revenue.conversionRate.toFixed(1)}%
               </Text>
-              <Text fontSize="sm" color="gray.500">Conversione</Text>
+              <Text fontSize="sm" color="gray.500">
+                Conversione
+              </Text>
             </VStack>
           </SimpleGrid>
         </Box>
 
         {/* Revenue by Tier */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Ricavi per Abbonamento</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Ricavi per Abbonamento
+          </Text>
           {revenueByTier.length > 0 && (
             <PieChart
               data={revenueByTier}
@@ -466,16 +528,22 @@ export default function AdminAnalyticsScreen() {
 
         {/* Revenue Projections */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Proiezioni</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Proiezioni
+          </Text>
           <HStack justifyContent="space-between" alignItems="center">
             <VStack>
-              <Text fontSize="md" color="gray.600">Ricavi Proiettati (30gg)</Text>
+              <Text fontSize="md" color="gray.600">
+                Ricavi Proiettati (30gg)
+              </Text>
               <Text fontSize="xl" fontWeight="bold" color={colors.primary}>
                 €{dashboard.revenue.projectedRevenue.toLocaleString()}
               </Text>
             </VStack>
             <VStack alignItems="flex-end">
-              <Text fontSize="md" color="gray.600">Crescita</Text>
+              <Text fontSize="md" color="gray.600">
+                Crescita
+              </Text>
               <HStack alignItems="center">
                 <Icon
                   as={MaterialIcons}
@@ -504,26 +572,34 @@ export default function AdminAnalyticsScreen() {
       <VStack space={4}>
         {/* Breeding Overview */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Panoramica Breeding</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Panoramica Breeding
+          </Text>
           <SimpleGrid columns={2} spacing={4}>
             <VStack alignItems="center">
               <Text fontSize="xl" fontWeight="bold" color={colors.primary}>
                 {dashboard.breeding.totalSimulations.toLocaleString()}
               </Text>
-              <Text fontSize="sm" color="gray.500">Simulazioni Totali</Text>
+              <Text fontSize="sm" color="gray.500">
+                Simulazioni Totali
+              </Text>
             </VStack>
             <VStack alignItems="center">
               <Text fontSize="xl" fontWeight="bold" color="green.500">
                 {dashboard.breeding.userEngagement.avgSimulationsPerUser.toFixed(1)}
               </Text>
-              <Text fontSize="sm" color="gray.500">Media/Utente</Text>
+              <Text fontSize="sm" color="gray.500">
+                Media/Utente
+              </Text>
             </VStack>
           </SimpleGrid>
         </Box>
 
         {/* Popular Crosses */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Incroci Popolari</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Incroci Popolari
+          </Text>
           <VStack space={3}>
             {dashboard.breeding.popularCrosses.map((cross, index) => (
               <Box key={index} p={3} bg={insightBgColor} borderRadius="md">
@@ -540,7 +616,9 @@ export default function AdminAnalyticsScreen() {
                     <Text fontSize="lg" fontWeight="bold" color={colors.primary}>
                       {cross.count}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">simulazioni</Text>
+                    <Text fontSize="xs" color="gray.500">
+                      simulazioni
+                    </Text>
                   </VStack>
                 </HStack>
               </Box>
@@ -550,20 +628,23 @@ export default function AdminAnalyticsScreen() {
 
         {/* Trending Strains */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Strain di Tendenza</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Strain di Tendenza
+          </Text>
           <VStack space={3}>
             {dashboard.breeding.trendingStrains.map((strain, index) => (
               <HStack key={index} justifyContent="space-between" alignItems="center">
                 <HStack alignItems="center" space={3}>
-                  <Badge
-                    colorScheme={strain.trend === 'up' ? 'green' : 'gray'}
-                    variant="solid"
-                  >
+                  <Badge colorScheme={strain.trend === 'up' ? 'green' : 'gray'} variant="solid">
                     #{index + 1}
                   </Badge>
                   <VStack>
-                    <Text fontSize="sm" fontWeight="semibold">{strain.name}</Text>
-                    <Text fontSize="xs" color="gray.600">{strain.mentions} menzioni</Text>
+                    <Text fontSize="sm" fontWeight="semibold">
+                      {strain.name}
+                    </Text>
+                    <Text fontSize="xs" color="gray.600">
+                      {strain.mentions} menzioni
+                    </Text>
                   </VStack>
                 </HStack>
                 <Icon
@@ -586,7 +667,9 @@ export default function AdminAnalyticsScreen() {
       <VStack space={4}>
         {/* Performance Metrics */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Metriche Performance</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Metriche Performance
+          </Text>
           <VStack space={4}>
             <HStack justifyContent="space-between" alignItems="center">
               <Text fontSize="md">Tempo di Caricamento Medio</Text>
@@ -613,23 +696,33 @@ export default function AdminAnalyticsScreen() {
 
         {/* Performance Status */}
         <Box bg={cardBg} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
-          <Text fontSize="lg" fontWeight="bold" mb={4}>Stato Sistema</Text>
+          <Text fontSize="lg" fontWeight="bold" mb={4}>
+            Stato Sistema
+          </Text>
           <VStack space={3}>
             <HStack justifyContent="space-between" alignItems="center">
               <Text fontSize="md">API Response Time</Text>
-              <Badge colorScheme="green" variant="solid">GOOD</Badge>
+              <Badge colorScheme="green" variant="solid">
+                GOOD
+              </Badge>
             </HStack>
             <HStack justifyContent="space-between" alignItems="center">
               <Text fontSize="md">Database Performance</Text>
-              <Badge colorScheme="green" variant="solid">OPTIMAL</Badge>
+              <Badge colorScheme="green" variant="solid">
+                OPTIMAL
+              </Badge>
             </HStack>
             <HStack justifyContent="space-between" alignItems="center">
               <Text fontSize="md">Memory System</Text>
-              <Badge colorScheme="yellow" variant="solid">MONITORING</Badge>
+              <Badge colorScheme="yellow" variant="solid">
+                MONITORING
+              </Badge>
             </HStack>
             <HStack justifyContent="space-between" alignItems="center">
               <Text fontSize="md">Analytics Collection</Text>
-              <Badge colorScheme="green" variant="solid">ACTIVE</Badge>
+              <Badge colorScheme="green" variant="solid">
+                ACTIVE
+              </Badge>
             </HStack>
           </VStack>
         </Box>
@@ -639,12 +732,18 @@ export default function AdminAnalyticsScreen() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case 'overview': return renderOverviewTab();
-      case 'users': return renderUsersTab();
-      case 'revenue': return renderRevenueTab();
-      case 'breeding': return renderBreedingTab();
-      case 'performance': return renderPerformanceTab();
-      default: return renderOverviewTab();
+      case 'overview':
+        return renderOverviewTab();
+      case 'users':
+        return renderUsersTab();
+      case 'revenue':
+        return renderRevenueTab();
+      case 'breeding':
+        return renderBreedingTab();
+      case 'performance':
+        return renderPerformanceTab();
+      default:
+        return renderOverviewTab();
     }
   };
 
@@ -652,7 +751,9 @@ export default function AdminAnalyticsScreen() {
     return (
       <Box flex={1} justifyContent="center" alignItems="center" bg={bgColor}>
         <Spinner size="lg" color={colors.primary} />
-        <Text mt={4} color="gray.500">Caricamento analytics...</Text>
+        <Text mt={4} color="gray.500">
+          Caricamento analytics...
+        </Text>
       </Box>
     );
   }

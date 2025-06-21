@@ -42,41 +42,39 @@ function ConversationItem({ conversation, onPress }: ConversationItemProps) {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   const getQueryTypeColor = (type: ConversationEntry['queryType']) => {
     switch (type) {
-      case 'breeding': return 'green';
-      case 'recommendation': return 'blue';
-      case 'education': return 'purple';
-      default: return 'gray';
+      case 'breeding':
+        return 'green';
+      case 'recommendation':
+        return 'blue';
+      case 'education':
+        return 'purple';
+      default:
+        return 'gray';
     }
   };
 
   const getQueryTypeLabel = (type: ConversationEntry['queryType']) => {
     switch (type) {
-      case 'breeding': return 'Breeding';
-      case 'recommendation': return 'Consigli';
-      case 'education': return 'Educazione';
-      default: return 'Generale';
+      case 'breeding':
+        return 'Breeding';
+      case 'recommendation':
+        return 'Consigli';
+      case 'education':
+        return 'Educazione';
+      default:
+        return 'Generale';
     }
   };
 
   return (
-    <Pressable
-      onPress={onPress}
-      _pressed={{ opacity: 0.7 }}
-    >
-      <Box
-        bg={bgColor}
-        borderWidth={1}
-        borderColor={borderColor}
-        borderRadius="lg"
-        p={4}
-        mb={3}
-      >
+    <Pressable onPress={onPress} _pressed={{ opacity: 0.7 }}>
+      <Box bg={bgColor} borderWidth={1} borderColor={borderColor} borderRadius="lg" p={4} mb={3}>
         <VStack space={3}>
           {/* Header */}
           <HStack justifyContent="space-between" alignItems="flex-start">
@@ -88,7 +86,7 @@ function ConversationItem({ conversation, onPress }: ConversationItemProps) {
                 {formatTime(conversation.timestamp)}
               </Text>
             </VStack>
-            
+
             <VStack alignItems="flex-end" space={1}>
               <Badge
                 colorScheme={getQueryTypeColor(conversation.queryType)}
@@ -106,7 +104,9 @@ function ConversationItem({ conversation, onPress }: ConversationItemProps) {
           {/* Strains mentioned */}
           {conversation.strainsHentioned && conversation.strainsHentioned.length > 0 && (
             <HStack space={1} flexWrap="wrap">
-              <Text fontSize="xs" color="gray.600">Strain:</Text>
+              <Text fontSize="xs" color="gray.600">
+                Strain:
+              </Text>
               {conversation.strainsHentioned.slice(0, 3).map((strain, index) => (
                 <Badge key={index} colorScheme="green" variant="outline" size="xs">
                   {strain}
@@ -118,7 +118,9 @@ function ConversationItem({ conversation, onPress }: ConversationItemProps) {
           {/* Effects mentioned */}
           {conversation.effectsRequested && conversation.effectsRequested.length > 0 && (
             <HStack space={1} flexWrap="wrap">
-              <Text fontSize="xs" color="gray.600">Effetti:</Text>
+              <Text fontSize="xs" color="gray.600">
+                Effetti:
+              </Text>
               {conversation.effectsRequested.slice(0, 3).map((effect, index) => (
                 <Badge key={index} colorScheme="blue" variant="outline" size="xs">
                   {effect}
@@ -158,7 +160,7 @@ export default function ConversationHistoryScreen() {
     isLoaded,
     loadConversationContext,
     clearAllMemory,
-    exportUserData
+    exportUserData,
   } = useConversationMemory();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -182,10 +184,11 @@ export default function ConversationHistoryScreen() {
   }, [isLoaded, loadConversationContext]);
 
   const filteredConversations = recentConversations.filter(conv => {
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch =
+      searchQuery === '' ||
       conv.query.toLowerCase().includes(searchQuery.toLowerCase()) ||
       conv.aiResponse.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.strainsHentioned?.some(strain => 
+      conv.strainsHentioned?.some(strain =>
         strain.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
@@ -219,7 +222,7 @@ export default function ConversationHistoryScreen() {
     try {
       await clearAllMemory();
       navigation.goBack();
-      
+
       toast.show({
         title: 'Cronologia cancellata',
         description: 'Tutte le conversazioni sono state eliminate',
@@ -237,7 +240,7 @@ export default function ConversationHistoryScreen() {
   const handleExportHistory = async () => {
     try {
       const data = await exportUserData();
-      
+
       toast.show({
         title: 'Esportazione completata',
         description: 'I dati sono pronti per il download',
@@ -268,7 +271,9 @@ export default function ConversationHistoryScreen() {
     return (
       <Box flex={1} justifyContent="center" alignItems="center" bg={bgColor}>
         <Spinner size="lg" color={colors.primary} />
-        <Text mt={4} color="gray.500">Caricamento cronologia...</Text>
+        <Text mt={4} color="gray.500">
+          Caricamento cronologia...
+        </Text>
       </Box>
     );
   }
@@ -297,7 +302,7 @@ export default function ConversationHistoryScreen() {
                   {analytics.totalConversations} conversazioni totali
                 </Text>
               </VStack>
-              
+
               <HStack space={2}>
                 <Button
                   size="sm"
@@ -352,38 +357,38 @@ export default function ConversationHistoryScreen() {
 
           {/* Statistics */}
           {analytics.totalConversations > 0 && (
-            <Box
-              bg={cardBgColor}
-              p={4}
-              borderRadius="lg"
-              borderWidth={1}
-              borderColor={borderColor}
-            >
+            <Box bg={cardBgColor} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
               <VStack space={3}>
                 <Text fontSize="md" fontWeight="semibold">
                   Statistiche
                 </Text>
-                
+
                 <HStack justifyContent="space-around">
                   <VStack alignItems="center">
                     <Text fontSize="lg" fontWeight="bold" color={colors.primary}>
                       {analytics.totalConversations}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">Conversazioni</Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Conversazioni
+                    </Text>
                   </VStack>
-                  
+
                   <VStack alignItems="center">
                     <Text fontSize="lg" fontWeight="bold" color={colors.primary}>
                       {Math.round(analytics.averageSessionLength)}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">Media/sessione</Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Media/sessione
+                    </Text>
                   </VStack>
-                  
+
                   <VStack alignItems="center">
                     <Text fontSize="lg" fontWeight="bold" color={colors.primary}>
                       {analytics.topStrains.length}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">Strain discussi</Text>
+                    <Text fontSize="xs" color="gray.500">
+                      Strain discussi
+                    </Text>
                   </VStack>
                 </HStack>
 
@@ -391,7 +396,9 @@ export default function ConversationHistoryScreen() {
                   <>
                     <Divider />
                     <VStack space={2}>
-                      <Text fontSize="sm" fontWeight="medium">Strain più discussi:</Text>
+                      <Text fontSize="sm" fontWeight="medium">
+                        Strain più discussi:
+                      </Text>
                       <HStack flexWrap="wrap" space={1}>
                         {analytics.topStrains.slice(0, 5).map((strain, index) => (
                           <Badge key={index} colorScheme="green" variant="outline">
@@ -411,14 +418,9 @@ export default function ConversationHistoryScreen() {
             <Text fontSize="md" fontWeight="semibold">
               Conversazioni ({filteredConversations.length})
             </Text>
-            
+
             {filteredConversations.length === 0 ? (
-              <Box
-                bg={cardBgColor}
-                p={8}
-                borderRadius="lg"
-                alignItems="center"
-              >
+              <Box bg={cardBgColor} p={8} borderRadius="lg" alignItems="center">
                 <Icon
                   as={MaterialIcons}
                   name="chat-bubble-outline"
@@ -427,10 +429,9 @@ export default function ConversationHistoryScreen() {
                   mb={3}
                 />
                 <Text color="gray.500" textAlign="center">
-                  {searchQuery || filterType !== 'all' 
+                  {searchQuery || filterType !== 'all'
                     ? 'Nessuna conversazione trovata con i filtri attuali'
-                    : 'Nessuna conversazione ancora. Inizia a chattare!'
-                  }
+                    : 'Nessuna conversazione ancora. Inizia a chattare!'}
                 </Text>
               </Box>
             ) : (
@@ -449,11 +450,7 @@ export default function ConversationHistoryScreen() {
       </ScrollView>
 
       {/* Conversation Detail Modal */}
-      <Modal
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        size="full"
-      >
+      <Modal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} size="full">
         <Modal.Content maxW="95%" maxH="95%">
           <Modal.CloseButton />
           <Modal.Header>
@@ -466,32 +463,36 @@ export default function ConversationHistoryScreen() {
             {selectedConversation && (
               <VStack space={4}>
                 {/* Metadata */}
-                <Box
-                  bg={metadataBgColor}
-                  p={3}
-                  borderRadius="md"
-                >
+                <Box bg={metadataBgColor} p={3} borderRadius="md">
                   <VStack space={2}>
                     <HStack justifyContent="space-between">
-                      <Text fontSize="sm" color="gray.600">Data:</Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Data:
+                      </Text>
                       <Text fontSize="sm" fontWeight="medium">
                         {selectedConversation.timestamp.toLocaleDateString('it-IT', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
                           hour: '2-digit',
-                          minute: '2-digit'
+                          minute: '2-digit',
                         })}
                       </Text>
                     </HStack>
-                    
+
                     <HStack justifyContent="space-between">
-                      <Text fontSize="sm" color="gray.600">Tipo:</Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Tipo:
+                      </Text>
                       <Badge
                         colorScheme={
-                          selectedConversation.queryType === 'breeding' ? 'green' :
-                          selectedConversation.queryType === 'recommendation' ? 'blue' :
-                          selectedConversation.queryType === 'education' ? 'purple' : 'gray'
+                          selectedConversation.queryType === 'breeding'
+                            ? 'green'
+                            : selectedConversation.queryType === 'recommendation'
+                              ? 'blue'
+                              : selectedConversation.queryType === 'education'
+                                ? 'purple'
+                                : 'gray'
                         }
                         variant="solid"
                         size="sm"
@@ -499,9 +500,11 @@ export default function ConversationHistoryScreen() {
                         {selectedConversation.queryType}
                       </Badge>
                     </HStack>
-                    
+
                     <HStack justifyContent="space-between">
-                      <Text fontSize="sm" color="gray.600">Sessione:</Text>
+                      <Text fontSize="sm" color="gray.600">
+                        Sessione:
+                      </Text>
                       <Text fontSize="sm" fontFamily="monospace">
                         {selectedConversation.sessionId.substring(0, 16)}...
                       </Text>
@@ -521,9 +524,7 @@ export default function ConversationHistoryScreen() {
                     borderLeftWidth={3}
                     borderLeftColor="blue.500"
                   >
-                    <Text fontSize="sm">
-                      {selectedConversation.query}
-                    </Text>
+                    <Text fontSize="sm">{selectedConversation.query}</Text>
                   </Box>
                 </VStack>
 
@@ -539,23 +540,24 @@ export default function ConversationHistoryScreen() {
                     borderLeftWidth={3}
                     borderLeftColor="green.500"
                   >
-                    <Text fontSize="sm">
-                      {selectedConversation.aiResponse}
-                    </Text>
+                    <Text fontSize="sm">{selectedConversation.aiResponse}</Text>
                   </Box>
                 </VStack>
 
                 {/* Tags */}
-                {(selectedConversation.strainsHentioned?.length > 0 || 
-                  (selectedConversation.effectsRequested && selectedConversation.effectsRequested.length > 0)) && (
+                {(selectedConversation.strainsHentioned?.length > 0 ||
+                  (selectedConversation.effectsRequested &&
+                    selectedConversation.effectsRequested.length > 0)) && (
                   <VStack space={3}>
                     <Text fontSize="md" fontWeight="semibold">
                       Tags:
                     </Text>
-                    
+
                     {selectedConversation.strainsHentioned?.length > 0 && (
                       <VStack space={2}>
-                        <Text fontSize="sm" color="gray.600">Strain menzionati:</Text>
+                        <Text fontSize="sm" color="gray.600">
+                          Strain menzionati:
+                        </Text>
                         <HStack flexWrap="wrap" space={1}>
                           {selectedConversation.strainsHentioned.map((strain, index) => (
                             <Badge key={index} colorScheme="green" variant="outline">
@@ -565,19 +567,22 @@ export default function ConversationHistoryScreen() {
                         </HStack>
                       </VStack>
                     )}
-                    
-                    {selectedConversation.effectsRequested && selectedConversation.effectsRequested.length > 0 && (
-                      <VStack space={2}>
-                        <Text fontSize="sm" color="gray.600">Effetti richiesti:</Text>
-                        <HStack flexWrap="wrap" space={1}>
-                          {selectedConversation.effectsRequested.map((effect, index) => (
-                            <Badge key={index} colorScheme="blue" variant="outline">
-                              {effect}
-                            </Badge>
-                          ))}
-                        </HStack>
-                      </VStack>
-                    )}
+
+                    {selectedConversation.effectsRequested &&
+                      selectedConversation.effectsRequested.length > 0 && (
+                        <VStack space={2}>
+                          <Text fontSize="sm" color="gray.600">
+                            Effetti richiesti:
+                          </Text>
+                          <HStack flexWrap="wrap" space={1}>
+                            {selectedConversation.effectsRequested.map((effect, index) => (
+                              <Badge key={index} colorScheme="blue" variant="outline">
+                                {effect}
+                              </Badge>
+                            ))}
+                          </HStack>
+                        </VStack>
+                      )}
                   </VStack>
                 )}
               </VStack>
@@ -585,10 +590,7 @@ export default function ConversationHistoryScreen() {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button
-              variant="ghost"
-              onPress={() => setIsDetailModalOpen(false)}
-            >
+            <Button variant="ghost" onPress={() => setIsDetailModalOpen(false)}>
               Chiudi
             </Button>
           </Modal.Footer>

@@ -24,18 +24,14 @@ interface DocumentViewerProps {
   onClose: () => void;
 }
 
-export default function DocumentViewer({ 
-  documentType, 
-  language, 
-  onClose 
-}: DocumentViewerProps) {
+export default function DocumentViewer({ documentType, language, onClose }: DocumentViewerProps) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [webViewRef, setWebViewRef] = useState<any>(null);
-  
+
   const { document, loading, error, retryLoad } = useDocumentCache(documentType, language);
-  
+
   const bgColor = useColorModeValue('white', colors.darkBackground);
   const headerBg = useColorModeValue('gray.50', colors.darkCard);
 
@@ -125,12 +121,7 @@ export default function DocumentViewer({
 
         {hasError && (
           <VStack flex={1} alignItems="center" justifyContent="center" space={4} px={6}>
-            <Icon 
-              as={MaterialIcons} 
-              name="error-outline" 
-              size="xl" 
-              color="red.500" 
-            />
+            <Icon as={MaterialIcons} name="error-outline" size="xl" color="red.500" />
             <Text fontSize="lg" fontWeight="medium" textAlign="center">
               {t('legal.documentError')}
             </Text>
@@ -144,11 +135,7 @@ export default function DocumentViewer({
             >
               {t('common.retry')}
             </Button>
-            <Button
-              variant="ghost"
-              colorScheme="gray"
-              onPress={handleGoBack}
-            >
+            <Button variant="ghost" colorScheme="gray" onPress={handleGoBack}>
               {t('legal.goBack')}
             </Button>
           </VStack>
@@ -167,14 +154,14 @@ export default function DocumentViewer({
             scalesPageToFit={true}
             startInLoadingState={true}
             renderLoading={() => (
-              <VStack 
-                position="absolute" 
-                top={0} 
-                left={0} 
-                right={0} 
+              <VStack
+                position="absolute"
+                top={0}
+                left={0}
+                right={0}
                 bottom={0}
-                alignItems="center" 
-                justifyContent="center" 
+                alignItems="center"
+                justifyContent="center"
                 bg={bgColor}
               >
                 <Spinner size="lg" color={colors.primary} />
@@ -237,15 +224,15 @@ export default function DocumentViewer({
         )}
 
         {isLoading && document && (
-          <Box 
-            position="absolute" 
-            top={0} 
-            left={0} 
-            right={0} 
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
             bottom={0}
-            alignItems="center" 
-            justifyContent="center" 
-            bg={bgColor + '80'}
+            alignItems="center"
+            justifyContent="center"
+            bg={`${bgColor}80`}
           >
             <Spinner size="lg" color={colors.primary} />
           </Box>

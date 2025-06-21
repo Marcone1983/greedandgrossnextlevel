@@ -1,12 +1,6 @@
 import { Platform } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import {
   VStack,
   HStack,
@@ -34,7 +28,7 @@ import { formatNumber } from '@/utils/helpers';
 export default function AdminPanel() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const navigation = useNavigation();
   const toast = useToast();
   const [downloadDatabase] = useDownloadDatabaseMutation();
@@ -68,29 +62,29 @@ export default function AdminPanel() {
           onPress: async () => {
             try {
               const blob = await downloadDatabase({ format }).unwrap();
-              const fileUri = FileSystem.documentDirectory + `database.${format}`;
-              
+              const fileUri = `${FileSystem.documentDirectory}database.${format}`;
+
               // Convert blob to base64 and save
               const reader = new FileReader();
               reader.onloadend = async () => {
                 const base64data = reader.result as string;
                 const base64 = base64data.split(',')[1];
-                
+
                 await FileSystem.writeAsStringAsync(fileUri, base64, {
                   encoding: FileSystem.EncodingType.Base64,
                 });
-                
+
                 await Sharing.shareAsync(fileUri);
               };
               reader.readAsDataURL(blob);
-              
+
               toast.show({
                 description: `Database esportato in ${format.toUpperCase()}`,
                 colorScheme: 'success',
               });
             } catch (error) {
               toast.show({
-                description: 'Errore durante l\'export',
+                description: "Errore durante l'export",
                 colorScheme: 'error',
               });
             }
@@ -102,10 +96,7 @@ export default function AdminPanel() {
 
   const StatCard = ({ title, value, subtitle, icon, color = colors.primary }: any) => (
     <View style={[styles.statCard, shadows.sm]}>
-      <LinearGradient
-        colors={[colors.surface, colors.background]}
-        style={styles.statGradient}
-      >
+      <LinearGradient colors={[colors.surface, colors.background]} style={styles.statGradient}>
         <HStack alignItems="center" justifyContent="space-between">
           <VStack>
             <Text fontSize="2xl" fontWeight="bold" color={colors.text}>
@@ -131,9 +122,7 @@ export default function AdminPanel() {
       <View style={styles.container}>
         <VStack style={styles.loading} space={4}>
           <Spinner size="lg" color={colors.secondary} />
-          <Text color={colors.textSecondary}>
-            Caricamento pannello admin...
-          </Text>
+          <Text color={colors.textSecondary}>Caricamento pannello admin...</Text>
         </VStack>
       </View>
     );
@@ -172,7 +161,7 @@ export default function AdminPanel() {
           <Text fontSize="lg" fontWeight="bold" color={colors.text}>
             Statistiche Rapide
           </Text>
-          
+
           <HStack space={3}>
             <StatCard
               title="Utenti Totali"
@@ -193,7 +182,7 @@ export default function AdminPanel() {
             <StatCard
               title="Premium"
               value={formatNumber(stats?.premiumUsers || 0)}
-              subtitle={`${((stats?.premiumUsers || 0) / (stats?.totalUsers || 1) * 100).toFixed(1)}%`}
+              subtitle={`${(((stats?.premiumUsers || 0) / (stats?.totalUsers || 1)) * 100).toFixed(1)}%`}
               icon="workspace-premium"
               color={colors.secondary}
             />
@@ -211,7 +200,7 @@ export default function AdminPanel() {
           <Text fontSize="lg" fontWeight="bold" color={colors.text}>
             Revenue Analytics
           </Text>
-          
+
           <VStack space={2}>
             <HStack justifyContent="space-between">
               <Text color={colors.textSecondary}>Giornaliero</Text>
@@ -239,20 +228,21 @@ export default function AdminPanel() {
           <Text fontSize="lg" fontWeight="bold" color={colors.text}>
             System Health
           </Text>
-          
+
           <VStack space={3}>
             <VStack space={1}>
               <HStack justifyContent="space-between">
                 <Text color={colors.textSecondary}>API Latency</Text>
-                <Text color={colors.text}>
-                  {stats?.systemHealth.apiLatency || 0}ms
-                </Text>
+                <Text color={colors.text}>{stats?.systemHealth.apiLatency || 0}ms</Text>
               </HStack>
               <Progress
-                value={Math.min((stats?.systemHealth.apiLatency || 0) / 500 * 100, 100)}
+                value={Math.min(((stats?.systemHealth.apiLatency || 0) / 500) * 100, 100)}
                 colorScheme={
-                  (stats?.systemHealth.apiLatency || 0) < 200 ? 'success' :
-                  (stats?.systemHealth.apiLatency || 0) < 400 ? 'warning' : 'error'
+                  (stats?.systemHealth.apiLatency || 0) < 200
+                    ? 'success'
+                    : (stats?.systemHealth.apiLatency || 0) < 400
+                      ? 'warning'
+                      : 'error'
                 }
                 bg="gray.700"
                 size="sm"
@@ -296,7 +286,7 @@ export default function AdminPanel() {
           <Text fontSize="lg" fontWeight="bold" color={colors.text}>
             Strain Più Popolari
           </Text>
-          
+
           {stats?.popularStrains.slice(0, 5).map((strain, index) => (
             <HStack key={strain.id} alignItems="center" justifyContent="space-between">
               <HStack alignItems="center" space={3}>
@@ -312,9 +302,7 @@ export default function AdminPanel() {
                   </Text>
                 </VStack>
               </HStack>
-              <Text color={colors.textSecondary}>
-                {strain.popularity} richieste
-              </Text>
+              <Text color={colors.textSecondary}>{strain.popularity} richieste</Text>
             </HStack>
           ))}
         </VStack>
@@ -324,7 +312,7 @@ export default function AdminPanel() {
           <Text fontSize="lg" fontWeight="bold" color={colors.text}>
             Azioni Admin
           </Text>
-          
+
           <VStack space={3}>
             <Button
               onPress={() => handleExportDatabase('json')}
@@ -334,7 +322,7 @@ export default function AdminPanel() {
             >
               Export Database (JSON)
             </Button>
-            
+
             <Button
               onPress={() => handleExportDatabase('csv')}
               leftIcon={<Icon as={MaterialIcons} name="table-chart" />}
@@ -343,7 +331,7 @@ export default function AdminPanel() {
             >
               Export Database (CSV)
             </Button>
-            
+
             <Button
               onPress={loadStats}
               leftIcon={<Icon as={MaterialIcons} name="refresh" />}

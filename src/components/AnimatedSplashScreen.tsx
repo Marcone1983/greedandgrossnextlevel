@@ -1,13 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import {
-  View,
-  Text,
-  Animated,
-  Dimensions,
-  StyleSheet,
-  StatusBar,
-  Image,
-} from 'react-native';
+import { View, Text, Animated, Dimensions, StyleSheet, StatusBar, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '@/constants/theme';
 import * as Haptics from 'expo-haptics';
@@ -60,7 +52,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
     ]).start(() => {
       // Haptic feedback when logo appears
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
+
       // Step 2: Text slide up
       setTimeout(() => {
         Animated.parallel([
@@ -85,7 +77,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
           duration: 400,
           useNativeDriver: true,
         }).start();
-        
+
         // Start loading simulation
         simulateLoading();
       }, 800);
@@ -119,7 +111,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
       if (currentStep < loadingSteps.length) {
         const step = loadingSteps[currentStep];
         setLoadingText(step.text);
-        
+
         accumulatedTime += step.duration;
         const newProgress = (accumulatedTime / totalDuration) * 100;
         setProgress(newProgress);
@@ -193,7 +185,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
                 useNativeDriver: true,
               }),
             ]),
-          ]),
+          ])
         ).start();
       }, randomDelay);
     });
@@ -230,7 +222,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
   return (
     <View style={styles.container}>
       <StatusBar hidden />
-      
+
       {/* Gradient Background */}
       <LinearGradient
         colors={[colors.darkGreen, colors.background, colors.primary]}
@@ -264,20 +256,13 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
           style={[
             styles.logoContainer,
             {
-              transform: [
-                { scale: logoScale },
-                { rotate: logoRotateInterpolate },
-              ],
+              transform: [{ scale: logoScale }, { rotate: logoRotateInterpolate }],
               opacity: logoOpacity,
             },
           ]}
         >
-          <Image 
-            source={require('@/assets/logoGG.png')} 
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          
+          <Image source={require('@/assets/logoGG.png')} style={styles.logo} resizeMode="contain" />
+
           {/* Glowing effect */}
           <View style={styles.glowEffect} />
         </Animated.View>
@@ -297,14 +282,9 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
         </Animated.View>
 
         {/* Loading Section */}
-        <Animated.View
-          style={[
-            styles.loadingContainer,
-            { opacity: progressOpacity },
-          ]}
-        >
+        <Animated.View style={[styles.loadingContainer, { opacity: progressOpacity }]}>
           <Text style={styles.loadingText}>{loadingText}</Text>
-          
+
           {/* Progress Bar */}
           <View style={styles.progressBarContainer}>
             <View style={styles.progressBarBackground}>

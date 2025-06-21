@@ -11,14 +11,9 @@ export const trackScreenTransition = async (
   toScreen: string,
   _navigationMethod: 'push' | 'replace' | 'goBack' | 'reset' = 'push'
 ) => {
-  await analyticsCollector.trackUserInteraction(
-    'app_open',
-    toScreen,
-    'screen_transition',
-    {
-      fromScreen
-    }
-  );
+  await analyticsCollector.trackUserInteraction('app_open', toScreen, 'screen_transition', {
+    fromScreen,
+  });
 };
 
 // User onboarding tracking
@@ -37,8 +32,8 @@ export const trackOnboardingStep = async (
         step: step.toString(),
         completed,
         timeSpent,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -58,8 +53,8 @@ export const trackFeatureDiscovery = async (
         featureName,
         discoveryMethod,
         firstTime,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -70,16 +65,12 @@ export const trackUserEngagement = async (
   screenTime: Record<string, number>,
   interactionCount: number
 ) => {
-  await analyticsCollector.trackSystemMetric(
-    'user_retention',
-    sessionDuration,
-    {
-      screenTime,
-      interactionCount,
-      engagementScore: calculateEngagementScore(sessionDuration, interactionCount),
-      timestamp: new Date().toISOString()
-    } as any
-  );
+  await analyticsCollector.trackSystemMetric('user_retention', sessionDuration, {
+    screenTime,
+    interactionCount,
+    engagementScore: calculateEngagementScore(sessionDuration, interactionCount),
+    timestamp: new Date().toISOString(),
+  } as any);
 };
 
 // Calculate engagement score
@@ -105,8 +96,8 @@ export const trackStrainInteraction = async (
       metadata: {
         interactionType,
         ...metadata,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -124,7 +115,7 @@ export const trackDetailedBreedingSimulation = async (
   }
 ) => {
   await analyticsCollector.trackBreedingSimulation(parent1, parent2, result);
-  
+
   await analyticsCollector.trackUserInteraction(
     'breeding_simulation',
     'BreedingScreen',
@@ -134,8 +125,8 @@ export const trackDetailedBreedingSimulation = async (
         parents: [parent1, parent2],
         result: result.name,
         ...simulationMetrics,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -153,20 +144,15 @@ export const trackSearchBehavior = async (
   }
 ) => {
   await analyticsCollector.trackSearch(query, results, 'SearchScreen');
-  
-  await analyticsCollector.trackUserInteraction(
-    'search',
-    'SearchScreen',
-    'search_behavior',
-    {
-      searchQuery: query,
-      metadata: {
-        resultCount: results.length,
-        ...userBehavior,
-        timestamp: new Date().toISOString()
-      }
-    } as any
-  );
+
+  await analyticsCollector.trackUserInteraction('search', 'SearchScreen', 'search_behavior', {
+    searchQuery: query,
+    metadata: {
+      resultCount: results.length,
+      ...userBehavior,
+      timestamp: new Date().toISOString(),
+    },
+  } as any);
 };
 
 // Tutorial completion tracking
@@ -189,8 +175,8 @@ export const trackTutorialProgress = async (
         progress: (currentStep / totalSteps) * 100,
         completed,
         skipped,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -212,8 +198,8 @@ export const trackSocialSharing = async (
         contentId,
         platform,
         success,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -225,19 +211,14 @@ export const trackSettingsChange = async (
   newValue: any,
   screen: string = 'SettingsScreen'
 ) => {
-  await analyticsCollector.trackUserInteraction(
-    'settings_change',
-    screen,
-    'setting_modified',
-    {
-      settingsChanged: [setting],
-      metadata: {
-        oldValue,
-        newValue,
-        timestamp: new Date().toISOString()
-      }
-    } as any
-  );
+  await analyticsCollector.trackUserInteraction('settings_change', screen, 'setting_modified', {
+    settingsChanged: [setting],
+    metadata: {
+      oldValue,
+      newValue,
+      timestamp: new Date().toISOString(),
+    },
+  } as any);
 };
 
 // Error tracking with context
@@ -257,7 +238,7 @@ export const trackDetailedError = async (
     appVersion: context.appVersion,
     userId: context.userId,
     errorStack: error.stack,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   } as any);
 };
 
@@ -268,20 +249,15 @@ export const trackABTest = async (
   action: 'view' | 'interact' | 'convert',
   metadata?: any
 ) => {
-  await analyticsCollector.trackUserInteraction(
-    'app_open',
-    'ABTest',
-    `ab_test_${action}`,
-    {
-      metadata: {
-        testName,
-        variant,
-        action,
-        ...metadata,
-        timestamp: new Date().toISOString()
-      }
-    } as any
-  );
+  await analyticsCollector.trackUserInteraction('app_open', 'ABTest', `ab_test_${action}`, {
+    metadata: {
+      testName,
+      variant,
+      action,
+      ...metadata,
+      timestamp: new Date().toISOString(),
+    },
+  } as any);
 };
 
 // Push notification tracking
@@ -301,8 +277,8 @@ export const trackPushNotification = async (
         notificationType,
         action,
         ...metadata,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -371,8 +347,8 @@ export const trackConversionFunnel = async (
         progress: (stepNumber / totalSteps) * 100,
         completed,
         ...metadata,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     } as any
   );
 };
@@ -384,19 +360,15 @@ export const trackUserRetention = async (
   sessionNumber: number,
   returningUser: boolean
 ) => {
-  await analyticsCollector.trackSystemMetric(
-    'user_retention',
-    daysSinceInstall,
-    {
-      daysSinceLastUse,
-      metadata: {
-        sessionNumber,
-        returningUser,
-        retentionCohort: getRetentionCohort(daysSinceInstall),
-        timestamp: new Date().toISOString()
-      }
-    } as any
-  );
+  await analyticsCollector.trackSystemMetric('user_retention', daysSinceInstall, {
+    daysSinceLastUse,
+    metadata: {
+      sessionNumber,
+      returningUser,
+      retentionCohort: getRetentionCohort(daysSinceInstall),
+      timestamp: new Date().toISOString(),
+    },
+  } as any);
 };
 
 // Helper function to determine retention cohort

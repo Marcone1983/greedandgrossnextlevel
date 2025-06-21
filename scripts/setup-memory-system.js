@@ -2,7 +2,7 @@
 
 /**
  * Memory System Setup Script for GREED & GROSS App
- * 
+ *
  * This script helps set up the memory system by:
  * 1. Creating necessary Firebase collections
  * 2. Setting up indexes for optimal performance
@@ -57,7 +57,6 @@ async function setupMemorySystem() {
     console.log('   npm install crypto-js date-fns @types/crypto-js');
     console.log('3. Test the memory system in your app');
     console.log('4. Configure environment variables if needed');
-
   } catch (error) {
     console.error('❌ Error setting up memory system:', error);
     process.exit(1);
@@ -67,15 +66,15 @@ async function setupMemorySystem() {
 async function setupFirestoreIndexes() {
   // Note: Indexes are typically created automatically when queries are run
   // or can be managed through the Firebase Console
-  
+
   console.log('   • user_conversations collection');
   console.log('     - userId (ascending) + timestamp (descending)');
   console.log('     - userId (ascending) + encrypted (ascending)');
-  
+
   console.log('   • user_memory_profiles collection');
   console.log('     - userId (ascending)');
   console.log('     - lastInteraction (descending)');
-  
+
   console.log('   ✓ Index configuration documented');
 }
 
@@ -133,16 +132,12 @@ async function createSampleMemoryProfiles() {
         allowPersonalization: true,
         gdprCompliant: true,
       },
-      learningInsights: [
-        'Medical use focus',
-        'Sleep-related queries',
-        'Beginner level questions',
-      ],
+      learningInsights: ['Medical use focus', 'Sleep-related queries', 'Beginner level questions'],
     },
   ];
 
   const batch = db.batch();
-  
+
   for (const profile of sampleProfiles) {
     const docRef = db.collection('user_memory_profiles').doc(profile.userId);
     batch.set(docRef, profile);
@@ -159,7 +154,8 @@ async function createSampleConversations() {
       userId: 'demo_user_1',
       sessionId: 'session_demo_1',
       query: 'What are the best sativa strains for creativity?',
-      response: 'For creativity, I recommend Jack Herer, Sour Diesel, and Green Crack. These sativas are known for their uplifting and focus-enhancing effects.',
+      response:
+        'For creativity, I recommend Jack Herer, Sour Diesel, and Green Crack. These sativas are known for their uplifting and focus-enhancing effects.',
       strainsMentioned: ['Jack Herer', 'Sour Diesel', 'Green Crack'],
       effects: ['creative', 'uplifting', 'focused'],
       preferences: {
@@ -183,7 +179,8 @@ async function createSampleConversations() {
       userId: 'demo_user_1',
       sessionId: 'session_demo_1',
       query: 'Can you simulate crossing Jack Herer with Sour Diesel?',
-      response: 'Crossing Jack Herer x Sour Diesel would likely produce a balanced sativa-dominant hybrid with high energy and creative effects. Expected THC: 22-26%, with prominent limonene and pinene terpenes.',
+      response:
+        'Crossing Jack Herer x Sour Diesel would likely produce a balanced sativa-dominant hybrid with high energy and creative effects. Expected THC: 22-26%, with prominent limonene and pinene terpenes.',
       strainsMentioned: ['Jack Herer', 'Sour Diesel', 'Jack Diesel (hybrid)'],
       effects: ['energetic', 'creative', 'uplifting'],
       preferences: {
@@ -206,7 +203,8 @@ async function createSampleConversations() {
       userId: 'demo_user_2',
       sessionId: 'session_demo_2',
       query: 'I need help finding strains for sleep problems',
-      response: 'For sleep issues, I recommend indica strains like Northern Lights, Granddaddy Purple, and Bubba Kush. These have high myrcene content which promotes relaxation and sedation.',
+      response:
+        'For sleep issues, I recommend indica strains like Northern Lights, Granddaddy Purple, and Bubba Kush. These have high myrcene content which promotes relaxation and sedation.',
       strainsMentioned: ['Northern Lights', 'Granddaddy Purple', 'Bubba Kush'],
       effects: ['relaxed', 'sleepy', 'sedating'],
       preferences: {
@@ -228,7 +226,7 @@ async function createSampleConversations() {
   ];
 
   const batch = db.batch();
-  
+
   for (const conversation of sampleConversations) {
     const docRef = db.collection('user_conversations').doc(conversation.id);
     batch.set(docRef, conversation);

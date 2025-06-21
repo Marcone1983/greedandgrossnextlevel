@@ -18,23 +18,23 @@ export const api = createApi({
     },
   }),
   tagTypes: ['Strain', 'Chat', 'Stats'],
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     // Strain endpoints
     getPopularStrains: builder.query({
       query: () => '/strains/popular',
       providesTags: ['Strain'],
     }),
     searchStrains: builder.query({
-      query: (search) => `/strains/search?q=${encodeURIComponent(search)}`,
+      query: search => `/strains/search?q=${encodeURIComponent(search)}`,
       providesTags: ['Strain'],
     }),
-    
+
     // Chat endpoints
     getRecentMessages: builder.query({
       query: () => '/chat/recent',
       providesTags: ['Chat'],
     }),
-    
+
     // Admin endpoints
     getAdminStats: builder.query({
       query: () => '/admin/stats',
@@ -44,7 +44,7 @@ export const api = createApi({
       query: ({ format }) => ({
         url: `/admin/export?format=${format}`,
         method: 'GET',
-        responseHandler: (response) => response.blob(),
+        responseHandler: response => response.blob(),
       }),
     }),
   }),

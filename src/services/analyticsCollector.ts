@@ -1,4 +1,13 @@
-import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  Timestamp,
+} from 'firebase/firestore';
 import { getAnalytics, logEvent } from 'firebase/analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import { memoryService } from './memoryService';
@@ -8,7 +17,15 @@ export interface UserInteraction {
   userId: string;
   sessionId: string;
   timestamp: Date;
-  eventType: 'app_open' | 'breeding_simulation' | 'strain_view' | 'search' | 'share' | 'subscription' | 'memory_access' | 'settings_change';
+  eventType:
+    | 'app_open'
+    | 'breeding_simulation'
+    | 'strain_view'
+    | 'search'
+    | 'share'
+    | 'subscription'
+    | 'memory_access'
+    | 'settings_change';
   screen: string;
   action: string;
   metadata?: {
@@ -38,7 +55,11 @@ export interface UserInteraction {
 export interface ConversionEvent {
   id?: string;
   userId: string;
-  eventType: 'subscription_started' | 'subscription_upgraded' | 'subscription_cancelled' | 'in_app_purchase';
+  eventType:
+    | 'subscription_started'
+    | 'subscription_upgraded'
+    | 'subscription_cancelled'
+    | 'in_app_purchase';
   timestamp: Date;
   value: number;
   currency: string;
@@ -50,7 +71,12 @@ export interface ConversionEvent {
 export interface SystemMetric {
   id?: string;
   timestamp: Date;
-  metricType: 'app_performance' | 'error_rate' | 'user_retention' | 'feature_usage' | 'memory_performance';
+  metricType:
+    | 'app_performance'
+    | 'error_rate'
+    | 'user_retention'
+    | 'feature_usage'
+    | 'memory_performance';
   value: number;
   metadata?: {
     errorMessage?: string;
@@ -109,7 +135,7 @@ class AnalyticsCollector {
       metadata,
       userAgent: await this.getUserAgent(),
       deviceInfo: await this.getDeviceInfo(),
-      location: await this.getLocationInfo()
+      location: await this.getLocationInfo(),
     };
 
     // Add to batch queue
@@ -121,13 +147,17 @@ class AnalyticsCollector {
     }
 
     // Firebase Analytics event
-    logEvent(this.analytics, eventType as any, {
-      screen_name: screen,
-      action,
-      user_id: this.userId,
-      session_id: this.sessionId,
-      ...metadata
-    } as any);
+    logEvent(
+      this.analytics,
+      eventType as any,
+      {
+        screen_name: screen,
+        action,
+        user_id: this.userId,
+        session_id: this.sessionId,
+        ...metadata,
+      } as any
+    );
   }
 
   // CONVERSION TRACKING
@@ -146,13 +176,13 @@ class AnalyticsCollector {
       value,
       currency,
       revenue: value,
-      metadata
+      metadata,
     };
 
     try {
       await addDoc(collection(this.db, 'conversion_events'), {
         ...conversion,
-        timestamp: Timestamp.fromDate(conversion.timestamp)
+        timestamp: Timestamp.fromDate(conversion.timestamp),
       });
 
       // Firebase Analytics purchase event
@@ -160,7 +190,7 @@ class AnalyticsCollector {
         transaction_id: this.generateSessionId(),
         value,
         currency,
-        user_id: this.userId
+        user_id: this.userId,
       });
     } catch (error) {
       console.error('Error tracking conversion:', error);
@@ -177,13 +207,13 @@ class AnalyticsCollector {
       timestamp: new Date(),
       metricType,
       value,
-      metadata
+      metadata,
     };
 
     try {
       await addDoc(collection(this.db, 'system_metrics'), {
         ...metric,
-        timestamp: Timestamp.fromDate(metric.timestamp)
+        timestamp: Timestamp.fromDate(metric.timestamp),
       });
     } catch (error) {
       console.error('Error tracking system metric:', error);
@@ -205,8 +235,8 @@ class AnalyticsCollector {
         thc: result.thc,
         cbd: result.cbd,
         effects: result.effects,
-        terpenes: result.terpenes
-      }
+        terpenes: result.terpenes,
+      },
     });
 
     // Track breeding patterns for AI improvement
@@ -225,10 +255,10 @@ class AnalyticsCollector {
           thc: result.thc,
           cbd: result.cbd,
           indica: result.indica,
-          sativa: result.sativa
+          sativa: result.sativa,
         },
         effects: result.effects,
-        popularity: 1 // Will be aggregated
+        popularity: 1, // Will be aggregated
       };
 
       await addDoc(collection(this.db, 'breeding_patterns'), pattern);
@@ -244,8 +274,8 @@ class AnalyticsCollector {
       metadata: {
         resultCount: results.length,
         searchLength: query.length,
-        hasResults: results.length > 0
-      }
+        hasResults: results.length > 0,
+      },
     });
 
     // Track search patterns
@@ -259,7 +289,7 @@ class AnalyticsCollector {
         resultCount,
         timestamp: Timestamp.now(),
         userId: this.userId,
-        sessionId: this.sessionId
+        sessionId: this.sessionId,
       };
 
       await addDoc(collection(this.db, 'search_patterns'), searchData);
@@ -276,14 +306,14 @@ class AnalyticsCollector {
   ): Promise<void> {
     await this.trackUserInteraction('subscription', 'SubscriptionScreen', event, {
       subscriptionTier: tier,
-      ...metadata
+      ...metadata,
     });
 
     if (['subscribe', 'upgrade'].includes(event) && tier) {
       const tierValues = { basic: 4.99, premium: 9.99, pro: 19.99 };
       await this.trackConversion('subscription_started', tierValues[tier] || 0, 'EUR', {
         tier,
-        event
+        event,
       });
     }
   }
@@ -295,7 +325,7 @@ class AnalyticsCollector {
   ): Promise<void> {
     await this.trackUserInteraction('memory_access', 'MemorySystem', operation, {
       memoryOperation: operation,
-      ...metadata
+      ...metadata,
     });
   }
 
@@ -305,14 +335,14 @@ class AnalyticsCollector {
       errorMessage: error.message,
       context,
       stack: error.stack,
-      ...metadata
+      ...metadata,
     });
 
     // Firebase Analytics error
     logEvent(this.analytics, 'exception', {
       description: error.message,
       fatal: false,
-      context
+      context,
     });
   }
 
@@ -321,7 +351,7 @@ class AnalyticsCollector {
     await this.trackSystemMetric('app_performance', value, {
       feature: metric,
       loadTime: value,
-      context
+      context,
     });
   }
 
@@ -334,7 +364,7 @@ class AnalyticsCollector {
         startTime: Timestamp.now(),
         platform: await this.getPlatform(),
         appVersion: await this.getAppVersion(),
-        deviceInfo: await this.getDeviceInfo()
+        deviceInfo: await this.getDeviceInfo(),
       };
 
       await addDoc(collection(this.db, 'user_sessions'), sessionData);
@@ -359,10 +389,10 @@ class AnalyticsCollector {
     this.batchQueue = [];
 
     try {
-      const promises = batch.map(interaction => 
+      const promises = batch.map(interaction =>
         addDoc(collection(this.db, 'user_interactions'), {
           ...interaction,
-          timestamp: Timestamp.fromDate(interaction.timestamp)
+          timestamp: Timestamp.fromDate(interaction.timestamp),
         })
       );
 
@@ -380,11 +410,7 @@ class AnalyticsCollector {
   }
 
   private async getUserAgent(): Promise<string> {
-    try {
-      return 'GREED-GROSS-Mobile/1.0';
-    } catch {
-      return 'unknown';
-    }
+    return 'GREED-GROSS-Mobile/1.0';
   }
 
   private async getDeviceInfo(): Promise<UserInteraction['deviceInfo']> {
@@ -392,12 +418,12 @@ class AnalyticsCollector {
       const platform = await this.getPlatform();
       return {
         platform,
-        version: await this.getAppVersion()
+        version: await this.getAppVersion(),
       };
     } catch {
       return {
         platform: 'unknown',
-        version: '1.0.0'
+        version: '1.0.0',
       };
     }
   }
@@ -406,14 +432,14 @@ class AnalyticsCollector {
     try {
       const { geoLocationService } = await import('./geoLocationService');
       const locationData = await geoLocationService.getLocationForAnalytics();
-      
+
       return {
         country: locationData.country,
-        timezone: locationData.timezone
+        timezone: locationData.timezone,
       };
     } catch {
       return {
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
     }
   }
@@ -469,14 +495,14 @@ class AnalyticsCollector {
       const interactions = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        timestamp: doc.data().timestamp.toDate()
+        timestamp: doc.data().timestamp.toDate(),
       }));
 
       return {
         totalInteractions: interactions.length,
         uniqueSessions: [...new Set(interactions.map((i: any) => i.sessionId))].length,
         topActions: this.getTopActions(interactions),
-        screenTime: this.calculateScreenTime(interactions)
+        screenTime: this.calculateScreenTime(interactions),
       };
     } catch (error) {
       console.error('Error getting session analytics:', error);
@@ -484,7 +510,7 @@ class AnalyticsCollector {
     }
   }
 
-  private getTopActions(interactions: any[]): {action: string, count: number}[] {
+  private getTopActions(interactions: any[]): { action: string; count: number }[] {
     const actionCounts = {};
     interactions.forEach(i => {
       actionCounts[i.action] = (actionCounts[i.action] || 0) + 1;

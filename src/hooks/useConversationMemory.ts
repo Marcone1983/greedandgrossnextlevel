@@ -1,7 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { memoryService, ConversationEntry, UserMemoryProfile, MemorySettings } from '@/services/memoryService';
+import {
+  memoryService,
+  ConversationEntry,
+  UserMemoryProfile,
+  MemorySettings,
+} from '@/services/memoryService';
 
 interface ConversationMemoryState {
   isLoaded: boolean;
@@ -23,13 +28,21 @@ interface ConversationMemoryState {
 }
 
 interface UseConversationMemoryReturn extends ConversationMemoryState {
-  recordConversation: (query: string, aiResponse: string, metadata?: Partial<ConversationEntry>) => Promise<void>;
+  recordConversation: (
+    query: string,
+    aiResponse: string,
+    metadata?: Partial<ConversationEntry>
+  ) => Promise<void>;
   loadConversationContext: () => Promise<void>;
   getContextForAI: () => string;
   updateMemorySettings: (settings: Partial<MemorySettings>) => Promise<void>;
   getMemorySettings: () => Promise<MemorySettings>;
   // Missing properties that are used in components
-  saveConversation: (query: string, aiResponse: string, strainsMentioned?: string[]) => Promise<void>;
+  saveConversation: (
+    query: string,
+    aiResponse: string,
+    strainsMentioned?: string[]
+  ) => Promise<void>;
   getContextPrompt: () => string;
   getSuggestedPrompts: () => string[];
   memoryEnabled: boolean;
@@ -42,9 +55,9 @@ interface UseConversationMemoryReturn extends ConversationMemoryState {
   exportUserData: () => Promise<any>;
   startNewSession: () => Promise<void>;
   getSuggestedPrompt: () => string | null;
-  getMemoryStatus: () => { 
-    enabled: boolean; 
-    strength: 'weak' | 'moderate' | 'strong'; 
+  getMemoryStatus: () => {
+    enabled: boolean;
+    strength: 'weak' | 'moderate' | 'strong';
     lastActivity: string;
     conversationCount: number;
   };
@@ -52,7 +65,7 @@ interface UseConversationMemoryReturn extends ConversationMemoryState {
 
 export function useConversationMemory(): UseConversationMemoryReturn {
   const { user } = useSelector((state: RootState) => state.auth);
-  
+
   const [state, setState] = useState<ConversationMemoryState>({
     isLoaded: false,
     isEnabled: true,
@@ -66,7 +79,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
       typicalUseCases: [],
       experienceLevel: 'beginner',
       conversationStyle: 'detailed',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     },
     recentConversations: [],
     suggestedPrompts: [],
@@ -78,8 +91,8 @@ export function useConversationMemory(): UseConversationMemoryReturn {
       topStrains: [],
       topEffects: [],
       queryTypeDistribution: {},
-      weeklyActivity: []
-    }
+      weeklyActivity: [],
+    },
   });
 
   // LOAD CONVERSATION CONTEXT
@@ -105,7 +118,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
         recentConversations: context.recentConversations,
         suggestedPrompts: context.suggestedPrompts,
         memoryStrength,
-        analytics
+        analytics,
       }));
     } catch (error) {
       console.error('Error loading conversation context:', error);
@@ -114,22 +127,21 @@ export function useConversationMemory(): UseConversationMemoryReturn {
   }, [user?.id]);
 
   // RECORD CONVERSATION
-  const recordConversation = useCallback(async (
-    query: string, 
-    aiResponse: string, 
-    metadata: Partial<ConversationEntry> = {}
-  ) => {
-    if (!user?.id || !state.isEnabled) return;
+  const recordConversation = useCallback(
+    async (query: string, aiResponse: string, metadata: Partial<ConversationEntry> = {}) => {
+      if (!user?.id || !state.isEnabled) return;
 
-    try {
-      await memoryService.recordConversation(user.id, query, aiResponse, metadata);
-      
-      // Reload context to update state
-      await loadConversationContext();
-    } catch (error) {
-      console.error('Error recording conversation:', error);
-    }
-  }, [user?.id, state.isEnabled, loadConversationContext]);
+      try {
+        await memoryService.recordConversation(user.id, query, aiResponse, metadata);
+
+        // Reload context to update state
+        await loadConversationContext();
+      } catch (error) {
+        console.error('Error recording conversation:', error);
+      }
+    },
+    [user?.id, state.isEnabled, loadConversationContext]
+  );
 
   // GET CONTEXT FOR AI
   const getContextForAI = useCallback((): string => {
@@ -138,7 +150,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     }
 
     let aiContext = `${state.contextSummary}\n`;
-    
+
     if (state.recentConversations.length > 0) {
       aiContext += `\nULTIME CONVERSAZIONI:\n`;
       state.recentConversations.slice(0, 3).forEach((conv, index) => {
@@ -147,24 +159,27 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     }
 
     aiContext += `\nTieni conto di questo contesto per personalizzare la risposta.\n`;
-    
+
     return aiContext;
   }, [state.isEnabled, state.contextSummary, state.recentConversations]);
 
   // UPDATE MEMORY SETTINGS
-  const updateMemorySettings = useCallback(async (settings: Partial<MemorySettings>) => {
-    if (!user?.id) return;
+  const updateMemorySettings = useCallback(
+    async (settings: Partial<MemorySettings>) => {
+      if (!user?.id) return;
 
-    try {
-      await memoryService.updateMemorySettings(user.id, settings);
-      
-      if (settings.enabled !== undefined) {
-        setState(prev => ({ ...prev, isEnabled: settings.enabled! }));
+      try {
+        await memoryService.updateMemorySettings(user.id, settings);
+
+        if (settings.enabled !== undefined) {
+          setState(prev => ({ ...prev, isEnabled: settings.enabled! }));
+        }
+      } catch (error) {
+        console.error('Error updating memory settings:', error);
       }
-    } catch (error) {
-      console.error('Error updating memory settings:', error);
-    }
-  }, [user?.id]);
+    },
+    [user?.id]
+  );
 
   // GET MEMORY SETTINGS
   const getMemorySettings = useCallback(async (): Promise<MemorySettings> => {
@@ -174,7 +189,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
         retentionDays: 365,
         encryptSensitiveData: true,
         allowAnalytics: true,
-        autoSessionSave: true
+        autoSessionSave: true,
       };
     }
 
@@ -187,7 +202,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
 
     try {
       await memoryService.deleteAllUserData(user.id);
-      
+
       // Reset state
       setState(prev => ({
         ...prev,
@@ -201,7 +216,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
           typicalUseCases: [],
           experienceLevel: 'beginner',
           conversationStyle: 'detailed',
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
         },
         recentConversations: [],
         suggestedPrompts: [],
@@ -212,8 +227,8 @@ export function useConversationMemory(): UseConversationMemoryReturn {
           topStrains: [],
           topEffects: [],
           queryTypeDistribution: {},
-          weeklyActivity: []
-        }
+          weeklyActivity: [],
+        },
       }));
     } catch (error) {
       console.error('Error clearing memory:', error);
@@ -246,7 +261,7 @@ export function useConversationMemory(): UseConversationMemoryReturn {
   // GET SUGGESTED PROMPT
   const getSuggestedPrompt = useCallback((): string | null => {
     if (state.suggestedPrompts.length === 0) return null;
-    
+
     // Rotate through suggested prompts
     const randomIndex = Math.floor(Math.random() * state.suggestedPrompts.length);
     return state.suggestedPrompts[randomIndex];
@@ -255,17 +270,20 @@ export function useConversationMemory(): UseConversationMemoryReturn {
   // GET MEMORY STATUS
   const getMemoryStatus = useCallback(() => {
     const lastActivity = state.recentConversations[0]?.timestamp;
-    const lastActivityString = lastActivity 
-      ? formatTimeAgo(lastActivity)
-      : 'Nessuna attività';
+    const lastActivityString = lastActivity ? formatTimeAgo(lastActivity) : 'Nessuna attività';
 
     return {
       enabled: state.isEnabled,
       strength: state.memoryStrength,
       lastActivity: lastActivityString,
-      conversationCount: state.analytics.totalConversations
+      conversationCount: state.analytics.totalConversations,
     };
-  }, [state.isEnabled, state.memoryStrength, state.recentConversations, state.analytics.totalConversations]);
+  }, [
+    state.isEnabled,
+    state.memoryStrength,
+    state.recentConversations,
+    state.analytics.totalConversations,
+  ]);
 
   // EFFECTS
   useEffect(() => {
@@ -283,11 +301,14 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     };
 
     // Save session every 5 minutes if active
-    const interval = setInterval(() => {
-      if (state.isEnabled && user?.id) {
-        memoryService.saveSession();
-      }
-    }, 5 * 60 * 1000);
+    const interval = setInterval(
+      () => {
+        if (state.isEnabled && user?.id) {
+          memoryService.saveSession();
+        }
+      },
+      5 * 60 * 1000
+    );
 
     return () => {
       clearInterval(interval);
@@ -296,13 +317,12 @@ export function useConversationMemory(): UseConversationMemoryReturn {
   }, [state.isEnabled, user?.id]);
 
   // Implement missing methods that are used in components
-  const saveConversation = useCallback(async (
-    query: string, 
-    aiResponse: string, 
-    strainsMentioned: string[] = []
-  ) => {
-    await recordConversation(query, aiResponse, { strainsHentioned: strainsMentioned });
-  }, [recordConversation]);
+  const saveConversation = useCallback(
+    async (query: string, aiResponse: string, strainsMentioned: string[] = []) => {
+      await recordConversation(query, aiResponse, { strainsHentioned: strainsMentioned });
+    },
+    [recordConversation]
+  );
 
   const getContextPrompt = useCallback((): string => {
     return getContextForAI();
@@ -320,9 +340,12 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     return await exportUserData();
   }, [exportUserData]);
 
-  const updatePrivacySettings = useCallback(async (settings: Partial<MemorySettings>) => {
-    await updateMemorySettings(settings);
-  }, [updateMemorySettings]);
+  const updatePrivacySettings = useCallback(
+    async (settings: Partial<MemorySettings>) => {
+      await updateMemorySettings(settings);
+    },
+    [updateMemorySettings]
+  );
 
   return {
     ...state,
@@ -345,13 +368,13 @@ export function useConversationMemory(): UseConversationMemoryReturn {
     memoryProfile: state.userProfile,
     updatePrivacySettings,
     clearHistory,
-    exportData
+    exportData,
   };
 }
 
 // UTILITY FUNCTIONS
 function calculateMemoryStrength(
-  recentCount: number, 
+  recentCount: number,
   totalCount: number
 ): 'weak' | 'moderate' | 'strong' {
   if (totalCount < 5) return 'weak';
@@ -365,7 +388,7 @@ function formatTimeAgo(date: Date): string {
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
-  
+
   if (days > 0) return `${days} giorni fa`;
   if (hours > 0) return `${hours} ore fa`;
   if (minutes > 0) return `${minutes} minuti fa`;

@@ -1,6 +1,6 @@
 /**
  * PRODUCTION ANALYTICS INTEGRATION
- * 
+ *
  * This file integrates all analytics services to provide the complete
  * SQL-style analytics queries, Admin dashboard REST API endpoints,
  * Geographic location detection, and CSV export functionality
@@ -21,13 +21,13 @@ export {
   adminDashboardAPI,
   geoLocationService,
   csvExportService,
-  memoryService
+  memoryService,
 };
 
 // PRODUCTION ANALYTICS CLASS
 export class ProductionAnalytics {
   private static instance: ProductionAnalytics;
-  
+
   private constructor() {}
 
   static getInstance(): ProductionAnalytics {
@@ -42,10 +42,10 @@ export class ProductionAnalytics {
     try {
       // Initialize all services
       analyticsCollector.initialize(userId);
-      
+
       // Start location detection if enabled
       await geoLocationService.getCurrentLocation();
-      
+
       // Production Analytics initialized successfully
     } catch (error) {
       console.error('Failed to initialize Production Analytics:', error);
@@ -65,7 +65,15 @@ export class ProductionAnalytics {
    * Export analytics report with specified options
    */
   async exportReport(
-    type: 'overview' | 'insights' | 'users' | 'revenue' | 'breeding' | 'memory' | 'geographic' | 'complete',
+    type:
+      | 'overview'
+      | 'insights'
+      | 'users'
+      | 'revenue'
+      | 'breeding'
+      | 'memory'
+      | 'geographic'
+      | 'complete',
     format: 'csv' | 'json' = 'csv',
     dateRange: number = 30
   ) {
@@ -74,7 +82,7 @@ export class ProductionAnalytics {
       dateRange,
       includeAnalytics: true,
       includeGeographicData: true,
-      anonymizeData: true
+      anonymizeData: true,
     });
   }
 
@@ -91,7 +99,7 @@ export class ProductionAnalytics {
   async getGeographicAnalytics(days: number = 30) {
     const insights = await geoLocationService.getGeographicInsights(days);
     const countries = await geoLocationService.getCountryPopularity();
-    
+
     return {
       regionalInsights: insights,
       countryPopularity: countries,
@@ -99,8 +107,8 @@ export class ProductionAnalytics {
         totalRegions: insights.length,
         totalCountries: countries.length,
         totalUsers: countries.reduce((sum, c) => sum + c.userCount, 0),
-        avgGrowthRate: countries.reduce((sum, c) => sum + c.growthRate, 0) / countries.length
-      }
+        avgGrowthRate: countries.reduce((sum, c) => sum + c.growthRate, 0) / countries.length,
+      },
     };
   }
 
@@ -108,7 +116,13 @@ export class ProductionAnalytics {
    * Track user interaction with automatic location detection
    */
   async trackUserAction(
-    eventType: 'app_open' | 'breeding_simulation' | 'strain_view' | 'search' | 'share' | 'subscription',
+    eventType:
+      | 'app_open'
+      | 'breeding_simulation'
+      | 'strain_view'
+      | 'search'
+      | 'share'
+      | 'subscription',
     screen: string,
     action: string,
     metadata?: any
@@ -135,7 +149,7 @@ export class ProductionAnalytics {
         adoptionRate: 65,
         totalConversations: 12500,
         avgConversationsPerUser: 8.5,
-        retentionRates: { day1: 89, day7: 67, day30: 45 }
+        retentionRates: { day1: 89, day7: 67, day30: 45 },
       };
     }
   }
@@ -164,14 +178,14 @@ export class ProductionAnalytics {
         analytics: 'operational',
         memory: 'operational',
         geolocation: 'operational',
-        export: 'operational'
+        export: 'operational',
       },
       performance: {
         avgResponseTime: 1.2,
         errorRate: 0.1,
-        uptime: 99.9
+        uptime: 99.9,
       },
-      lastCheck: new Date().toISOString()
+      lastCheck: new Date().toISOString(),
     };
   }
 }
@@ -186,39 +200,39 @@ export const PRODUCTION_ANALYTICS_CONFIG = {
     revenue: 20,
     breeding: 30,
     export: 5,
-    realtime: 120
+    realtime: 120,
   },
-  
+
   // Data retention policies
   DATA_RETENTION: {
     interactions: 365, // days
     sessions: 90,
     exports: 30,
-    cache: 1 // days
+    cache: 1, // days
   },
-  
+
   // Export limits
   EXPORT_LIMITS: {
     maxRecords: 100000,
     maxFileSize: 50 * 1024 * 1024, // 50MB
-    batchSize: 1000
+    batchSize: 1000,
   },
-  
+
   // Geographic settings
   GEOGRAPHIC: {
     enableLocationServices: false, // Default to privacy-first
     cacheLocationData: true,
     locationAccuracy: 'medium' as 'high' | 'medium' | 'low',
-    refreshInterval: 24 * 60 * 60 * 1000 // 24 hours
+    refreshInterval: 24 * 60 * 60 * 1000, // 24 hours
   },
-  
+
   // Security settings
   SECURITY: {
     requireAuth: true,
     anonymizeUserData: true,
     encryptSensitiveData: true,
-    auditAPIAccess: true
-  }
+    auditAPIAccess: true,
+  },
 };
 
 // PRODUCTION HELPER FUNCTIONS
@@ -265,18 +279,18 @@ export const ProductionAnalyticsHelpers = {
    */
   sanitizeUserData(data: any): any {
     const sanitized = { ...data };
-    
+
     // Remove sensitive fields
     delete sanitized.email;
     delete sanitized.password;
     delete sanitized.apiKey;
     delete sanitized.token;
-    
+
     // Hash user ID if present
     if (sanitized.userId) {
       sanitized.userId = this.hashUserId(sanitized.userId);
     }
-    
+
     return sanitized;
   },
 
@@ -287,11 +301,11 @@ export const ProductionAnalyticsHelpers = {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
       const char = userId.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Math.abs(hash).toString(36);
-  }
+  },
 };
 
 // EXPORT DEFAULT INSTANCE

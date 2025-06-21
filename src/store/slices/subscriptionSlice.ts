@@ -34,18 +34,13 @@ const subscriptionSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    clearSubscription: (state) => {
+    clearSubscription: state => {
       state.subscription = null;
     },
   },
 });
 
-export const {
-  setSubscription,
-  setProducts,
-  setLoading,
-  setError,
-  clearSubscription,
-} = subscriptionSlice.actions;
+export const { setSubscription, setProducts, setLoading, setError, clearSubscription } =
+  subscriptionSlice.actions;
 
 export default subscriptionSlice.reducer;

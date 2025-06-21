@@ -1,11 +1,6 @@
 import { Platform } from 'react-native';
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, FlatList, Alert } from 'react-native';
 import {
   VStack,
   HStack,
@@ -43,12 +38,12 @@ export default function StrainLibraryScreen() {
   const [filteredStrains, setFilteredStrains] = useState<Strain[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStrain, setSelectedStrain] = useState<Strain | null>(null);
-  
+
   const { isOpen, onOpen, onClose } = useDisclose();
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const toast = useToast();
-  
+
   const { user } = useSelector((state: RootState) => state.auth);
   const { filters } = useSelector((state: RootState) => state.strain);
 
@@ -71,10 +66,11 @@ export default function StrainLibraryScreen() {
 
     // Search filter
     if (searchQuery) {
-      filtered = filtered.filter(strain =>
-        strain.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        strain.parentA.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        strain.parentB.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        strain =>
+          strain.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          strain.parentA.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          strain.parentB.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -86,18 +82,14 @@ export default function StrainLibraryScreen() {
     // Terpene filter
     if (filters.terpene) {
       filtered = filtered.filter(strain =>
-        strain.terpenes.some(t => 
-          t.name.toLowerCase().includes(filters.terpene!.toLowerCase())
-        )
+        strain.terpenes.some(t => t.name.toLowerCase().includes(filters.terpene!.toLowerCase()))
       );
     }
 
     // Effect filter
     if (filters.effect) {
       filtered = filtered.filter(strain =>
-        strain.effects.some(e => 
-          e.toLowerCase().includes(filters.effect!.toLowerCase())
-        )
+        strain.effects.some(e => e.toLowerCase().includes(filters.effect!.toLowerCase()))
       );
     }
 
@@ -155,18 +147,18 @@ export default function StrainLibraryScreen() {
     try {
       const pdfContent = generatePDFContent(filteredStrains);
       const fileUri = `${FileSystem.documentDirectory}strain_library.pdf`;
-      
+
       // In a real app, you'd use react-native-pdf or similar
       await FileSystem.writeAsStringAsync(fileUri, pdfContent);
       await Sharing.shareAsync(fileUri);
-      
+
       toast.show({
         description: 'PDF esportato con successo',
         colorScheme: 'success',
       });
     } catch (error) {
       toast.show({
-        description: 'Errore durante l\'esportazione',
+        description: "Errore durante l'esportazione",
         colorScheme: 'error',
       });
     }
@@ -177,10 +169,7 @@ export default function StrainLibraryScreen() {
   };
 
   const renderStrainItem = ({ item }: { item: Strain }) => (
-    <StrainCard
-      strain={item}
-      onPress={() => handleStrainPress(item)}
-    />
+    <StrainCard strain={item} onPress={() => handleStrainPress(item)} />
   );
 
   if (isLoading) {
@@ -198,10 +187,7 @@ export default function StrainLibraryScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={gradients.dark}
-        style={styles.headerGradient}
-      >
+      <LinearGradient colors={gradients.dark} style={styles.headerGradient}>
         <VStack space={3} px={4} py={2}>
           <HStack alignItems="center" justifyContent="space-between">
             <HStack alignItems="center" space={2}>
@@ -241,13 +227,7 @@ export default function StrainLibraryScreen() {
               bg: 'gray.700',
             }}
             InputLeftElement={
-              <Icon
-                as={MaterialIcons}
-                name="search"
-                size={5}
-                color={colors.textSecondary}
-                ml={3}
-              />
+              <Icon as={MaterialIcons} name="search" size={5} color={colors.textSecondary} ml={3} />
             }
             style={styles.input}
           />
@@ -257,7 +237,9 @@ export default function StrainLibraryScreen() {
             <Select
               selectedValue={filters.type}
               placeholder="Tipo"
-              onValueChange={(value) => dispatch(setFilters({ type: value as 'sativa' | 'indica' | 'hybrid' | 'all' }))}
+              onValueChange={value =>
+                dispatch(setFilters({ type: value as 'sativa' | 'indica' | 'hybrid' | 'all' }))
+              }
               dropdownIcon={<Icon as={MaterialIcons} name="arrow-drop-down" />}
               _selectedItem={{
                 bg: colors.primary,
@@ -275,7 +257,7 @@ export default function StrainLibraryScreen() {
             <Input
               placeholder="Terpene"
               value={filters.terpene || ''}
-              onChangeText={(value) => dispatch(setFilters({ terpene: value }))}
+              onChangeText={value => dispatch(setFilters({ terpene: value }))}
               flex={1}
               bg="gray.800"
             />
@@ -283,7 +265,7 @@ export default function StrainLibraryScreen() {
             <Input
               placeholder="Effetto"
               value={filters.effect || ''}
-              onChangeText={(value) => dispatch(setFilters({ effect: value }))}
+              onChangeText={value => dispatch(setFilters({ effect: value }))}
               flex={1}
               bg="gray.800"
             />
@@ -310,7 +292,7 @@ export default function StrainLibraryScreen() {
       ) : (
         <FlatList
           data={filteredStrains}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           renderItem={renderStrainItem}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}

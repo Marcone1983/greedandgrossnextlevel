@@ -70,11 +70,11 @@ export default function AdminDocumentManager() {
       setIsLoading(true);
       const path = `legal/${selectedLanguage}/${selectedDocumentType}.html`;
       const ref = storage().ref(path);
-      
+
       try {
         const url = await ref.getDownloadURL();
         const response = await fetch(url);
-        
+
         if (response.ok) {
           const content = await response.text();
           setDocumentContent(content);
@@ -101,7 +101,7 @@ export default function AdminDocumentManager() {
   const generateDefaultContent = () => {
     const documentName = DOCUMENT_TYPES.find(doc => doc.value === selectedDocumentType)?.label;
     const languageName = LANGUAGES[selectedLanguage].nativeName;
-    
+
     const defaultContent = `<!DOCTYPE html>
 <html lang="${selectedLanguage}">
 <head>
@@ -218,11 +218,11 @@ export default function AdminDocumentManager() {
     }
 
     const progressKey = `${selectedDocumentType}-${selectedLanguage}`;
-    
+
     try {
       setUploadProgress(prev => ({
         ...prev,
-        [progressKey]: { progress: 0, uploading: true }
+        [progressKey]: { progress: 0, uploading: true },
       }));
 
       const path = `legal/${selectedLanguage}/${selectedDocumentType}.html`;
@@ -236,29 +236,30 @@ export default function AdminDocumentManager() {
           documentType: selectedDocumentType,
           language: selectedLanguage,
           uploadedBy: 'admin',
-        }
+        },
       });
 
       // Monitor progress
-      uploadTask.on('state_changed', 
-        (snapshot) => {
+      uploadTask.on(
+        'state_changed',
+        snapshot => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           setUploadProgress(prev => ({
             ...prev,
-            [progressKey]: { ...prev[progressKey], progress }
+            [progressKey]: { ...prev[progressKey], progress },
           }));
         },
-        (error) => {
+        error => {
           console.error('Upload error:', error);
           setUploadProgress(prev => ({
             ...prev,
-            [progressKey]: { 
-              progress: 0, 
-              uploading: false, 
-              error: error instanceof Error ? error.message : 'Upload failed'
-            }
+            [progressKey]: {
+              progress: 0,
+              uploading: false,
+              error: error instanceof Error ? error.message : 'Upload failed',
+            },
           }));
-          
+
           toast.show({
             title: 'Upload Failed',
             description: error instanceof Error ? error.message : 'Upload failed',
@@ -268,9 +269,9 @@ export default function AdminDocumentManager() {
         () => {
           setUploadProgress(prev => ({
             ...prev,
-            [progressKey]: { progress: 100, uploading: false }
+            [progressKey]: { progress: 100, uploading: false },
           }));
-          
+
           toast.show({
             title: 'Upload Successful',
             description: `${DOCUMENT_TYPES.find(d => d.value === selectedDocumentType)?.label} (${LANGUAGES[selectedLanguage].nativeName}) uploaded successfully`,
@@ -278,7 +279,7 @@ export default function AdminDocumentManager() {
           });
 
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          
+
           logAnalytics('admin_document_uploaded', {
             document_type: selectedDocumentType,
             language: selectedLanguage,
@@ -286,18 +287,17 @@ export default function AdminDocumentManager() {
           });
         }
       );
-
     } catch (error) {
       console.error('Upload error:', error);
       setUploadProgress(prev => ({
         ...prev,
-        [progressKey]: { 
-          progress: 0, 
-          uploading: false, 
-          error: error instanceof Error ? error.message : 'Upload failed'
-        }
+        [progressKey]: {
+          progress: 0,
+          uploading: false,
+          error: error instanceof Error ? error.message : 'Upload failed',
+        },
       }));
-      
+
       toast.show({
         title: 'Upload Failed',
         description: error instanceof Error ? error.message : 'Upload failed',
@@ -315,7 +315,7 @@ export default function AdminDocumentManager() {
       });
       return;
     }
-    
+
     setIsPreviewOpen(true);
     logAnalytics('admin_document_preview_opened', {
       document_type: selectedDocumentType,
@@ -337,11 +337,11 @@ export default function AdminDocumentManager() {
           {/* Header */}
           <VStack space={2}>
             <HStack alignItems="center" space={3}>
-              <Icon 
-                as={MaterialCommunityIcons} 
-                name="file-document-edit" 
-                size="lg" 
-                color={colors.primary} 
+              <Icon
+                as={MaterialCommunityIcons}
+                name="file-document-edit"
+                size="lg"
+                color={colors.primary}
               />
               <Text fontSize="xl" fontWeight="bold">
                 Legal Documents Management
@@ -355,39 +355,41 @@ export default function AdminDocumentManager() {
           {/* Document Selection */}
           <Box bg={bgColor} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
             <VStack space={4}>
-              <Text fontSize="md" fontWeight="semibold">Document Selection</Text>
-              
+              <Text fontSize="md" fontWeight="semibold">
+                Document Selection
+              </Text>
+
               <HStack space={4}>
                 <VStack flex={1}>
-                  <Text fontSize="sm" color="gray.600" mb={2}>Document Type</Text>
+                  <Text fontSize="sm" color="gray.600" mb={2}>
+                    Document Type
+                  </Text>
                   <Select
                     selectedValue={selectedDocumentType}
                     onValueChange={setSelectedDocumentType}
                     placeholder="Select document type"
                     bg={useColorModeValue('white', colors.darkCard)}
                   >
-                    {DOCUMENT_TYPES.map((doc) => (
-                      <Select.Item 
-                        key={doc.value} 
-                        label={doc.label} 
-                        value={doc.value}
-                      />
+                    {DOCUMENT_TYPES.map(doc => (
+                      <Select.Item key={doc.value} label={doc.label} value={doc.value} />
                     ))}
                   </Select>
                 </VStack>
 
                 <VStack flex={1}>
-                  <Text fontSize="sm" color="gray.600" mb={2}>Language</Text>
+                  <Text fontSize="sm" color="gray.600" mb={2}>
+                    Language
+                  </Text>
                   <Select
                     selectedValue={selectedLanguage}
-                    onValueChange={(value) => setSelectedLanguage(value as SupportedLanguage)}
+                    onValueChange={value => setSelectedLanguage(value as SupportedLanguage)}
                     placeholder="Select language"
                     bg={useColorModeValue('white', colors.darkCard)}
                   >
                     {Object.entries(LANGUAGES).map(([code, lang]) => (
-                      <Select.Item 
-                        key={code} 
-                        label={`${lang.flag} ${lang.nativeName}`} 
+                      <Select.Item
+                        key={code}
+                        label={`${lang.flag} ${lang.nativeName}`}
                         value={code}
                       />
                     ))}
@@ -401,7 +403,9 @@ export default function AdminDocumentManager() {
           <Box bg={bgColor} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
             <VStack space={4}>
               <HStack justifyContent="space-between" alignItems="center">
-                <Text fontSize="md" fontWeight="semibold">Document Content</Text>
+                <Text fontSize="md" fontWeight="semibold">
+                  Document Content
+                </Text>
                 <HStack space={2}>
                   <Button
                     size="sm"
@@ -456,18 +460,16 @@ export default function AdminDocumentManager() {
           {/* Upload Section */}
           <Box bg={bgColor} p={4} borderRadius="lg" borderWidth={1} borderColor={borderColor}>
             <VStack space={4}>
-              <Text fontSize="md" fontWeight="semibold">Upload Document</Text>
-              
+              <Text fontSize="md" fontWeight="semibold">
+                Upload Document
+              </Text>
+
               {currentProgress?.uploading && (
                 <VStack space={2}>
                   <Text fontSize="sm" color="gray.600">
                     Uploading... {Math.round(currentProgress.progress)}%
                   </Text>
-                  <Progress 
-                    value={currentProgress.progress} 
-                    colorScheme="primary" 
-                    size="sm"
-                  />
+                  <Progress value={currentProgress.progress} colorScheme="primary" size="sm" />
                 </VStack>
               )}
 
@@ -530,17 +532,10 @@ export default function AdminDocumentManager() {
             </Text>
           </Modal.Header>
           <Modal.Body>
-            <Box 
-              bg="white" 
-              flex={1} 
-              borderRadius="md" 
-              borderWidth={1} 
-              borderColor="gray.200"
-              p={4}
-            >
+            <Box bg="white" flex={1} borderRadius="md" borderWidth={1} borderColor="gray.200" p={4}>
               <Text fontSize="xs" color="gray.500" mb={4}>
-                Language: {LANGUAGES[selectedLanguage].nativeName} | 
-                Platform: {Platform.OS === 'ios' ? 'iOS' : 'Android'}
+                Language: {LANGUAGES[selectedLanguage].nativeName} | Platform:{' '}
+                {Platform.OS === 'ios' ? 'iOS' : 'Android'}
               </Text>
               <ScrollView showsVerticalScrollIndicator={true}>
                 <Text fontSize="xs" fontFamily="monospace">

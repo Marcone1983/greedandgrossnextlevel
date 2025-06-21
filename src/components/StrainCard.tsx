@@ -37,12 +37,7 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
                 </Text>
               </HStack>
             </VStack>
-            <Icon
-              as={MaterialCommunityIcons}
-              name="cannabis"
-              size={6}
-              color={typeColor}
-            />
+            <Icon as={MaterialCommunityIcons} name="cannabis" size={6} color={typeColor} />
           </HStack>
         </LinearGradient>
       </TouchableOpacity>
@@ -73,19 +68,16 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
                   </Text>
                 </VStack>
                 <View style={[styles.typeIndicator, { backgroundColor: typeColor }]}>
-                  <Icon
-                    as={MaterialCommunityIcons}
-                    name="cannabis"
-                    size={8}
-                    color="white"
-                  />
+                  <Icon as={MaterialCommunityIcons} name="cannabis" size={8} color="white" />
                 </View>
               </HStack>
 
               {/* Stats */}
               <HStack space={4}>
                 <VStack flex={1}>
-                  <Text fontSize="xs" color={colors.textSecondary}>THC</Text>
+                  <Text fontSize="xs" color={colors.textSecondary}>
+                    THC
+                  </Text>
                   <Progress
                     value={strain.thc}
                     max={30}
@@ -93,10 +85,14 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
                     colorScheme="warning"
                     bg="gray.700"
                   />
-                  <Text fontSize="xs" color={colors.text}>{strain.thc}%</Text>
+                  <Text fontSize="xs" color={colors.text}>
+                    {strain.thc}%
+                  </Text>
                 </VStack>
                 <VStack flex={1}>
-                  <Text fontSize="xs" color={colors.textSecondary}>CBD</Text>
+                  <Text fontSize="xs" color={colors.textSecondary}>
+                    CBD
+                  </Text>
                   <Progress
                     value={strain.cbd}
                     max={10}
@@ -104,7 +100,9 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
                     colorScheme="info"
                     bg="gray.700"
                   />
-                  <Text fontSize="xs" color={colors.text}>{strain.cbd}%</Text>
+                  <Text fontSize="xs" color={colors.text}>
+                    {strain.cbd}%
+                  </Text>
                 </VStack>
               </HStack>
 
@@ -115,12 +113,7 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
                 </Text>
                 <HStack space={2} flexWrap="wrap">
                   {strain.terpenes.slice(0, 3).map((terpene, index) => (
-                    <Badge
-                      key={index}
-                      colorScheme="success"
-                      variant="outline"
-                      size="sm"
-                    >
+                    <Badge key={index} colorScheme="success" variant="outline" size="sm">
                       {terpene.name}
                     </Badge>
                   ))}
@@ -131,12 +124,7 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
               <HStack space={2} flexWrap="wrap">
                 {strain.effects.slice(0, 3).map((effect, index) => (
                   <HStack key={index} alignItems="center" space={1}>
-                    <Icon
-                      as={MaterialIcons}
-                      name="lens"
-                      size={2}
-                      color={colors.accent}
-                    />
+                    <Icon as={MaterialIcons} name="lens" size={2} color={colors.accent} />
                     <Text fontSize="xs" color={colors.text}>
                       {effect}
                     </Text>
@@ -147,20 +135,18 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
               {/* Footer */}
               <HStack alignItems="center" justifyContent="space-between">
                 <HStack space={2} alignItems="center">
-                  <Icon
-                    as={MaterialIcons}
-                    name="timer"
-                    size={4}
-                    color={colors.textSecondary}
-                  />
+                  <Icon as={MaterialIcons} name="timer" size={4} color={colors.textSecondary} />
                   <Text fontSize="xs" color={colors.textSecondary}>
                     {strain.genetics.floweringTime} settimane
                   </Text>
                 </HStack>
                 <Badge
                   colorScheme={
-                    strain.genetics.difficulty === 'easy' ? 'success' :
-                    strain.genetics.difficulty === 'medium' ? 'warning' : 'error'
+                    strain.genetics.difficulty === 'easy'
+                      ? 'success'
+                      : strain.genetics.difficulty === 'medium'
+                        ? 'warning'
+                        : 'error'
                   }
                   size="sm"
                 >

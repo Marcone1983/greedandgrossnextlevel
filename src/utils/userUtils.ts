@@ -59,12 +59,9 @@ export function calculateDailyLimits(tier: 'free' | 'premium' | 'admin') {
   }
 }
 
-export function checkFeatureAccess(
-  user: User,
-  feature: 'cross' | 'message' | 'strain'
-): boolean {
+export function checkFeatureAccess(user: User, feature: 'cross' | 'message' | 'strain'): boolean {
   const limits = calculateDailyLimits(user.tier);
-  
+
   switch (feature) {
     case 'cross':
       return user.stats.dailyCrossesUsed < limits.crosses;

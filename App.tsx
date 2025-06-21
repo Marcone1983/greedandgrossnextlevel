@@ -25,9 +25,9 @@ export default function App() {
     async function prepare() {
       try {
         await Font.loadAsync({
-          'Roboto': require('@assets/fonts/Roboto-Regular.ttf'),
+          Roboto: require('@assets/fonts/Roboto-Regular.ttf'),
           'Roboto-Bold': require('@assets/fonts/Roboto-Bold.ttf'),
-          'Orbitron': require('@assets/fonts/Orbitron-Regular.ttf'),
+          Orbitron: require('@assets/fonts/Orbitron-Regular.ttf'),
           'Orbitron-Bold': require('@assets/fonts/Orbitron-Bold.ttf'),
         });
 

@@ -27,14 +27,14 @@ export type SupportedLanguage = keyof typeof LANGUAGES;
 const getDeviceLanguage = (): SupportedLanguage => {
   const locales = RNLocalize.getLocales();
   const supportedLanguages = Object.keys(LANGUAGES) as SupportedLanguage[];
-  
+
   for (const locale of locales) {
     const language = locale.languageCode as SupportedLanguage;
     if (supportedLanguages.includes(language)) {
       return language;
     }
   }
-  
+
   // Fallback to English
   return 'en';
 };
@@ -49,7 +49,7 @@ const getSavedLanguage = async (): Promise<SupportedLanguage> => {
   } catch (error) {
     console.warn('Error reading saved language:', error);
   }
-  
+
   return getDeviceLanguage();
 };
 
@@ -71,31 +71,29 @@ export const changeLanguage = async (language: SupportedLanguage): Promise<void>
 // Initialize i18n
 const initI18n = async () => {
   const savedLanguage = await getSavedLanguage();
-  
-  i18n
-    .use(initReactI18next)
-    .init({
-      resources: {
-        it: { translation: it },
-        en: { translation: en },
-        es: { translation: es },
-        de: { translation: de },
-        fr: { translation: fr },
-      },
-      lng: savedLanguage,
-      fallbackLng: 'en',
-      
-      interpolation: {
-        escapeValue: false,
-      },
-      
-      react: {
-        useSuspense: false,
-      },
-      
-      debug: __DEV__,
-    });
-    
+
+  i18n.use(initReactI18next).init({
+    resources: {
+      it: { translation: it },
+      en: { translation: en },
+      es: { translation: es },
+      de: { translation: de },
+      fr: { translation: fr },
+    },
+    lng: savedLanguage,
+    fallbackLng: 'en',
+
+    interpolation: {
+      escapeValue: false,
+    },
+
+    react: {
+      useSuspense: false,
+    },
+
+    debug: __DEV__,
+  });
+
   return savedLanguage;
 };
 

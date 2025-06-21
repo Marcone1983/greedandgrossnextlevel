@@ -44,24 +44,24 @@ export default function RootNavigator() {
       ) : (
         <>
           <Stack.Screen name="Main" component={MainNavigator} />
-          <Stack.Screen 
-            name="Paywall" 
+          <Stack.Screen
+            name="Paywall"
             component={PaywallScreen}
             options={{
               presentation: 'modal',
               cardOverlayEnabled: true,
             }}
           />
-          <Stack.Screen 
-            name="ConversationHistory" 
+          <Stack.Screen
+            name="ConversationHistory"
             component={ConversationHistoryScreen}
             options={{
               headerShown: false,
             }}
           />
           {isAdmin && (
-            <Stack.Screen 
-              name="AdminPanel" 
+            <Stack.Screen
+              name="AdminPanel"
               component={AdminPanel}
               options={{
                 presentation: 'modal',

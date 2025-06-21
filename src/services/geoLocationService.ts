@@ -50,20 +50,20 @@ class GeoLocationService {
       name: 'ipapi',
       url: 'http://ip-api.com/json/',
       fields: 'status,message,country,countryCode,region,regionName,city,zip,timezone,lat,lon,isp',
-      parser: this.parseIPAPIResponse.bind(this)
+      parser: this.parseIPAPIResponse.bind(this),
     },
     {
       name: 'ipinfo',
       url: 'https://ipinfo.io/json',
       fields: '',
-      parser: this.parseIPInfoResponse.bind(this)
+      parser: this.parseIPInfoResponse.bind(this),
     },
     {
       name: 'ipgeolocation',
       url: 'https://api.ipgeolocation.io/ipgeo?apiKey=fallback',
       fields: '',
-      parser: this.parseIPGeolocationResponse.bind(this)
-    }
+      parser: this.parseIPGeolocationResponse.bind(this),
+    },
   ];
 
   constructor() {
@@ -75,7 +75,7 @@ class GeoLocationService {
     try {
       const preferences = await this.getLocationPreferences();
       this.isLocationEnabled = preferences.enableLocationServices;
-      
+
       if (this.isLocationEnabled) {
         await this.loadCachedLocation();
         this.startLocationDetection();
@@ -125,7 +125,7 @@ class GeoLocationService {
 
   // GPS LOCATION
   private async getGPSLocation(): Promise<LocationData | null> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       // React Native Geolocation would be used here
       // For now, we'll simulate GPS unavailable in most environments
       resolve(null);
@@ -138,7 +138,7 @@ class GeoLocationService {
       try {
         const response = await fetch(service.url);
         const data = await response.json();
-        
+
         if (response.ok) {
           const locationData = service.parser(data);
           if (locationData) {
@@ -146,7 +146,7 @@ class GeoLocationService {
               ...locationData,
               accuracy: 'medium',
               source: 'ip',
-              timestamp: new Date()
+              timestamp: new Date(),
             };
           }
         }
@@ -155,14 +155,14 @@ class GeoLocationService {
         continue;
       }
     }
-    
+
     return null;
   }
 
   // IP SERVICE PARSERS
   private parseIPAPIResponse(data: any): Partial<LocationData> | null {
     if (data.status === 'fail') return null;
-    
+
     return {
       country: data.country,
       countryCode: data.countryCode,
@@ -173,15 +173,15 @@ class GeoLocationService {
       timezone: data.timezone,
       latitude: data.lat,
       longitude: data.lon,
-      isp: data.isp
+      isp: data.isp,
     };
   }
 
   private parseIPInfoResponse(data: any): Partial<LocationData> | null {
     if (!data.country) return null;
-    
+
     const [city, region] = (data.region || '').split(', ');
-    
+
     return {
       country: data.country,
       countryCode: data.country,
@@ -192,13 +192,13 @@ class GeoLocationService {
       timezone: data.timezone,
       latitude: data.loc ? parseFloat(data.loc.split(',')[0]) : undefined,
       longitude: data.loc ? parseFloat(data.loc.split(',')[1]) : undefined,
-      isp: data.org
+      isp: data.org,
     };
   }
 
   private parseIPGeolocationResponse(data: any): Partial<LocationData> | null {
     if (!data.country_name) return null;
-    
+
     return {
       country: data.country_name,
       countryCode: data.country_code2,
@@ -209,7 +209,7 @@ class GeoLocationService {
       timezone: data.time_zone?.name,
       latitude: data.latitude ? parseFloat(data.latitude) : undefined,
       longitude: data.longitude ? parseFloat(data.longitude) : undefined,
-      isp: data.isp
+      isp: data.isp,
     };
   }
 
@@ -217,7 +217,7 @@ class GeoLocationService {
   private getTimezoneOnlyLocation(): LocationData {
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const timezoneParts = timezone.split('/');
-    
+
     return {
       country: 'Unknown',
       countryCode: 'XX',
@@ -227,7 +227,7 @@ class GeoLocationService {
       timezone,
       accuracy: 'low',
       source: 'cached',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -237,13 +237,16 @@ class GeoLocationService {
     if (!preferences.enableLocationServices) return;
 
     // Update location every 15 minutes when app is active
-    setInterval(async () => {
-      try {
-        await this.getCurrentLocation(true);
-      } catch (error) {
-        console.error('Error in location watch:', error);
-      }
-    }, 15 * 60 * 1000);
+    setInterval(
+      async () => {
+        try {
+          await this.getCurrentLocation(true);
+        } catch (error) {
+          console.error('Error in location watch:', error);
+        }
+      },
+      15 * 60 * 1000
+    );
   }
 
   stopLocationDetection(): void {
@@ -258,7 +261,7 @@ class GeoLocationService {
     try {
       // This would query Firebase for geographic data
       // For now, we'll return mock data that demonstrates the structure
-      
+
       const mockInsights: GeographicInsight[] = [
         {
           region: 'Europe',
@@ -267,7 +270,7 @@ class GeoLocationService {
           averageSessionDuration: 8.5,
           conversionRate: 4.2,
           topUseCases: ['creativity', 'relaxation', 'medical'],
-          seasonalTrends: { spring: 85, summer: 120, autumn: 95, winter: 110 }
+          seasonalTrends: { spring: 85, summer: 120, autumn: 95, winter: 110 },
         },
         {
           region: 'North America',
@@ -276,7 +279,7 @@ class GeoLocationService {
           averageSessionDuration: 12.3,
           conversionRate: 6.8,
           topUseCases: ['recreational', 'medical', 'breeding'],
-          seasonalTrends: { spring: 180, summer: 220, autumn: 195, winter: 205 }
+          seasonalTrends: { spring: 180, summer: 220, autumn: 195, winter: 205 },
         },
         {
           region: 'Asia Pacific',
@@ -284,10 +287,10 @@ class GeoLocationService {
           popularStrains: ['Jack Herer', 'Granddaddy Purple', 'AK-47'],
           averageSessionDuration: 6.2,
           conversionRate: 2.1,
-          topUseCases: ['education', 'medical', 'research']
-        }
+          topUseCases: ['education', 'medical', 'research'],
+        },
       ];
-      
+
       return mockInsights;
     } catch (error) {
       console.error('Error getting geographic insights:', error);
@@ -295,54 +298,51 @@ class GeoLocationService {
     }
   }
 
-  async getCountryPopularity(): Promise<{
-    country: string;
-    countryCode: string;
-    userCount: number;
-    growthRate: number;
-    averageRevenue: number;
-    topStrains: string[];
-  }[]> {
-    try {
-      // Mock data for country popularity
-      return [
-        {
-          country: 'United States',
-          countryCode: 'US',
-          userCount: 1850,
-          growthRate: 15.3,
-          averageRevenue: 12.50,
-          topStrains: ['OG Kush', 'Sour Diesel', 'Girl Scout Cookies']
-        },
-        {
-          country: 'Canada',
-          countryCode: 'CA',
-          userCount: 890,
-          growthRate: 22.1,
-          averageRevenue: 18.75,
-          topStrains: ['Blue Dream', 'White Widow', 'Purple Haze']
-        },
-        {
-          country: 'Germany',
-          countryCode: 'DE',
-          userCount: 456,
-          growthRate: 8.7,
-          averageRevenue: 9.80,
-          topStrains: ['Northern Lights', 'Skunk #1', 'Amnesia Haze']
-        },
-        {
-          country: 'Netherlands',
-          countryCode: 'NL',
-          userCount: 234,
-          growthRate: 5.2,
-          averageRevenue: 14.25,
-          topStrains: ['White Widow', 'Super Silver Haze', 'Jack Herer']
-        }
-      ];
-    } catch (error) {
-      console.error('Error getting country popularity:', error);
-      return [];
-    }
+  async getCountryPopularity(): Promise<
+    {
+      country: string;
+      countryCode: string;
+      userCount: number;
+      growthRate: number;
+      averageRevenue: number;
+      topStrains: string[];
+    }[]
+  > {
+    // Mock data for country popularity
+    return [
+      {
+        country: 'United States',
+        countryCode: 'US',
+        userCount: 1850,
+        growthRate: 15.3,
+        averageRevenue: 12.5,
+        topStrains: ['OG Kush', 'Sour Diesel', 'Girl Scout Cookies'],
+      },
+      {
+        country: 'Canada',
+        countryCode: 'CA',
+        userCount: 890,
+        growthRate: 22.1,
+        averageRevenue: 18.75,
+        topStrains: ['Blue Dream', 'White Widow', 'Purple Haze'],
+      },
+      {
+        country: 'Germany',
+        countryCode: 'DE',
+        userCount: 456,
+        growthRate: 8.7,
+        averageRevenue: 9.8,
+        topStrains: ['Northern Lights', 'Skunk #1', 'Amnesia Haze'],
+      },
+      {
+        country: 'Netherlands',
+        countryCode: 'NL',
+        userCount: 234,
+        growthRate: 5.2,
+        averageRevenue: 14.25,
+        topStrains: ['White Widow', 'Super Silver Haze', 'Jack Herer'],
+      },
+    ];
   }
 
   // LOCATION PREFERENCES
@@ -355,13 +355,13 @@ class GeoLocationService {
     } catch (error) {
       console.error('Error getting location preferences:', error);
     }
-    
+
     return {
       enableLocationServices: false, // Default to disabled for privacy
       precisionLevel: 'medium',
       cacheLocationData: true,
       shareLocationForAnalytics: false,
-      autoDetectTimezone: true
+      autoDetectTimezone: true,
     };
   }
 
@@ -369,14 +369,11 @@ class GeoLocationService {
     try {
       const currentPrefs = await this.getLocationPreferences();
       const newPrefs = { ...currentPrefs, ...preferences };
-      
-      await AsyncStorage.setItem(
-        '@greedgross:location-preferences',
-        JSON.stringify(newPrefs)
-      );
-      
+
+      await AsyncStorage.setItem('@greedgross:location-preferences', JSON.stringify(newPrefs));
+
       this.isLocationEnabled = newPrefs.enableLocationServices;
-      
+
       if (this.isLocationEnabled) {
         this.startLocationDetection();
       } else {
@@ -395,7 +392,7 @@ class GeoLocationService {
       if (cached) {
         const locationData = JSON.parse(cached);
         locationData.timestamp = new Date(locationData.timestamp);
-        
+
         if (this.isLocationFresh(locationData)) {
           this.cachedLocation = locationData;
         }
@@ -409,10 +406,7 @@ class GeoLocationService {
     try {
       const preferences = await this.getLocationPreferences();
       if (preferences.cacheLocationData) {
-        await AsyncStorage.setItem(
-          '@greedgross:cached-location',
-          JSON.stringify(location)
-        );
+        await AsyncStorage.setItem('@greedgross:cached-location', JSON.stringify(location));
       }
     } catch (error) {
       console.error('Error saving location cache:', error);
@@ -432,13 +426,17 @@ class GeoLocationService {
     const now = new Date();
     const locationTime = new Date(location.timestamp);
     const ageInHours = (now.getTime() - locationTime.getTime()) / (1000 * 60 * 60);
-    
+
     // Different freshness requirements based on accuracy
     switch (location.accuracy) {
-      case 'high': return ageInHours < 1; // GPS data valid for 1 hour
-      case 'medium': return ageInHours < 24; // IP data valid for 24 hours
-      case 'low': return ageInHours < 168; // Timezone data valid for 1 week
-      default: return false;
+      case 'high':
+        return ageInHours < 1; // GPS data valid for 1 hour
+      case 'medium':
+        return ageInHours < 24; // IP data valid for 24 hours
+      case 'low':
+        return ageInHours < 168; // Timezone data valid for 1 week
+      default:
+        return false;
     }
   }
 
@@ -449,24 +447,24 @@ class GeoLocationService {
     timezone: string;
   }> {
     const preferences = await this.getLocationPreferences();
-    
+
     if (!preferences.shareLocationForAnalytics) {
       return {
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
     }
-    
+
     const location = await this.getCurrentLocation();
     if (!location) {
       return {
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
     }
-    
+
     return {
       country: location.countryCode || 'Unknown',
       region: location.regionCode || 'Unknown',
-      timezone: location.timezone || 'UTC'
+      timezone: location.timezone || 'UTC',
     };
   }
 
@@ -484,12 +482,54 @@ class GeoLocationService {
   async isInEurope(): Promise<boolean> {
     const location = await this.getCurrentLocation();
     const europeanCountries = [
-      'AD', 'AL', 'AT', 'BA', 'BE', 'BG', 'BY', 'CH', 'CY', 'CZ', 'DE', 'DK',
-      'EE', 'ES', 'FI', 'FR', 'GB', 'GE', 'GR', 'HR', 'HU', 'IE', 'IS', 'IT',
-      'LI', 'LT', 'LU', 'LV', 'MC', 'MD', 'ME', 'MK', 'MT', 'NL', 'NO', 'PL',
-      'PT', 'RO', 'RS', 'RU', 'SE', 'SI', 'SK', 'SM', 'UA', 'VA'
+      'AD',
+      'AL',
+      'AT',
+      'BA',
+      'BE',
+      'BG',
+      'BY',
+      'CH',
+      'CY',
+      'CZ',
+      'DE',
+      'DK',
+      'EE',
+      'ES',
+      'FI',
+      'FR',
+      'GB',
+      'GE',
+      'GR',
+      'HR',
+      'HU',
+      'IE',
+      'IS',
+      'IT',
+      'LI',
+      'LT',
+      'LU',
+      'LV',
+      'MC',
+      'MD',
+      'ME',
+      'MK',
+      'MT',
+      'NL',
+      'NO',
+      'PL',
+      'PT',
+      'RO',
+      'RS',
+      'RU',
+      'SE',
+      'SI',
+      'SK',
+      'SM',
+      'UA',
+      'VA',
     ];
-    
+
     return location ? europeanCountries.includes(location.countryCode || '') : false;
   }
 
@@ -497,11 +537,11 @@ class GeoLocationService {
   async exportLocationData(): Promise<any> {
     const preferences = await this.getLocationPreferences();
     const cachedLocation = await AsyncStorage.getItem('@greedgross:cached-location');
-    
+
     return {
       preferences,
       cachedLocation: cachedLocation ? JSON.parse(cachedLocation) : null,
-      exportDate: new Date().toISOString()
+      exportDate: new Date().toISOString(),
     };
   }
 
@@ -509,9 +549,9 @@ class GeoLocationService {
     try {
       await Promise.all([
         AsyncStorage.removeItem('@greedgross:location-preferences'),
-        AsyncStorage.removeItem('@greedgross:cached-location')
+        AsyncStorage.removeItem('@greedgross:cached-location'),
       ]);
-      
+
       this.cachedLocation = null;
       this.isLocationEnabled = false;
       this.stopLocationDetection();

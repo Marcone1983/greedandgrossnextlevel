@@ -1,5 +1,15 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getFirestore, collection, addDoc, query, where, orderBy, limit, getDocs, deleteDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  deleteDoc,
+} from 'firebase/firestore';
 import CryptoJS from 'crypto-js';
 // import { User } from '@/types';
 
@@ -68,7 +78,7 @@ class MemoryService {
     if (this.sessionConversations.length > 0) {
       await this.saveSession();
     }
-    
+
     this.currentSession = this.generateSessionId();
     this.sessionConversations = [];
     return this.currentSession;
@@ -76,16 +86,16 @@ class MemoryService {
 
   async saveSession(): Promise<void> {
     if (this.sessionConversations.length === 0) return;
-    
+
     try {
       const sessionData = {
         sessionId: this.currentSession,
         conversations: this.sessionConversations,
         startTime: this.sessionConversations[0]?.timestamp,
         endTime: new Date(),
-        conversationCount: this.sessionConversations.length
+        conversationCount: this.sessionConversations.length,
       };
-      
+
       await AsyncStorage.setItem(
         `@greedgross:session:${this.currentSession}`,
         JSON.stringify(sessionData)
@@ -108,7 +118,7 @@ class MemoryService {
     const strainsHentioned = this.extractStrains(aiResponse);
     const effectsRequested = this.extractEffects(query);
     const queryType = this.classifyQuery(query);
-    
+
     const conversation: ConversationEntry = {
       userId,
       sessionId: this.currentSession,
@@ -119,7 +129,7 @@ class MemoryService {
       effectsRequested,
       queryType,
       isEncrypted: settings.encryptSensitiveData,
-      ...metadata
+      ...metadata,
     };
 
     // Add to current session
@@ -128,7 +138,7 @@ class MemoryService {
     // Save to Firebase
     try {
       await addDoc(collection(this.db, 'conversations'), conversation);
-      
+
       // Update user profile
       await this.updateUserProfile(userId, conversation);
     } catch (error) {
@@ -137,7 +147,10 @@ class MemoryService {
   }
 
   // CONTEXT RECONSTRUCTION
-  async getConversationContext(userId: string, limitCount: number = 20): Promise<{
+  async getConversationContext(
+    userId: string,
+    limitCount: number = 20
+  ): Promise<{
     recentConversations: ConversationEntry[];
     userProfile: UserMemoryProfile;
     contextSummary: string;
@@ -151,27 +164,27 @@ class MemoryService {
         orderBy('timestamp', 'desc'),
         limit(limitCount)
       );
-      
+
       const snapshot = await getDocs(conversationsQuery);
       const conversations = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-        timestamp: doc.data().timestamp.toDate()
+        timestamp: doc.data().timestamp.toDate(),
       })) as ConversationEntry[];
 
       // Decrypt if needed
       const decryptedConversations = conversations.map(conv => ({
         ...conv,
         query: conv.isEncrypted ? this.decrypt(conv.query) : conv.query,
-        aiResponse: conv.isEncrypted ? this.decrypt(conv.aiResponse) : conv.aiResponse
+        aiResponse: conv.isEncrypted ? this.decrypt(conv.aiResponse) : conv.aiResponse,
       }));
 
       // Get user profile
       const userProfile = await this.getUserProfile(userId);
-      
+
       // Generate context summary
       const contextSummary = this.generateContextSummary(decryptedConversations, userProfile);
-      
+
       // Generate suggested prompts
       const suggestedPrompts = this.generateSuggestedPrompts(userProfile, decryptedConversations);
 
@@ -179,7 +192,7 @@ class MemoryService {
         recentConversations: decryptedConversations,
         userProfile,
         contextSummary,
-        suggestedPrompts
+        suggestedPrompts,
       };
     } catch (error) {
       console.error('Error getting conversation context:', error);
@@ -187,7 +200,7 @@ class MemoryService {
         recentConversations: [],
         userProfile: await this.createDefaultProfile(userId),
         contextSummary: '',
-        suggestedPrompts: []
+        suggestedPrompts: [],
       };
     }
   }
@@ -202,14 +215,14 @@ class MemoryService {
     } catch (error) {
       console.error('Error getting user profile:', error);
     }
-    
+
     return this.createDefaultProfile(userId);
   }
 
   async updateUserProfile(userId: string, conversation: ConversationEntry): Promise<void> {
     try {
       const profile = await this.getUserProfile(userId);
-      
+
       // Update strains preferences
       conversation.strainsHentioned?.forEach(strain => {
         if (!profile.preferredStrains.includes(strain)) {
@@ -225,17 +238,17 @@ class MemoryService {
       });
 
       // Update experience level based on query complexity
-      profile.experienceLevel = this.detectExperienceLevel(conversation.query, profile.experienceLevel);
-      
+      profile.experienceLevel = this.detectExperienceLevel(
+        conversation.query,
+        profile.experienceLevel
+      );
+
       // Update conversation style
       profile.conversationStyle = this.detectConversationStyle(conversation.query);
-      
+
       profile.lastUpdated = new Date();
 
-      await AsyncStorage.setItem(
-        `@greedgross:profile:${userId}`,
-        JSON.stringify(profile)
-      );
+      await AsyncStorage.setItem(`@greedgross:profile:${userId}`, JSON.stringify(profile));
     } catch (error) {
       console.error('Error updating user profile:', error);
     }
@@ -251,7 +264,7 @@ class MemoryService {
       typicalUseCases: [],
       experienceLevel: 'beginner',
       conversationStyle: 'detailed',
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
   }
 
@@ -262,24 +275,24 @@ class MemoryService {
     const recentStrains = [...new Set(conversations.flatMap(c => c.strainsHentioned || []))];
     const _recentEffects = [...new Set(conversations.flatMap(c => c.effectsRequested || []))];
     const queryTypes = conversations.map(c => c.queryType);
-    
+
     let summary = `CONTESTO CONVERSAZIONI PRECEDENTI:\n`;
-    
+
     if (profile.preferredStrains.length > 0) {
       summary += `- Strain preferiti: ${profile.preferredStrains.slice(0, 5).join(', ')}\n`;
     }
-    
+
     if (profile.preferredEffects.length > 0) {
       summary += `- Effetti preferiti: ${profile.preferredEffects.slice(0, 5).join(', ')}\n`;
     }
-    
+
     if (recentStrains.length > 0) {
       summary += `- Strain discussi recentemente: ${recentStrains.slice(0, 3).join(', ')}\n`;
     }
-    
+
     summary += `- Livello esperienza: ${profile.experienceLevel}\n`;
     summary += `- Stile conversazione: ${profile.conversationStyle}\n`;
-    
+
     if (conversations.length > 0) {
       summary += `- Ultima conversazione: ${this.getTimeAgo(conversations[0].timestamp)}\n`;
     }
@@ -292,88 +305,131 @@ class MemoryService {
     return summary;
   }
 
-  generateSuggestedPrompts(profile: UserMemoryProfile, conversations: ConversationEntry[]): string[] {
+  generateSuggestedPrompts(
+    profile: UserMemoryProfile,
+    conversations: ConversationEntry[]
+  ): string[] {
     const suggestions: string[] = [];
-    
+
     if (profile.preferredStrains.length > 0) {
       suggestions.push(`Raccontami di più su ${profile.preferredStrains[0]}`);
       suggestions.push(`Come posso migliorare la coltivazione di ${profile.preferredStrains[0]}?`);
     }
-    
+
     if (profile.preferredEffects.length > 0) {
       suggestions.push(`Quali strain danno effetti ${profile.preferredEffects[0]}?`);
     }
-    
+
     const lastBreeding = conversations.find(c => c.queryType === 'breeding');
     if (lastBreeding) {
       suggestions.push(`Continua la discussione sul breeding`);
     }
-    
+
     if (profile.experienceLevel === 'beginner') {
       suggestions.push(`Consigli per principianti nella coltivazione`);
       suggestions.push(`Come scegliere la prima strain da coltivare?`);
     }
-    
+
     suggestions.push(`Strain trending del momento`);
     suggestions.push(`Novità nel mondo della genetica cannabis`);
-    
+
     return suggestions.slice(0, 5);
   }
 
   // UTILITY FUNCTIONS
   private extractStrains(text: string): string[] {
     const commonStrains = [
-      'Blue Dream', 'White Widow', 'OG Kush', 'Sour Diesel', 'Green Crack',
-      'Northern Lights', 'Purple Haze', 'Jack Herer', 'Granddaddy Purple',
-      'Skunk #1', 'AK-47', 'Blueberry', 'Amnesia Haze', 'Girl Scout Cookies'
+      'Blue Dream',
+      'White Widow',
+      'OG Kush',
+      'Sour Diesel',
+      'Green Crack',
+      'Northern Lights',
+      'Purple Haze',
+      'Jack Herer',
+      'Granddaddy Purple',
+      'Skunk #1',
+      'AK-47',
+      'Blueberry',
+      'Amnesia Haze',
+      'Girl Scout Cookies',
     ];
-    
-    return commonStrains.filter(strain => 
-      text.toLowerCase().includes(strain.toLowerCase())
-    );
+
+    return commonStrains.filter(strain => text.toLowerCase().includes(strain.toLowerCase()));
   }
 
   private extractEffects(text: string): string[] {
     const effects = [
-      'creative', 'energetic', 'relaxing', 'sleepy', 'focused', 'happy',
-      'euphoric', 'uplifting', 'calming', 'productive', 'social', 'hungry'
+      'creative',
+      'energetic',
+      'relaxing',
+      'sleepy',
+      'focused',
+      'happy',
+      'euphoric',
+      'uplifting',
+      'calming',
+      'productive',
+      'social',
+      'hungry',
     ];
-    
-    return effects.filter(effect => 
-      text.toLowerCase().includes(effect.toLowerCase())
-    );
+
+    return effects.filter(effect => text.toLowerCase().includes(effect.toLowerCase()));
   }
 
   private classifyQuery(query: string): ConversationEntry['queryType'] {
     const lowerQuery = query.toLowerCase();
-    
-    if (lowerQuery.includes('cross') || lowerQuery.includes('breed') || lowerQuery.includes('incrocio')) {
+
+    if (
+      lowerQuery.includes('cross') ||
+      lowerQuery.includes('breed') ||
+      lowerQuery.includes('incrocio')
+    ) {
       return 'breeding';
     }
-    if (lowerQuery.includes('recommend') || lowerQuery.includes('suggest') || lowerQuery.includes('consiglia')) {
+    if (
+      lowerQuery.includes('recommend') ||
+      lowerQuery.includes('suggest') ||
+      lowerQuery.includes('consiglia')
+    ) {
       return 'recommendation';
     }
-    if (lowerQuery.includes('how') || lowerQuery.includes('why') || lowerQuery.includes('come') || lowerQuery.includes('perché')) {
+    if (
+      lowerQuery.includes('how') ||
+      lowerQuery.includes('why') ||
+      lowerQuery.includes('come') ||
+      lowerQuery.includes('perché')
+    ) {
       return 'education';
     }
-    
+
     return 'general';
   }
 
-  private detectExperienceLevel(query: string, currentLevel: string): UserMemoryProfile['experienceLevel'] {
-    const technicalTerms = ['terpenes', 'phenotype', 'genotype', 'breeding', 'feminized', 'autoflowering'];
+  private detectExperienceLevel(
+    query: string,
+    currentLevel: string
+  ): UserMemoryProfile['experienceLevel'] {
+    const technicalTerms = [
+      'terpenes',
+      'phenotype',
+      'genotype',
+      'breeding',
+      'feminized',
+      'autoflowering',
+    ];
     const beginnerTerms = ['first time', 'beginner', 'start', 'easy', 'simple'];
-    
+
     const hasTechnical = technicalTerms.some(term => query.toLowerCase().includes(term));
     const hasBeginner = beginnerTerms.some(term => query.toLowerCase().includes(term));
-    
+
     if (hasTechnical && currentLevel !== 'expert') {
       return currentLevel === 'beginner' ? 'intermediate' : 'expert';
     }
     if (hasBeginner) {
       return 'beginner';
     }
-    
+
     return currentLevel as UserMemoryProfile['experienceLevel'];
   }
 
@@ -389,7 +445,7 @@ class MemoryService {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
+
     if (days > 0) return `${days} giorni fa`;
     if (hours > 0) return `${hours} ore fa`;
     if (minutes > 0) return `${minutes} minuti fa`;
@@ -421,13 +477,13 @@ class MemoryService {
     } catch (error) {
       console.error('Error getting memory settings:', error);
     }
-    
+
     return {
       enabled: true,
       retentionDays: 365,
       encryptSensitiveData: true,
       allowAnalytics: true,
-      autoSessionSave: true
+      autoSessionSave: true,
     };
   }
 
@@ -435,7 +491,7 @@ class MemoryService {
     try {
       const currentSettings = await this.getMemorySettings(userId);
       const newSettings = { ...currentSettings, ...settings };
-      
+
       await AsyncStorage.setItem(
         `@greedgross:memory-settings:${userId}`,
         JSON.stringify(newSettings)
@@ -451,17 +507,17 @@ class MemoryService {
       const conversations = await this.getAllUserConversations(userId);
       const profile = await this.getUserProfile(userId);
       const settings = await this.getMemorySettings(userId);
-      
+
       return {
         userId,
         exportDate: new Date(),
         conversations: conversations.map(conv => ({
           ...conv,
           query: conv.isEncrypted ? this.decrypt(conv.query) : conv.query,
-          aiResponse: conv.isEncrypted ? this.decrypt(conv.aiResponse) : conv.aiResponse
+          aiResponse: conv.isEncrypted ? this.decrypt(conv.aiResponse) : conv.aiResponse,
         })),
         profile,
-        settings
+        settings,
       };
     } catch (error) {
       console.error('Error exporting user data:', error);
@@ -476,15 +532,15 @@ class MemoryService {
         collection(this.db, 'conversations'),
         where('userId', '==', userId)
       );
-      
+
       const snapshot = await getDocs(conversationsQuery);
       const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(deletePromises);
-      
+
       // Delete from AsyncStorage
       await AsyncStorage.removeItem(`@greedgross:profile:${userId}`);
       await AsyncStorage.removeItem(`@greedgross:memory-settings:${userId}`);
-      
+
       // Clear session data
       this.sessionConversations = [];
     } catch (error) {
@@ -499,12 +555,12 @@ class MemoryService {
       where('userId', '==', userId),
       orderBy('timestamp', 'desc')
     );
-    
+
     const snapshot = await getDocs(conversationsQuery);
     return snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-      timestamp: doc.data().timestamp.toDate()
+      timestamp: doc.data().timestamp.toDate(),
     })) as ConversationEntry[];
   }
 
@@ -519,14 +575,14 @@ class MemoryService {
   }> {
     try {
       const conversations = await this.getAllUserConversations(userId);
-      
+
       return {
         totalConversations: conversations.length,
         averageSessionLength: this.calculateAverageSessionLength(conversations),
         topStrains: this.getTopStrains(conversations),
         topEffects: this.getTopEffects(conversations),
         queryTypeDistribution: this.getQueryTypeDistribution(conversations),
-        weeklyActivity: this.getWeeklyActivity(conversations)
+        weeklyActivity: this.getWeeklyActivity(conversations),
       };
     } catch (error) {
       console.error('Error getting conversation analytics:', error);
@@ -536,7 +592,7 @@ class MemoryService {
         topStrains: [],
         topEffects: [],
         queryTypeDistribution: {},
-        weeklyActivity: []
+        weeklyActivity: [],
       };
     }
   }
@@ -544,63 +600,63 @@ class MemoryService {
   private calculateAverageSessionLength(conversations: ConversationEntry[]): number {
     const sessions = [...new Set(conversations.map(c => c.sessionId))];
     if (sessions.length === 0) return 0;
-    
+
     const sessionLengths = sessions.map(sessionId => {
       const sessionConvs = conversations.filter(c => c.sessionId === sessionId);
       return sessionConvs.length;
     });
-    
+
     return sessionLengths.reduce((sum, length) => sum + length, 0) / sessions.length;
   }
 
   private getTopStrains(conversations: ConversationEntry[]): string[] {
     const strainCounts: Record<string, number> = {};
-    
+
     conversations.forEach(conv => {
       conv.strainsHentioned?.forEach(strain => {
         strainCounts[strain] = (strainCounts[strain] || 0) + 1;
       });
     });
-    
+
     return Object.entries(strainCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([strain]) => strain);
   }
 
   private getTopEffects(conversations: ConversationEntry[]): string[] {
     const effectCounts: Record<string, number> = {};
-    
+
     conversations.forEach(conv => {
       conv.effectsRequested?.forEach(effect => {
         effectCounts[effect] = (effectCounts[effect] || 0) + 1;
       });
     });
-    
+
     return Object.entries(effectCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 5)
       .map(([effect]) => effect);
   }
 
   private getQueryTypeDistribution(conversations: ConversationEntry[]): Record<string, number> {
     const distribution: Record<string, number> = {};
-    
+
     conversations.forEach(conv => {
       distribution[conv.queryType] = (distribution[conv.queryType] || 0) + 1;
     });
-    
+
     return distribution;
   }
 
   private getWeeklyActivity(conversations: ConversationEntry[]): number[] {
     const weeklyActivity = new Array(7).fill(0);
-    
+
     conversations.forEach(conv => {
       const dayOfWeek = conv.timestamp.getDay();
       weeklyActivity[dayOfWeek]++;
     });
-    
+
     return weeklyActivity;
   }
 }

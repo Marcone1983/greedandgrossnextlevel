@@ -27,7 +27,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
     trackScreenViews = true,
     trackUserInteractions = true,
     trackErrors = true,
-    enableMemoryTracking = true
+    enableMemoryTracking = true,
   } = options;
 
   const { user } = useSelector((state: RootState) => state.auth);
@@ -44,7 +44,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
   useEffect(() => {
     if (!trackScreenViews || !user?.id) return;
 
-    const unsubscribe = navigation.addListener('state', (e) => {
+    const unsubscribe = navigation.addListener('state', e => {
       const route = navigation.getCurrentRoute();
       if (route) {
         trackScreen(route.name);
@@ -55,53 +55,44 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
   }, [navigation, trackScreenViews, user?.id]);
 
   // Track general events
-  const trackEvent = useCallback(async (
-    eventType: string,
-    screen: string,
-    action: string,
-    metadata?: any
-  ) => {
-    if (!trackUserInteractions) return;
-    
-    try {
-      await analyticsCollector.trackUserInteraction(
-        eventType as any,
-        screen,
-        action,
-        metadata
-      );
-    } catch (error) {
-      console.error('Error tracking event:', error);
-    }
-  }, [trackUserInteractions]);
+  const trackEvent = useCallback(
+    async (eventType: string, screen: string, action: string, metadata?: any) => {
+      if (!trackUserInteractions) return;
+
+      try {
+        await analyticsCollector.trackUserInteraction(eventType as any, screen, action, metadata);
+      } catch (error) {
+        console.error('Error tracking event:', error);
+      }
+    },
+    [trackUserInteractions]
+  );
 
   // Track screen views
-  const trackScreen = useCallback(async (screenName: string, metadata?: any) => {
-    await trackEvent('app_open', screenName, 'screen_view', {
-      ...metadata,
-      timestamp: new Date().toISOString()
-    });
-  }, [trackEvent]);
+  const trackScreen = useCallback(
+    async (screenName: string, metadata?: any) => {
+      await trackEvent('app_open', screenName, 'screen_view', {
+        ...metadata,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [trackEvent]
+  );
 
   // Track breeding simulations
-  const trackBreeding = useCallback(async (
-    parent1: string,
-    parent2: string,
-    result: any
-  ) => {
-    try {
-      await analyticsCollector.trackBreedingSimulation(parent1, parent2, result, user?.id);
-    } catch (error) {
-      console.error('Error tracking breeding simulation:', error);
-    }
-  }, [user?.id]);
+  const trackBreeding = useCallback(
+    async (parent1: string, parent2: string, result: any) => {
+      try {
+        await analyticsCollector.trackBreedingSimulation(parent1, parent2, result, user?.id);
+      } catch (error) {
+        console.error('Error tracking breeding simulation:', error);
+      }
+    },
+    [user?.id]
+  );
 
   // Track search activities
-  const trackSearch = useCallback(async (
-    query: string,
-    results: any[],
-    screen: string
-  ) => {
+  const trackSearch = useCallback(async (query: string, results: any[], screen: string) => {
     try {
       await analyticsCollector.trackSearch(query, results, screen);
     } catch (error) {
@@ -110,43 +101,30 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
   }, []);
 
   // Track subscription events
-  const trackSubscription = useCallback(async (
-    event: string,
-    tier?: string,
-    metadata?: any
-  ) => {
+  const trackSubscription = useCallback(async (event: string, tier?: string, metadata?: any) => {
     try {
-      await analyticsCollector.trackSubscriptionEvent(
-        event as any,
-        tier,
-        metadata
-      );
+      await analyticsCollector.trackSubscriptionEvent(event as any, tier, metadata);
     } catch (error) {
       console.error('Error tracking subscription event:', error);
     }
   }, []);
 
   // Track errors
-  const trackError = useCallback(async (
-    error: Error,
-    context: string,
-    metadata?: any
-  ) => {
-    if (!trackErrors) return;
-    
-    try {
-      await analyticsCollector.trackError(error, context, metadata);
-    } catch (err) {
-      console.error('Error tracking error:', err);
-    }
-  }, [trackErrors]);
+  const trackError = useCallback(
+    async (error: Error, context: string, metadata?: any) => {
+      if (!trackErrors) return;
+
+      try {
+        await analyticsCollector.trackError(error, context, metadata);
+      } catch (err) {
+        console.error('Error tracking error:', err);
+      }
+    },
+    [trackErrors]
+  );
 
   // Track performance metrics
-  const trackPerformance = useCallback(async (
-    metric: string,
-    value: number,
-    context?: string
-  ) => {
+  const trackPerformance = useCallback(async (metric: string, value: number, context?: string) => {
     try {
       await analyticsCollector.trackPerformance(metric, value, context);
     } catch (error) {
@@ -155,15 +133,18 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
   }, []);
 
   // Track memory system operations
-  const trackMemory = useCallback(async (operation: string, metadata?: any) => {
-    if (!enableMemoryTracking) return;
-    
-    try {
-      await analyticsCollector.trackMemoryOperation(operation as any, metadata);
-    } catch (error) {
-      console.error('Error tracking memory operation:', error);
-    }
-  }, [enableMemoryTracking]);
+  const trackMemory = useCallback(
+    async (operation: string, metadata?: any) => {
+      if (!enableMemoryTracking) return;
+
+      try {
+        await analyticsCollector.trackMemoryOperation(operation as any, metadata);
+      } catch (error) {
+        console.error('Error tracking memory operation:', error);
+      }
+    },
+    [enableMemoryTracking]
+  );
 
   return {
     trackEvent,
@@ -173,7 +154,7 @@ export function useAnalytics(options: UseAnalyticsOptions = {}): UseAnalyticsRet
     trackSubscription,
     trackError,
     trackPerformance,
-    trackMemory
+    trackMemory,
   };
 }
 
@@ -198,60 +179,66 @@ export function withAnalytics<T extends {}>(
 export function useBreedingAnalytics() {
   const analytics = useAnalytics();
 
-  const trackSimulationStart = useCallback((parent1: string, parent2: string) => {
-    analytics.trackEvent('breeding_simulation', 'BreedingScreen', 'simulation_start', {
-      parents: [parent1, parent2],
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSimulationStart = useCallback(
+    (parent1: string, parent2: string) => {
+      analytics.trackEvent('breeding_simulation', 'BreedingScreen', 'simulation_start', {
+        parents: [parent1, parent2],
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackSimulationComplete = useCallback((
-    parent1: string,
-    parent2: string,
-    result: any,
-    duration: number
-  ) => {
-    analytics.trackBreeding(parent1, parent2, result);
-    analytics.trackEvent('breeding_simulation', 'BreedingScreen', 'simulation_complete', {
-      parents: [parent1, parent2],
-      result: result.name,
-      duration,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSimulationComplete = useCallback(
+    (parent1: string, parent2: string, result: any, duration: number) => {
+      analytics.trackBreeding(parent1, parent2, result);
+      analytics.trackEvent('breeding_simulation', 'BreedingScreen', 'simulation_complete', {
+        parents: [parent1, parent2],
+        result: result.name,
+        duration,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackSimulationError = useCallback((
-    parent1: string,
-    parent2: string,
-    error: Error
-  ) => {
-    analytics.trackError(error, 'breeding_simulation', {
-      parents: [parent1, parent2],
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSimulationError = useCallback(
+    (parent1: string, parent2: string, error: Error) => {
+      analytics.trackError(error, 'breeding_simulation', {
+        parents: [parent1, parent2],
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackStrainView = useCallback((strainName: string, source: string) => {
-    analytics.trackEvent('strain_view', 'BreedingScreen', 'strain_view', {
-      strainName,
-      source,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackStrainView = useCallback(
+    (strainName: string, source: string) => {
+      analytics.trackEvent('strain_view', 'BreedingScreen', 'strain_view', {
+        strainName,
+        source,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackFavoriteStrain = useCallback((strainName: string, action: 'add' | 'remove') => {
-    analytics.trackEvent('strain_view', 'BreedingScreen', `favorite_${action}`, {
-      strainName,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackFavoriteStrain = useCallback(
+    (strainName: string, action: 'add' | 'remove') => {
+      analytics.trackEvent('strain_view', 'BreedingScreen', `favorite_${action}`, {
+        strainName,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
   return {
     trackSimulationStart,
     trackSimulationComplete,
     trackSimulationError,
     trackStrainView,
-    trackFavoriteStrain
+    trackFavoriteStrain,
   };
 }
 
@@ -259,52 +246,47 @@ export function useBreedingAnalytics() {
 export function useSearchAnalytics() {
   const analytics = useAnalytics();
 
-  const trackSearchQuery = useCallback((
-    query: string,
-    results: any[],
-    screen: string,
-    filters?: any
-  ) => {
-    analytics.trackSearch(query, results, screen);
-    analytics.trackEvent('search', screen, 'search_performed', {
-      query,
-      resultCount: results.length,
-      hasResults: results.length > 0,
-      filters,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSearchQuery = useCallback(
+    (query: string, results: any[], screen: string, filters?: any) => {
+      analytics.trackSearch(query, results, screen);
+      analytics.trackEvent('search', screen, 'search_performed', {
+        query,
+        resultCount: results.length,
+        hasResults: results.length > 0,
+        filters,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackSearchResult = useCallback((
-    query: string,
-    selectedResult: any,
-    resultIndex: number,
-    screen: string
-  ) => {
-    analytics.trackEvent('search', screen, 'search_result_selected', {
-      query,
-      selectedResult: selectedResult.name || selectedResult.id,
-      resultIndex,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSearchResult = useCallback(
+    (query: string, selectedResult: any, resultIndex: number, screen: string) => {
+      analytics.trackEvent('search', screen, 'search_result_selected', {
+        query,
+        selectedResult: selectedResult.name || selectedResult.id,
+        resultIndex,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackSearchFilter = useCallback((
-    filterType: string,
-    filterValue: any,
-    screen: string
-  ) => {
-    analytics.trackEvent('search', screen, 'search_filter_applied', {
-      filterType,
-      filterValue,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSearchFilter = useCallback(
+    (filterType: string, filterValue: any, screen: string) => {
+      analytics.trackEvent('search', screen, 'search_filter_applied', {
+        filterType,
+        filterValue,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
   return {
     trackSearchQuery,
     trackSearchResult,
-    trackSearchFilter
+    trackSearchFilter,
   };
 }
 
@@ -312,57 +294,62 @@ export function useSearchAnalytics() {
 export function useSubscriptionAnalytics() {
   const analytics = useAnalytics();
 
-  const trackSubscriptionView = useCallback((source: string) => {
-    analytics.trackSubscription('view_plans', undefined, {
-      source,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSubscriptionView = useCallback(
+    (source: string) => {
+      analytics.trackSubscription('view_plans', undefined, {
+        source,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackTrialStart = useCallback((tier: string) => {
-    analytics.trackSubscription('start_trial', tier, {
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackTrialStart = useCallback(
+    (tier: string) => {
+      analytics.trackSubscription('start_trial', tier, {
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackSubscriptionPurchase = useCallback((
-    tier: string,
-    price: number,
-    currency: string = 'EUR'
-  ) => {
-    analytics.trackSubscription('subscribe', tier, {
-      price,
-      currency,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSubscriptionPurchase = useCallback(
+    (tier: string, price: number, currency: string = 'EUR') => {
+      analytics.trackSubscription('subscribe', tier, {
+        price,
+        currency,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackSubscriptionCancel = useCallback((
-    tier: string,
-    reason?: string
-  ) => {
-    analytics.trackSubscription('cancel', tier, {
-      reason,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSubscriptionCancel = useCallback(
+    (tier: string, reason?: string) => {
+      analytics.trackSubscription('cancel', tier, {
+        reason,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
-  const trackSubscriptionUpgrade = useCallback((
-    fromTier: string,
-    toTier: string
-  ) => {
-    analytics.trackSubscription('upgrade', toTier, {
-      fromTier,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackSubscriptionUpgrade = useCallback(
+    (fromTier: string, toTier: string) => {
+      analytics.trackSubscription('upgrade', toTier, {
+        fromTier,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
   return {
     trackSubscriptionView,
     trackTrialStart,
     trackSubscriptionPurchase,
     trackSubscriptionCancel,
-    trackSubscriptionUpgrade
+    trackSubscriptionUpgrade,
   };
 }
 
@@ -372,45 +359,48 @@ export function useMemoryAnalytics() {
 
   const trackMemoryEnabled = useCallback(() => {
     analytics.trackMemory('enable', {
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }, [analytics]);
 
   const trackMemoryDisabled = useCallback(() => {
     analytics.trackMemory('disable', {
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }, [analytics]);
 
-  const trackMemoryCleared = useCallback((reason: string) => {
-    analytics.trackMemory('clear', {
-      reason,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackMemoryCleared = useCallback(
+    (reason: string) => {
+      analytics.trackMemory('clear', {
+        reason,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
   const trackMemoryExported = useCallback(() => {
     analytics.trackMemory('export', {
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }, [analytics]);
 
-  const trackConversationRecorded = useCallback((
-    conversationType: string,
-    responseLength: number
-  ) => {
-    analytics.trackMemory('conversation_recorded', {
-      conversationType,
-      responseLength,
-      timestamp: new Date().toISOString()
-    });
-  }, [analytics]);
+  const trackConversationRecorded = useCallback(
+    (conversationType: string, responseLength: number) => {
+      analytics.trackMemory('conversation_recorded', {
+        conversationType,
+        responseLength,
+        timestamp: new Date().toISOString(),
+      });
+    },
+    [analytics]
+  );
 
   return {
     trackMemoryEnabled,
     trackMemoryDisabled,
     trackMemoryCleared,
     trackMemoryExported,
-    trackConversationRecorded
+    trackConversationRecorded,
   };
 }

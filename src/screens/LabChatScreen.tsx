@@ -43,40 +43,41 @@ export default function LabChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState('');
   const [showStrainSelector, setShowStrainSelector] = useState(false);
-  const [selectedParents, setSelectedParents] = useState<{ parentA?: string; parentB?: string }>({});
-  
+  const [selectedParents, setSelectedParents] = useState<{ parentA?: string; parentB?: string }>(
+    {}
+  );
+
   const flatListRef = useRef<any>(null);
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const toast = useToast();
-  
+
   const { user } = useSelector((state: RootState) => state.auth);
   const { isLoading } = useSelector((state: RootState) => state.strain);
-  
+
   // Memory system integration
-  const {
-    saveConversation,
-    getContextPrompt,
-    getSuggestedPrompts,
-    memoryEnabled,
-    contextSummary,
-  } = useConversationMemory();
+  const { saveConversation, getContextPrompt, getSuggestedPrompts, memoryEnabled, contextSummary } =
+    useConversationMemory();
 
   useEffect(() => {
     const contextPrompt = memoryEnabled ? getContextPrompt() : '';
     const isReturningUser = contextSummary && contextSummary.length > 0;
-    
+
     const welcomeMessage: ChatMessage = {
       id: '1',
       userId: 'ai',
       username: 'GREED & GROSS',
       content: `${isReturningUser ? 'Bentornato' : 'Benvenuto'} nel laboratorio genetico! Sono GREED & GROSS, il tuo esperto di breeding cannabis. 
 
-${isReturningUser && contextPrompt ? `🧠 Ho memoria delle nostre conversazioni precedenti: ${contextPrompt}
+${
+  isReturningUser && contextPrompt
+    ? `🧠 Ho memoria delle nostre conversazioni precedenti: ${contextPrompt}
 
-` : ''}Posso aiutarti a simulare incroci genetici, analizzare terpeni, prevedere fenotipi e molto altro. 
+`
+    : ''
+}Posso aiutarti a simulare incroci genetici, analizzare terpeni, prevedere fenotipi e molto altro. 
 
-${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '🔬 Premium: Incroci illimitati disponibili!'}${memoryEnabled ? '\n\n💾 Sistema di memoria attivo - le nostre conversazioni vengono ricordate per un\'esperienza personalizzata.' : ''}`,
+${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '🔬 Premium: Incroci illimitati disponibili!'}${memoryEnabled ? "\n\n💾 Sistema di memoria attivo - le nostre conversazioni vengono ricordate per un'esperienza personalizzata." : ''}`,
       timestamp: new Date(),
       type: 'ai',
     };
@@ -112,11 +113,14 @@ ${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '�
 
     try {
       const contextPrompt = memoryEnabled ? getContextPrompt() : undefined;
-      const result = await performCrossBreeding({
-        parentA: selectedParents.parentA || extractStrainFromText(inputText, 0),
-        parentB: selectedParents.parentB || extractStrainFromText(inputText, 1),
-        userId: user!.id,
-      }, contextPrompt);
+      const result = await performCrossBreeding(
+        {
+          parentA: selectedParents.parentA || extractStrainFromText(inputText, 0),
+          parentB: selectedParents.parentB || extractStrainFromText(inputText, 1),
+          userId: user!.id,
+        },
+        contextPrompt
+      );
 
       await saveCrossResult(result);
       dispatch(setCrossResult(result));
@@ -129,10 +133,12 @@ ${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '�
         content: aiResponseContent,
         timestamp: new Date(),
         type: 'ai',
-        attachments: [{
-          type: 'strain',
-          data: result.result,
-        }],
+        attachments: [
+          {
+            type: 'strain',
+            data: result.result,
+          },
+        ],
       };
 
       setMessages(prev => [...prev, aiResponse]);
@@ -146,11 +152,7 @@ ${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '�
             result.result.name,
           ].filter(Boolean);
 
-          await saveConversation(
-            inputText,
-            aiResponseContent,
-            strainsMentioned
-          );
+          await saveConversation(inputText, aiResponseContent, strainsMentioned);
         } catch (memoryError) {
           console.error('Failed to save conversation to memory:', memoryError);
           // Don't show error to user as this is a background operation
@@ -158,7 +160,7 @@ ${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '�
       }
     } catch (error) {
       toast.show({
-        description: 'Errore durante l\'incrocio',
+        description: "Errore durante l'incrocio",
         colorScheme: 'error',
       });
     } finally {
@@ -196,17 +198,11 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
 
   const renderMessage = ({ item }: { item: ChatMessage }) => (
     <View style={styles.messageContainer}>
-      {item.type === 'ai' && (
-        <Avatar
-          source={AI_AVATAR}
-          size="sm"
-          style={styles.avatar}
-        />
-      )}
+      {item.type === 'ai' && <Avatar source={AI_AVATAR} size="sm" style={styles.avatar} />}
       <ChatBubble
         message={item}
         isAI={item.type === 'ai'}
-        onStrainPress={(strain) => {
+        onStrainPress={strain => {
           navigation.navigate('StrainLibrary', { selectedStrain: strain });
         }}
       />
@@ -214,7 +210,7 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
   );
 
   const suggestedPrompts = getSuggestedPrompts();
-  
+
   const handleSuggestedPromptPress = (prompt: string) => {
     setInputText(prompt);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -222,10 +218,7 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={gradients.dark}
-        style={styles.headerGradient}
-      >
+      <LinearGradient colors={gradients.dark} style={styles.headerGradient}>
         <HStack alignItems="center" justifyContent="space-between" px={4} py={2}>
           <HStack alignItems="center" space={2}>
             <Icon as={MaterialIcons} name="science" size={6} color={colors.primary} />
@@ -247,15 +240,12 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
         </HStack>
       </LinearGradient>
 
-      <MemoryIndicator 
-        position="top-right" 
-        showDetails={true}
-      />
+      <MemoryIndicator position="top-right" showDetails={true} />
 
       <FlatList
         ref={flatListRef}
         data={messages}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         renderItem={renderMessage}
         contentContainerStyle={styles.messagesList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd()}
@@ -327,7 +317,7 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
               onPress={() => setShowStrainSelector(true)}
               _pressed={{ bg: 'gray.700' }}
             />
-            
+
             <Input
               flex={1}
               placeholder="Chiedi un incrocio o analisi..."

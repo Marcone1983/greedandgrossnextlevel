@@ -45,13 +45,13 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
-  
+
   return function executedFunction(...args: Parameters<T>) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);
     };
-    
+
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
@@ -60,16 +60,16 @@ export function debounce<T extends (...args: any[]) => any>(
 export function calculateStrainMatch(strain1: string, strain2: string): number {
   const s1 = strain1.toLowerCase();
   const s2 = strain2.toLowerCase();
-  
+
   if (s1 === s2) return 100;
-  
+
   let matches = 0;
   const minLength = Math.min(s1.length, s2.length);
-  
+
   for (let i = 0; i < minLength; i++) {
     if (s1[i] === s2[i]) matches++;
   }
-  
+
   return Math.round((matches / Math.max(s1.length, s2.length)) * 100);
 }
 
@@ -103,7 +103,7 @@ export function validateUsername(username: string): boolean {
   if (!username || username.length < 3 || username.length > 20) {
     return false;
   }
-  
+
   // Allow alphanumeric characters, underscores, and hyphens
   const validPattern = /^[a-zA-Z0-9_-]+$/;
   return validPattern.test(username);
@@ -113,7 +113,7 @@ export function validateStrainName(strainName: string): boolean {
   if (!strainName || strainName.length < 2 || strainName.length > 50) {
     return false;
   }
-  
+
   // Allow letters, numbers, spaces, and common symbols
   const validPattern = /^[a-zA-Z0-9\s\-_#.()]+$/;
   return validPattern.test(strainName);

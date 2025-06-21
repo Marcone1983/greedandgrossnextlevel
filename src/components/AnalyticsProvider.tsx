@@ -48,14 +48,10 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
 
   const contextValue: AnalyticsContextType = {
     isEnabled,
-    updateSettings
+    updateSettings,
   };
 
-  return (
-    <AnalyticsContext.Provider value={contextValue}>
-      {children}
-    </AnalyticsContext.Provider>
-  );
+  return <AnalyticsContext.Provider value={contextValue}>{children}</AnalyticsContext.Provider>;
 }
 
 export function useAnalyticsContext(): AnalyticsContextType {

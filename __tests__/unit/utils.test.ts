@@ -14,7 +14,7 @@ describe('Helper Functions', () => {
     test('generateStrainId should create unique IDs', () => {
       const id1 = generateStrainId();
       const id2 = generateStrainId();
-      
+
       expect(id1).toMatch(/^strain_\d+_[a-z0-9]{9}$/);
       expect(id2).toMatch(/^strain_\d+_[a-z0-9]{9}$/);
       expect(id1).not.toBe(id2);
@@ -23,7 +23,7 @@ describe('Helper Functions', () => {
     test('generateUserId should create unique IDs', () => {
       const id1 = generateUserId();
       const id2 = generateUserId();
-      
+
       expect(id1).toMatch(/^user_\d+_[a-z0-9]{9}$/);
       expect(id2).toMatch(/^user_\d+_[a-z0-9]{9}$/);
       expect(id1).not.toBe(id2);
@@ -89,7 +89,7 @@ describe('User Utils', () => {
   describe('Anonymous User Generation', () => {
     test('should generate valid anonymous user', () => {
       const user = generateAnonymousUser('testuser');
-      
+
       expect(user.username).toBe('testuser');
       expect(user.tier).toBe('free');
       expect(user.stats.totalCrosses).toBe(0);

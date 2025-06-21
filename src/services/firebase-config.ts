@@ -102,24 +102,24 @@ export async function checkCachedCross(parentA: string, parentB: string): Promis
   try {
     const cacheId = generateCacheId(parentA, parentB);
     const cacheDoc = await getDoc(doc(db, COLLECTIONS.CROSSES_CACHE, cacheId));
-    
+
     if (cacheDoc.exists()) {
       const data = cacheDoc.data();
-      
+
       // Update hit count
       await updateDoc(doc(db, COLLECTIONS.CROSSES_CACHE, cacheId), {
         hitCount: (data.hitCount || 0) + 1,
         lastAccessed: Timestamp.now(),
       });
-      
+
       logAnalytics('cache_hit', { parentA, parentB, cacheId });
-      
+
       return {
         ...data.strain,
         createdAt: data.strain.createdAt.toDate(),
       } as Strain;
     }
-    
+
     return null;
   } catch (error) {
     console.error('Error checking cache:', error);
@@ -139,7 +139,7 @@ export async function saveCachedCross(strain: Strain) {
       hitCount: 1,
       lastAccessed: Timestamp.now(),
     });
-    
+
     logAnalytics('cache_save', { strainName: strain.name, cacheId });
   } catch (error) {
     console.error('Error saving to cache:', error);
@@ -150,14 +150,14 @@ export async function saveCachedCross(strain: Strain) {
 export async function getPopularStrains(limitCount: number = 10): Promise<any[]> {
   try {
     const popularStrainsDoc = await getDoc(doc(db, COLLECTIONS.SYSTEM, 'popular_strains'));
-    
+
     if (popularStrainsDoc.exists()) {
       const data = popularStrainsDoc.data();
       return Object.values(data)
         .sort((a: any, b: any) => b.popularity_score - a.popularity_score)
         .slice(0, limitCount);
     }
-    
+
     return [];
   } catch (error) {
     console.error('Error getting popular strains:', error);
@@ -169,9 +169,10 @@ export async function updateStrainPopularity(strainName: string) {
   try {
     const popularStrainsRef = doc(db, COLLECTIONS.SYSTEM, 'popular_strains');
     const strainKey = strainName.toLowerCase().replace(/\s+/g, '_');
-    
+
     await updateDoc(popularStrainsRef, {
-      [`${strainKey}.requests`]: (await getDoc(popularStrainsRef)).data()?.[strainKey]?.requests + 1 || 1,
+      [`${strainKey}.requests`]:
+        (await getDoc(popularStrainsRef)).data()?.[strainKey]?.requests + 1 || 1,
       [`${strainKey}.name`]: strainName,
       [`${strainKey}.last_requested`]: Timestamp.now(),
     });
@@ -200,12 +201,14 @@ export async function getRecentMessages(limitCount: number = 50): Promise<ChatMe
       orderBy('timestamp', 'desc'),
       limit(limitCount)
     );
-    
+
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
-      ...doc.data(),
-      timestamp: doc.data().timestamp.toDate(),
-    })).reverse() as ChatMessage[];
+    return snapshot.docs
+      .map(doc => ({
+        ...doc.data(),
+        timestamp: doc.data().timestamp.toDate(),
+      }))
+      .reverse() as ChatMessage[];
   } catch (error) {
     console.error('Error getting messages:', error);
     return [];
@@ -213,19 +216,17 @@ export async function getRecentMessages(limitCount: number = 50): Promise<ChatMe
 }
 
 export function subscribeToChatMessages(callback: (messages: ChatMessage[]) => void) {
-  const q = query(
-    collection(db, COLLECTIONS.CHATS),
-    orderBy('timestamp', 'desc'),
-    limit(50)
-  );
-  
-  return onSnapshot(q, (snapshot) => {
-    const messages = snapshot.docs.map(doc => ({
-      ...doc.data(),
-      id: doc.id,
-      timestamp: doc.data().timestamp.toDate(),
-    })).reverse() as ChatMessage[];
-    
+  const q = query(collection(db, COLLECTIONS.CHATS), orderBy('timestamp', 'desc'), limit(50));
+
+  return onSnapshot(q, snapshot => {
+    const messages = snapshot.docs
+      .map(doc => ({
+        ...doc.data(),
+        id: doc.id,
+        timestamp: doc.data().timestamp.toDate(),
+      }))
+      .reverse() as ChatMessage[];
+
     callback(messages);
   });
 }
@@ -246,7 +247,9 @@ export async function getTerpeneProfiles(): Promise<any[]> {
 
 export async function getTerpeneProfile(terpeneName: string): Promise<any | null> {
   try {
-    const terpeneDoc = await getDoc(doc(db, COLLECTIONS.TERPENE_PROFILES, terpeneName.toLowerCase()));
+    const terpeneDoc = await getDoc(
+      doc(db, COLLECTIONS.TERPENE_PROFILES, terpeneName.toLowerCase())
+    );
     if (terpeneDoc.exists()) {
       return { id: terpeneDoc.id, ...terpeneDoc.data() };
     }
@@ -262,15 +265,15 @@ export async function getBreedingTips(category?: string, difficulty?: string): P
   try {
     const baseCollection = collection(db, COLLECTIONS.BREEDING_TIPS);
     const constraints: any[] = [];
-    
+
     if (category) {
       constraints.push(where('category', '==', category));
     }
-    
+
     if (difficulty) {
       constraints.push(where('difficulty', '==', difficulty));
     }
-    
+
     const q = constraints.length > 0 ? query(baseCollection, ...constraints) : baseCollection;
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
@@ -288,7 +291,7 @@ export function logAnalytics(event: string, data: Record<string, any> = {}) {
   try {
     // Firebase Analytics
     logEvent(analytics, event, data);
-    
+
     // Custom Firestore Analytics
     const analyticsDoc: AnalyticsEvent = {
       event,
@@ -297,7 +300,7 @@ export function logAnalytics(event: string, data: Record<string, any> = {}) {
       userId: data.userId || 'anonymous',
       sessionId: data.sessionId || generateSessionId(),
     };
-    
+
     addDoc(collection(db, COLLECTIONS.ANALYTICS), {
       ...analyticsDoc,
       timestamp: Timestamp.fromDate(analyticsDoc.timestamp),
@@ -318,7 +321,7 @@ export async function getSystemStats() {
         last_updated: data.last_updated.toDate(),
       };
     }
-    
+
     // Fallback: Calculate stats from collections
     const [usersSnapshot, , crossesSnapshot] = await Promise.all([
       getDocs(collection(db, COLLECTIONS.USERS)),
@@ -326,12 +329,10 @@ export async function getSystemStats() {
       getDocs(collection(db, COLLECTIONS.CROSSES_CACHE)),
       getDocs(query(collection(db, COLLECTIONS.ANALYTICS), limit(1000))),
     ]);
-    
+
     const totalUsers = usersSnapshot.size;
-    const premiumUsers = usersSnapshot.docs.filter(
-      doc => doc.data().tier === 'premium'
-    ).length;
-    
+    const premiumUsers = usersSnapshot.docs.filter(doc => doc.data().tier === 'premium').length;
+
     const last24h = Timestamp.fromMillis(Date.now() - 24 * 60 * 60 * 1000);
     const activeUsersQuery = query(
       collection(db, COLLECTIONS.USERS),
@@ -339,9 +340,9 @@ export async function getSystemStats() {
     );
     const activeUsersSnapshot = await getDocs(activeUsersQuery);
     const activeUsers = activeUsersSnapshot.size;
-    
+
     const totalCrosses = crossesSnapshot.size;
-    
+
     const stats = {
       totalUsers,
       activeUsers,
@@ -359,13 +360,13 @@ export async function getSystemStats() {
       },
       last_updated: new Date(),
     };
-    
+
     // Save calculated stats
     await setDoc(doc(db, COLLECTIONS.SYSTEM, 'stats'), {
       ...stats,
       last_updated: Timestamp.fromDate(stats.last_updated),
     });
-    
+
     return stats;
   } catch (error) {
     console.error('Error getting system stats:', error);
@@ -382,9 +383,9 @@ export async function exportDatabase(format: 'json' | 'csv' = 'json') {
       COLLECTIONS.ANALYTICS,
       COLLECTIONS.CHATS,
     ];
-    
+
     const exportData: any = {};
-    
+
     for (const collectionName of collections) {
       const snapshot = await getDocs(collection(db, collectionName));
       exportData[collectionName] = snapshot.docs.map(doc => ({
@@ -392,7 +393,7 @@ export async function exportDatabase(format: 'json' | 'csv' = 'json') {
         ...doc.data(),
       }));
     }
-    
+
     if (format === 'json') {
       return JSON.stringify(exportData, null, 2);
     } else {
@@ -403,7 +404,7 @@ export async function exportDatabase(format: 'json' | 'csv' = 'json') {
         if (Array.isArray(documents) && documents.length > 0) {
           const headers = Object.keys(documents[0]);
           csvContent += `${headers.join(',')}\n`;
-          
+
           documents.forEach((doc: any) => {
             const row = headers.map(header => {
               const value = doc[header];

@@ -43,7 +43,7 @@ const chatSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    clearChat: (state) => {
+    clearChat: state => {
       state.globalMessages = [];
     },
   },

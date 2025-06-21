@@ -1,8 +1,23 @@
-import { getFirestore, collection, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  orderBy,
+  limit,
+  getDocs,
+  Timestamp,
+} from 'firebase/firestore';
 
 export interface AnalyticsInsight {
   id: string;
-  type: 'user_behavior' | 'revenue' | 'retention' | 'feature_usage' | 'performance' | 'breeding_trends';
+  type:
+    | 'user_behavior'
+    | 'revenue'
+    | 'retention'
+    | 'feature_usage'
+    | 'performance'
+    | 'breeding_trends';
   title: string;
   description: string;
   value: number | string;
@@ -46,15 +61,15 @@ export interface RevenueAnalytics {
 
 export interface BreedingAnalytics {
   totalSimulations: number;
-  popularCrosses: {parents: string[], count: number, avgRating?: number}[];
-  trendingStrains: {name: string, mentions: number, trend: 'up' | 'down'}[];
+  popularCrosses: { parents: string[]; count: number; avgRating?: number }[];
+  trendingStrains: { name: string; mentions: number; trend: 'up' | 'down' }[];
   userEngagement: {
     avgSimulationsPerUser: number;
     retentionBySimulationCount: Record<number, number>;
   };
   geneticPatterns: {
-    mostSuccessfulCrosses: {cross: string, successRate: number}[];
-    preferredTraits: {trait: string, frequency: number}[];
+    mostSuccessfulCrosses: { cross: string; successRate: number }[];
+    preferredTraits: { trait: string; frequency: number }[];
   };
 }
 
@@ -64,7 +79,10 @@ class AnalyticsEngine {
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
   // MAIN ANALYTICS DASHBOARD
-  async generateDashboardAnalytics(adminUserId: string, timeRange: number = 30): Promise<{
+  async generateDashboardAnalytics(
+    adminUserId: string,
+    timeRange: number = 30
+  ): Promise<{
     overview: any;
     insights: AnalyticsInsight[];
     userSegments: UserSegment[];
@@ -83,7 +101,7 @@ class AnalyticsEngine {
         this.generateUserSegments(),
         this.generateRevenueAnalytics(timeRange),
         this.generateBreedingAnalytics(timeRange),
-        this.generatePerformanceMetrics(timeRange)
+        this.generatePerformanceMetrics(timeRange),
       ]);
 
       const result = {
@@ -94,7 +112,7 @@ class AnalyticsEngine {
         breeding,
         performance,
         generatedAt: new Date(),
-        timeRange
+        timeRange,
       };
 
       this.setCache(cacheKey, result);
@@ -114,7 +132,7 @@ class AnalyticsEngine {
       this.getUserCount(startDate),
       this.getInteractionCount(startDate),
       this.getConversionCount(startDate),
-      this.getSessionCount(startDate)
+      this.getSessionCount(startDate),
     ]);
 
     const previousPeriodStart = new Date(startDate);
@@ -124,30 +142,30 @@ class AnalyticsEngine {
       this.getUserCount(previousPeriodStart, startDate),
       this.getInteractionCount(previousPeriodStart, startDate),
       this.getConversionCount(previousPeriodStart, startDate),
-      this.getSessionCount(previousPeriodStart, startDate)
+      this.getSessionCount(previousPeriodStart, startDate),
     ]);
 
     return {
       activeUsers: {
         current: users,
         previous: prevUsers,
-        growth: this.calculateGrowth(users, prevUsers)
+        growth: this.calculateGrowth(users, prevUsers),
       },
       totalInteractions: {
         current: interactions,
         previous: prevInteractions,
-        growth: this.calculateGrowth(interactions, prevInteractions)
+        growth: this.calculateGrowth(interactions, prevInteractions),
       },
       conversions: {
         current: conversions,
         previous: prevConversions,
-        growth: this.calculateGrowth(conversions, prevConversions)
+        growth: this.calculateGrowth(conversions, prevConversions),
       },
       sessions: {
         current: sessions,
         previous: prevSessions,
-        growth: this.calculateGrowth(sessions, prevSessions)
-      }
+        growth: this.calculateGrowth(sessions, prevSessions),
+      },
     };
   }
 
@@ -183,7 +201,7 @@ class AnalyticsEngine {
 
   private async generateUserBehaviorInsights(days: number): Promise<AnalyticsInsight[]> {
     const insights: AnalyticsInsight[] = [];
-    
+
     try {
       // Analyze session length trends
       const sessionLengthTrend = await this.analyzeSessionLengthTrend(days);
@@ -199,7 +217,7 @@ class AnalyticsEngine {
           priority: sessionLengthTrend.trend === 'down' ? 'high' : 'medium',
           actionable: true,
           metadata: sessionLengthTrend,
-          generatedAt: new Date()
+          generatedAt: new Date(),
         });
       }
 
@@ -217,7 +235,7 @@ class AnalyticsEngine {
           priority: 'high',
           actionable: true,
           metadata: dropOffAnalysis,
-          generatedAt: new Date()
+          generatedAt: new Date(),
         });
       }
 
@@ -234,9 +252,8 @@ class AnalyticsEngine {
         priority: memoryAdoption.adoptionRate < 30 ? 'high' : 'medium',
         actionable: true,
         metadata: memoryAdoption,
-        generatedAt: new Date()
+        generatedAt: new Date(),
       });
-
     } catch (error) {
       console.error('Error generating user behavior insights:', error);
     }
@@ -246,10 +263,10 @@ class AnalyticsEngine {
 
   private async generateRevenueInsights(days: number): Promise<AnalyticsInsight[]> {
     const insights: AnalyticsInsight[] = [];
-    
+
     try {
       const revenueAnalysis = await this.analyzeRevenuePatterns(days);
-      
+
       // Revenue growth insight
       if (Math.abs(revenueAnalysis.growth) > 10) {
         insights.push({
@@ -263,7 +280,7 @@ class AnalyticsEngine {
           priority: Math.abs(revenueAnalysis.growth) > 20 ? 'high' : 'medium',
           actionable: true,
           metadata: revenueAnalysis,
-          generatedAt: new Date()
+          generatedAt: new Date(),
         });
       }
 
@@ -280,10 +297,9 @@ class AnalyticsEngine {
           priority: 'high',
           actionable: true,
           metadata: { churnReasons: revenueAnalysis.churnReasons },
-          generatedAt: new Date()
+          generatedAt: new Date(),
         });
       }
-
     } catch (error) {
       console.error('Error generating revenue insights:', error);
     }
@@ -293,10 +309,10 @@ class AnalyticsEngine {
 
   private async generateBreedingInsights(days: number): Promise<AnalyticsInsight[]> {
     const insights: AnalyticsInsight[] = [];
-    
+
     try {
       const breedingTrends = await this.analyzeBreedingTrends(days);
-      
+
       // Popular breeding combinations
       if (breedingTrends.emergingTrends.length > 0) {
         insights.push({
@@ -310,7 +326,7 @@ class AnalyticsEngine {
           priority: 'medium',
           actionable: true,
           metadata: breedingTrends,
-          generatedAt: new Date()
+          generatedAt: new Date(),
         });
       }
 
@@ -327,10 +343,9 @@ class AnalyticsEngine {
           priority: 'high',
           actionable: true,
           metadata: breedingTrends,
-          generatedAt: new Date()
+          generatedAt: new Date(),
         });
       }
-
     } catch (error) {
       console.error('Error generating breeding insights:', error);
     }
@@ -352,12 +367,12 @@ class AnalyticsEngine {
         criteria: {
           subscriptionTier: ['premium', 'pro'],
           usageFrequency: 'high',
-          breedingActivity: 'active'
+          breedingActivity: 'active',
         },
         userCount: highValueUsers.count,
         averageRevenue: highValueUsers.avgRevenue,
         retentionRate: highValueUsers.retentionRate,
-        insights: highValueUsers.insights
+        insights: highValueUsers.insights,
       });
 
       // New users at risk
@@ -368,12 +383,12 @@ class AnalyticsEngine {
         description: 'Nuovi utenti con basso engagement',
         criteria: {
           usageFrequency: 'low',
-          registrationDate: { after: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+          registrationDate: { after: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
         },
         userCount: atRiskUsers.count,
         averageRevenue: atRiskUsers.avgRevenue,
         retentionRate: atRiskUsers.retentionRate,
-        insights: atRiskUsers.insights
+        insights: atRiskUsers.insights,
       });
 
       // Breeding enthusiasts
@@ -384,14 +399,13 @@ class AnalyticsEngine {
         description: 'Utenti molto attivi nella simulazione genetica',
         criteria: {
           breedingActivity: 'active',
-          usageFrequency: 'high'
+          usageFrequency: 'high',
         },
         userCount: breedingEnthusiasts.count,
         averageRevenue: breedingEnthusiasts.avgRevenue,
         retentionRate: breedingEnthusiasts.retentionRate,
-        insights: breedingEnthusiasts.insights
+        insights: breedingEnthusiasts.insights,
       });
-
     } catch (error) {
       console.error('Error generating user segments:', error);
     }
@@ -406,7 +420,7 @@ class AnalyticsEngine {
         this.calculateTotalRevenue(days),
         this.calculateRecurringRevenue(days),
         this.calculateNewRevenue(days),
-        this.calculateChurnRevenue(days)
+        this.calculateChurnRevenue(days),
       ]);
 
       const userCount = await this.getUserCount(new Date(Date.now() - days * 24 * 60 * 60 * 1000));
@@ -426,7 +440,7 @@ class AnalyticsEngine {
         conversionRate,
         revenueByTier,
         revenueGrowth,
-        projectedRevenue
+        projectedRevenue,
       };
     } catch (error) {
       console.error('Error generating revenue analytics:', error);
@@ -439,7 +453,7 @@ class AnalyticsEngine {
         conversionRate: 0,
         revenueByTier: {},
         revenueGrowth: 0,
-        projectedRevenue: 0
+        projectedRevenue: 0,
       };
     }
   }
@@ -450,20 +464,21 @@ class AnalyticsEngine {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      const [totalSimulations, popularCrosses, trendingStrains, userEngagement, geneticPatterns] = await Promise.all([
-        this.getTotalBreedingSimulations(startDate),
-        this.getPopularCrosses(startDate),
-        this.getTrendingStrains(days),
-        this.getBreedingUserEngagement(startDate),
-        this.getGeneticPatterns(startDate)
-      ]);
+      const [totalSimulations, popularCrosses, trendingStrains, userEngagement, geneticPatterns] =
+        await Promise.all([
+          this.getTotalBreedingSimulations(startDate),
+          this.getPopularCrosses(startDate),
+          this.getTrendingStrains(days),
+          this.getBreedingUserEngagement(startDate),
+          this.getGeneticPatterns(startDate),
+        ]);
 
       return {
         totalSimulations,
         popularCrosses,
         trendingStrains,
         userEngagement,
-        geneticPatterns
+        geneticPatterns,
       };
     } catch (error) {
       console.error('Error generating breeding analytics:', error);
@@ -473,12 +488,12 @@ class AnalyticsEngine {
         trendingStrains: [],
         userEngagement: {
           avgSimulationsPerUser: 0,
-          retentionBySimulationCount: {}
+          retentionBySimulationCount: {},
         },
         geneticPatterns: {
           mostSuccessfulCrosses: [],
-          preferredTraits: []
-        }
+          preferredTraits: [],
+        },
       };
     }
   }
@@ -574,7 +589,7 @@ class AnalyticsEngine {
   private setCache(key: string, data: any): void {
     this.cache.set(key, {
       data,
-      expiry: Date.now() + this.CACHE_TTL
+      expiry: Date.now() + this.CACHE_TTL,
     });
   }
 
@@ -593,7 +608,7 @@ class AnalyticsEngine {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
-      
+
       const previousStartDate = new Date(startDate);
       previousStartDate.setDate(previousStartDate.getDate() - days);
 
@@ -616,7 +631,7 @@ class AnalyticsEngine {
 
       const [currentSnapshot, previousSnapshot] = await Promise.all([
         getDocs(currentSessionsQuery),
-        getDocs(previousSessionsQuery)
+        getDocs(previousSessionsQuery),
       ]);
 
       // Group by session and calculate lengths
@@ -635,7 +650,7 @@ class AnalyticsEngine {
         percent: Math.abs(Math.round(percentChange)),
         currentAvg: Math.round(currentAvg),
         previousAvg: Math.round(previousAvg),
-        sessionsAnalyzed: currentSessions.length
+        sessionsAnalyzed: currentSessions.length,
       };
     } catch (error) {
       console.error('Error analyzing session length trend:', error);
@@ -652,14 +667,19 @@ class AnalyticsEngine {
       const journeyQuery = query(
         collection(this.db, 'user_interactions'),
         where('timestamp', '>=', Timestamp.fromDate(startDate)),
-        where('eventType', 'in', ['app_open', 'screen_view', 'breeding_simulation', 'subscription']),
+        where('eventType', 'in', [
+          'app_open',
+          'screen_view',
+          'breeding_simulation',
+          'subscription',
+        ]),
         orderBy('timestamp', 'asc')
       );
 
       const snapshot = await getDocs(journeyQuery);
       const interactions = snapshot.docs.map(doc => ({
         ...doc.data(),
-        timestamp: doc.data().timestamp.toDate()
+        timestamp: doc.data().timestamp.toDate(),
       }));
 
       // Funnel analysis: Calculate drop-off rates by screen
@@ -676,7 +696,7 @@ class AnalyticsEngine {
           screen: criticalDropOff.screen,
           usersSample: criticalDropOff.usersLost,
           totalUsers: funnelData[0]?.usersEntered || 0,
-          funnelData
+          funnelData,
         };
       }
 
@@ -684,7 +704,7 @@ class AnalyticsEngine {
         criticalDropOff: false,
         percentage: 0,
         screen: '',
-        funnelData
+        funnelData,
       };
     } catch (error) {
       console.error('Error analyzing user drop-off:', error);
@@ -696,7 +716,7 @@ class AnalyticsEngine {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
-      
+
       const previousStartDate = new Date(startDate);
       previousStartDate.setDate(previousStartDate.getDate() - days);
 
@@ -707,7 +727,7 @@ class AnalyticsEngine {
         where('eventType', '==', 'memory_access')
       );
 
-      // Previous period memory users  
+      // Previous period memory users
       const previousMemoryQuery = query(
         collection(this.db, 'user_interactions'),
         where('timestamp', '>=', Timestamp.fromDate(previousStartDate)),
@@ -731,7 +751,7 @@ class AnalyticsEngine {
         getDocs(currentMemoryQuery),
         getDocs(previousMemoryQuery),
         getDocs(currentUsersQuery),
-        getDocs(previousUsersQuery)
+        getDocs(previousUsersQuery),
       ]);
 
       const currentMemoryUsers = new Set(currentMemory.docs.map(doc => doc.data().userId)).size;
@@ -739,8 +759,10 @@ class AnalyticsEngine {
       const currentTotalUsers = new Set(currentUsers.docs.map(doc => doc.data().userId)).size;
       const previousTotalUsers = new Set(previousUsers.docs.map(doc => doc.data().userId)).size;
 
-      const currentAdoptionRate = currentTotalUsers > 0 ? (currentMemoryUsers / currentTotalUsers) * 100 : 0;
-      const previousAdoptionRate = previousTotalUsers > 0 ? (previousMemoryUsers / previousTotalUsers) * 100 : 0;
+      const currentAdoptionRate =
+        currentTotalUsers > 0 ? (currentMemoryUsers / currentTotalUsers) * 100 : 0;
+      const previousAdoptionRate =
+        previousTotalUsers > 0 ? (previousMemoryUsers / previousTotalUsers) * 100 : 0;
 
       const growth = previousAdoptionRate > 0 ? currentAdoptionRate - previousAdoptionRate : 0;
       const trend = growth > 2 ? 'up' : growth < -2 ? 'down' : 'stable';
@@ -752,7 +774,7 @@ class AnalyticsEngine {
         currentMemoryUsers,
         currentTotalUsers,
         memoryInteractions: currentMemory.size,
-        retentionData: await this.getMemoryUserRetention(days)
+        retentionData: await this.getMemoryUserRetention(days),
       };
     } catch (error) {
       console.error('Error analyzing memory adoption:', error);
@@ -767,37 +789,40 @@ class AnalyticsEngine {
 
   private async analyzeBreedingTrends(_days: number): Promise<any> {
     // Implementation would analyze breeding trends
-    return { 
+    return {
       emergingTrends: [{ name: 'Blue Dream x OG Kush', growth: 25, simulations: 150 }],
       engagementDrop: 8,
-      currentEngagement: 78
+      currentEngagement: 78,
     };
   }
 
   private async analyzeHighValueUsers(): Promise<any> {
-    return { 
-      count: 45, 
-      avgRevenue: 19.99, 
+    return {
+      count: 45,
+      avgRevenue: 19.99,
       retentionRate: 89,
-      insights: ['Utilizzano molto il sistema memory', 'Fanno molte simulazioni di breeding']
+      insights: ['Utilizzano molto il sistema memory', 'Fanno molte simulazioni di breeding'],
     };
   }
 
   private async analyzeAtRiskUsers(): Promise<any> {
-    return { 
-      count: 123, 
-      avgRevenue: 0, 
+    return {
+      count: 123,
+      avgRevenue: 0,
       retentionRate: 34,
-      insights: ['Basso engagement nelle prime 24h', 'Non utilizzano il breeding simulator']
+      insights: ['Basso engagement nelle prime 24h', 'Non utilizzano il breeding simulator'],
     };
   }
 
   private async analyzeBreedingEnthusiasts(): Promise<any> {
-    return { 
-      count: 78, 
-      avgRevenue: 12.50, 
+    return {
+      count: 78,
+      avgRevenue: 12.5,
       retentionRate: 91,
-      insights: ['Convertono molto agli abbonamenti premium', 'Contribuiscono ai contenuti della community']
+      insights: [
+        'Convertono molto agli abbonamenti premium',
+        'Contribuiscono ai contenuti della community',
+      ],
     };
   }
 
@@ -845,7 +870,7 @@ class AnalyticsEngine {
     // Implementation would get popular breeding crosses
     return [
       { parents: ['Blue Dream', 'OG Kush'], count: 45 },
-      { parents: ['White Widow', 'Sour Diesel'], count: 38 }
+      { parents: ['White Widow', 'Sour Diesel'], count: 38 },
     ];
   }
 
@@ -853,7 +878,7 @@ class AnalyticsEngine {
     // Implementation would get trending strains
     return [
       { name: 'Blue Dream', mentions: 156, trend: 'up' },
-      { name: 'OG Kush', mentions: 134, trend: 'stable' }
+      { name: 'OG Kush', mentions: 134, trend: 'stable' },
     ];
   }
 
@@ -861,20 +886,18 @@ class AnalyticsEngine {
     // Implementation would calculate breeding engagement
     return {
       avgSimulationsPerUser: 3.4,
-      retentionBySimulationCount: { 1: 45, 5: 78, 10: 89 }
+      retentionBySimulationCount: { 1: 45, 5: 78, 10: 89 },
     };
   }
 
   private async getGeneticPatterns(_startDate: Date): Promise<any> {
     // Implementation would analyze genetic patterns
     return {
-      mostSuccessfulCrosses: [
-        { cross: 'Blue Dream x OG Kush', successRate: 87 }
-      ],
+      mostSuccessfulCrosses: [{ cross: 'Blue Dream x OG Kush', successRate: 87 }],
       preferredTraits: [
         { trait: 'High THC', frequency: 234 },
-        { trait: 'Citrus Terpenes', frequency: 198 }
-      ]
+        { trait: 'Citrus Terpenes', frequency: 198 },
+      ],
     };
   }
 
@@ -893,7 +916,7 @@ class AnalyticsEngine {
     return {
       avgLoadTime: 1.2,
       errorRate: 0.5,
-      crashRate: 0.1
+      crashRate: 0.1,
     };
   }
 
@@ -926,20 +949,20 @@ class AnalyticsEngine {
   private calculateAverageSessionDuration(sessions: Record<string, any[]>): number {
     const sessionDurations = Object.values(sessions).map(sessionInteractions => {
       if (sessionInteractions.length < 2) return 0;
-      
-      const sortedInteractions = sessionInteractions.sort((a, b) => 
-        a.timestamp.getTime() - b.timestamp.getTime()
+
+      const sortedInteractions = sessionInteractions.sort(
+        (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
       );
-      
+
       const startTime = sortedInteractions[0].timestamp.getTime();
       const endTime = sortedInteractions[sortedInteractions.length - 1].timestamp.getTime();
-      
+
       return (endTime - startTime) / (1000 * 60); // Duration in minutes
     });
-    
+
     const validDurations = sessionDurations.filter(duration => duration > 0);
-    return validDurations.length > 0 
-      ? validDurations.reduce((sum, duration) => sum + duration, 0) / validDurations.length 
+    return validDurations.length > 0
+      ? validDurations.reduce((sum, duration) => sum + duration, 0) / validDurations.length
       : 0;
   }
 
@@ -950,30 +973,36 @@ class AnalyticsEngine {
     usersLost: number;
     dropOffRate: number;
   }[] {
-    const funnelSteps = ['SplashScreen', 'LoginScreen', 'LabChatScreen', 'BreedingScreen', 'SubscriptionScreen'];
+    const funnelSteps = [
+      'SplashScreen',
+      'LoginScreen',
+      'LabChatScreen',
+      'BreedingScreen',
+      'SubscriptionScreen',
+    ];
     const funnelData: any[] = [];
-    
+
     let previousUserCount = Object.keys(userJourneys).length;
-    
+
     funnelSteps.forEach((screen, index) => {
       const usersWhoReachedThisScreen = Object.values(userJourneys).filter(journey =>
         journey.some(interaction => interaction.screen === screen)
       ).length;
-      
+
       const usersLost = index === 0 ? 0 : previousUserCount - usersWhoReachedThisScreen;
       const dropOffRate = index === 0 ? 0 : (usersLost / previousUserCount) * 100;
-      
+
       funnelData.push({
         screen,
         usersEntered: previousUserCount,
         usersRetained: usersWhoReachedThisScreen,
         usersLost,
-        dropOffRate: Math.round(dropOffRate)
+        dropOffRate: Math.round(dropOffRate),
       });
-      
+
       previousUserCount = usersWhoReachedThisScreen;
     });
-    
+
     return funnelData;
   }
 
@@ -997,14 +1026,14 @@ class AnalyticsEngine {
       const snapshot = await getDocs(memoryUsersQuery);
       const memoryUsers = snapshot.docs.map(doc => ({
         userId: doc.data().userId,
-        startDate: doc.data().timestamp.toDate()
+        startDate: doc.data().timestamp.toDate(),
       }));
 
       // Calculate retention for each cohort
       const retentionMetrics = {
         day1: await this.calculateCohortRetention(memoryUsers, 1),
         day7: await this.calculateCohortRetention(memoryUsers, 7),
-        day30: await this.calculateCohortRetention(memoryUsers, 30)
+        day30: await this.calculateCohortRetention(memoryUsers, 30),
       };
 
       return retentionMetrics;
@@ -1018,7 +1047,7 @@ class AnalyticsEngine {
     if (users.length === 0) return 0;
 
     const retentionChecks = await Promise.all(
-      users.map(async (user) => {
+      users.map(async user => {
         const retentionDate = new Date(user.startDate);
         retentionDate.setDate(retentionDate.getDate() + retentionDays);
 
@@ -1026,7 +1055,11 @@ class AnalyticsEngine {
           collection(this.db, 'user_interactions'),
           where('userId', '==', user.userId),
           where('timestamp', '>=', Timestamp.fromDate(retentionDate)),
-          where('timestamp', '<', Timestamp.fromDate(new Date(retentionDate.getTime() + 24 * 60 * 60 * 1000))),
+          where(
+            'timestamp',
+            '<',
+            Timestamp.fromDate(new Date(retentionDate.getTime() + 24 * 60 * 60 * 1000))
+          ),
           limit(1)
         );
 
@@ -1040,14 +1073,16 @@ class AnalyticsEngine {
   }
 
   // ADVANCED SQL-STYLE AGGREGATION QUERIES
-  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<{
-    strainName: string;
-    totalRequests: number;
-    uniqueUsers: number;
-    averageSatisfaction: number;
-    trendDirection: 'up' | 'down' | 'stable';
-    weekOverWeekGrowth: number;
-  }[]> {
+  async getStrainPopularityWithPrecision(timeframe: number = 30): Promise<
+    {
+      strainName: string;
+      totalRequests: number;
+      uniqueUsers: number;
+      averageSatisfaction: number;
+      trendDirection: 'up' | 'down' | 'stable';
+      weekOverWeekGrowth: number;
+    }[]
+  > {
     try {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - timeframe);
@@ -1072,7 +1107,7 @@ class AnalyticsEngine {
 
       const [currentSnapshot, previousSnapshot] = await Promise.all([
         getDocs(currentStrainsQuery),
-        getDocs(previousStrainsQuery)
+        getDocs(previousStrainsQuery),
       ]);
 
       // Process current period data
@@ -1082,25 +1117,36 @@ class AnalyticsEngine {
       // Calculate trends and combine data
       const result = Object.keys(currentStrainData).map(strainName => {
         const current = currentStrainData[strainName];
-        const previous = previousStrainData[strainName] || { count: 0, users: new Set(), satisfaction: [] };
-        
-        const weekOverWeekGrowth = previous.count > 0 
-          ? Math.round(((current.count - previous.count) / previous.count) * 100)
-          : current.count > 0 ? 100 : 0;
+        const previous = previousStrainData[strainName] || {
+          count: 0,
+          users: new Set(),
+          satisfaction: [],
+        };
 
-        const trendDirection: 'up' | 'down' | 'stable' = 
-          weekOverWeekGrowth > 10 ? 'up' : 
-          weekOverWeekGrowth < -10 ? 'down' : 'stable';
+        const weekOverWeekGrowth =
+          previous.count > 0
+            ? Math.round(((current.count - previous.count) / previous.count) * 100)
+            : current.count > 0
+              ? 100
+              : 0;
+
+        const trendDirection: 'up' | 'down' | 'stable' =
+          weekOverWeekGrowth > 10 ? 'up' : weekOverWeekGrowth < -10 ? 'down' : 'stable';
 
         return {
           strainName,
           totalRequests: current.count,
           uniqueUsers: current.users.size,
-          averageSatisfaction: current.satisfaction.length > 0
-            ? Math.round((current.satisfaction.reduce((sum, val) => sum + val, 0) / current.satisfaction.length) * 100) / 100
-            : 0,
+          averageSatisfaction:
+            current.satisfaction.length > 0
+              ? Math.round(
+                  (current.satisfaction.reduce((sum, val) => sum + val, 0) /
+                    current.satisfaction.length) *
+                    100
+                ) / 100
+              : 0,
           trendDirection,
-          weekOverWeekGrowth: Math.abs(weekOverWeekGrowth)
+          weekOverWeekGrowth: Math.abs(weekOverWeekGrowth),
         };
       });
 
@@ -1111,28 +1157,32 @@ class AnalyticsEngine {
     }
   }
 
-  private aggregateStrainData(docs: any[]): Record<string, {
-    count: number;
-    users: Set<string>;
-    satisfaction: number[];
-  }> {
+  private aggregateStrainData(docs: any[]): Record<
+    string,
+    {
+      count: number;
+      users: Set<string>;
+      satisfaction: number[];
+    }
+  > {
     const strainData: Record<string, any> = {};
 
     docs.forEach(doc => {
       const data = doc.data();
       const strains = data.strainsMentioned || [];
       const userId = data.userId;
-      const satisfaction = data.userFeedback === 'helpful' ? 5 : data.userFeedback === 'not_helpful' ? 1 : 3;
+      const satisfaction =
+        data.userFeedback === 'helpful' ? 5 : data.userFeedback === 'not_helpful' ? 1 : 3;
 
       strains.forEach((strain: string) => {
         if (!strainData[strain]) {
           strainData[strain] = {
             count: 0,
             users: new Set(),
-            satisfaction: []
+            satisfaction: [],
           };
         }
-        
+
         strainData[strain].count++;
         strainData[strain].users.add(userId);
         strainData[strain].satisfaction.push(satisfaction);

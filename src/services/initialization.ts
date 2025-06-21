@@ -11,16 +11,16 @@ export async function initializeServices() {
   try {
     // Initialize RevenueCat
     await initializeRevenueCat();
-    
+
     // Initialize Notifications
     await initializeNotifications();
-    
+
     // Check and restore user session
     await restoreUserSession();
-    
+
     // Set up daily reset
     scheduleDailyReset();
-    
+
     // Log app open
     logAnalytics('app_open', {
       platform: Platform.OS,
@@ -33,21 +33,19 @@ export async function initializeServices() {
 
 async function initializeRevenueCat() {
   try {
-    const apiKey = Platform.OS === 'ios' 
-      ? REVENUECAT_APPLE_KEY 
-      : REVENUECAT_GOOGLE_KEY;
-    
+    const apiKey = Platform.OS === 'ios' ? REVENUECAT_APPLE_KEY : REVENUECAT_GOOGLE_KEY;
+
     if (apiKey) {
       Purchases.configure({ apiKey });
-      
+
       // Set up listener for purchase updates
-      Purchases.addCustomerInfoUpdateListener((info) => {
+      Purchases.addCustomerInfoUpdateListener(info => {
         // Update user subscription status
         const hasActiveSubscription = info.activeSubscriptions.length > 0;
         if (hasActiveSubscription) {
-          store.dispatch({ 
-            type: 'auth/updateUser', 
-            payload: { tier: 'premium' } 
+          store.dispatch({
+            type: 'auth/updateUser',
+            payload: { tier: 'premium' },
           });
         }
       });
@@ -61,12 +59,12 @@ async function initializeNotifications() {
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
-    
+
     if (existingStatus !== 'granted') {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    
+
     if (finalStatus === 'granted') {
       // Configure notification handling
       Notifications.setNotificationHandler({
@@ -88,14 +86,14 @@ async function restoreUserSession() {
     if (user) {
       // Update last active
       user.lastActive = new Date();
-      
+
       // Sync with Firebase
       await saveUserToFirebase(user);
-      
+
       // Restore to Redux
-      store.dispatch({ 
-        type: 'auth/loginSuccess', 
-        payload: user 
+      store.dispatch({
+        type: 'auth/loginSuccess',
+        payload: user,
       });
     }
   } catch (error) {
@@ -109,15 +107,18 @@ function scheduleDailyReset() {
   const midnight = new Date();
   midnight.setHours(24, 0, 0, 0);
   const timeUntilMidnight = midnight.getTime() - now.getTime();
-  
+
   // Schedule first reset
   setTimeout(() => {
     store.dispatch(resetDailyUsage());
-    
+
     // Schedule recurring daily resets
-    setInterval(() => {
-      store.dispatch(resetDailyUsage());
-    }, 24 * 60 * 60 * 1000);
+    setInterval(
+      () => {
+        store.dispatch(resetDailyUsage());
+      },
+      24 * 60 * 60 * 1000
+    );
   }, timeUntilMidnight);
 }
 

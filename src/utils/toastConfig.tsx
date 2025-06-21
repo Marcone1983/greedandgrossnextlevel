@@ -32,13 +32,7 @@ export const toastConfig = {
       text1Style={styles.text1}
       text2Style={styles.text2}
       renderLeadingIcon={() => (
-        <Icon
-          as={MaterialIcons}
-          name="error"
-          size={6}
-          color={colors.error}
-          style={styles.icon}
-        />
+        <Icon as={MaterialIcons} name="error" size={6} color={colors.error} style={styles.icon} />
       )}
     />
   ),
@@ -50,13 +44,7 @@ export const toastConfig = {
       text1Style={styles.text1}
       text2Style={styles.text2}
       renderLeadingIcon={() => (
-        <Icon
-          as={MaterialIcons}
-          name="info"
-          size={6}
-          color={colors.info}
-          style={styles.icon}
-        />
+        <Icon as={MaterialIcons} name="info" size={6} color={colors.info} style={styles.icon} />
       )}
     />
   ),

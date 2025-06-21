@@ -34,7 +34,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getOverviewMetrics.bind(this),
       requiresAuth: true,
-      rateLimit: 60
+      rateLimit: 60,
     });
 
     // Analytics Insights
@@ -43,7 +43,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getAnalyticsInsights.bind(this),
       requiresAuth: true,
-      rateLimit: 30
+      rateLimit: 30,
     });
 
     // User Analytics
@@ -52,7 +52,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getUserAnalytics.bind(this),
       requiresAuth: true,
-      rateLimit: 30
+      rateLimit: 30,
     });
 
     // Revenue Analytics
@@ -61,7 +61,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getRevenueAnalytics.bind(this),
       requiresAuth: true,
-      rateLimit: 20
+      rateLimit: 20,
     });
 
     // Breeding Analytics
@@ -70,7 +70,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getBreedingAnalytics.bind(this),
       requiresAuth: true,
-      rateLimit: 30
+      rateLimit: 30,
     });
 
     // Strain Popularity
@@ -79,7 +79,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getStrainPopularity.bind(this),
       requiresAuth: true,
-      rateLimit: 60
+      rateLimit: 60,
     });
 
     // User Segments
@@ -88,7 +88,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getUserSegments.bind(this),
       requiresAuth: true,
-      rateLimit: 20
+      rateLimit: 20,
     });
 
     // Memory System Analytics
@@ -97,7 +97,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getMemoryAnalytics.bind(this),
       requiresAuth: true,
-      rateLimit: 30
+      rateLimit: 30,
     });
 
     // Performance Metrics
@@ -106,7 +106,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getPerformanceMetrics.bind(this),
       requiresAuth: true,
-      rateLimit: 60
+      rateLimit: 60,
     });
 
     // Export Analytics
@@ -115,7 +115,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.exportAnalytics.bind(this),
       requiresAuth: true,
-      rateLimit: 5 // Limited due to resource intensity
+      rateLimit: 5, // Limited due to resource intensity
     });
 
     // Real-time Stats
@@ -124,7 +124,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getRealtimeStats.bind(this),
       requiresAuth: true,
-      rateLimit: 120
+      rateLimit: 120,
     });
 
     // System Health
@@ -133,7 +133,7 @@ class AdminDashboardAPI {
       method: 'GET',
       handler: this.getSystemHealth.bind(this),
       requiresAuth: false,
-      rateLimit: 60
+      rateLimit: 60,
     });
   }
 
@@ -152,7 +152,7 @@ class AdminDashboardAPI {
     headers: any = {}
   ): Promise<AdminAPIResponse> {
     const startTime = Date.now();
-    
+
     try {
       // Find matching endpoint
       const endpoint = this.findEndpoint(method, path);
@@ -172,12 +172,12 @@ class AdminDashboardAPI {
 
       // Execute handler
       const data = await endpoint.handler(params, query, body);
-      
+
       return {
         success: true,
         data,
         timestamp: new Date().toISOString(),
-        executionTime: Date.now() - startTime
+        executionTime: Date.now() - startTime,
       };
     } catch (error) {
       console.error('API Error:', error);
@@ -193,7 +193,7 @@ class AdminDashboardAPI {
   private async getOverviewMetrics(params: any, query: any): Promise<any> {
     const timeRange = parseInt(query.days) || 30;
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', timeRange);
-    
+
     return {
       timeRange,
       overview: dashboard.overview,
@@ -201,32 +201,32 @@ class AdminDashboardAPI {
         activeUsers: dashboard.overview.activeUsers.current,
         totalRevenue: dashboard.revenue.totalRevenue,
         conversions: dashboard.overview.conversions.current,
-        avgSessionTime: dashboard.performance?.avgLoadTime || 0
+        avgSessionTime: dashboard.performance?.avgLoadTime || 0,
       },
       trends: {
         userGrowth: dashboard.overview.activeUsers.growth,
         revenueGrowth: dashboard.revenue.revenueGrowth,
-        conversionGrowth: dashboard.overview.conversions.growth
-      }
+        conversionGrowth: dashboard.overview.conversions.growth,
+      },
     };
   }
 
   private async getAnalyticsInsights(params: any, query: any): Promise<any> {
     const timeRange = parseInt(query.days) || 30;
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', timeRange);
-    
+
     return {
       insights: dashboard.insights,
       totalInsights: dashboard.insights.length,
       highPriorityInsights: dashboard.insights.filter(i => i.priority === 'high').length,
-      actionableInsights: dashboard.insights.filter(i => i.actionable).length
+      actionableInsights: dashboard.insights.filter(i => i.actionable).length,
     };
   }
 
   private async getUserAnalytics(params: any, query: any): Promise<any> {
     const timeRange = parseInt(query.days) || 30;
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', timeRange);
-    
+
     return {
       overview: dashboard.overview.activeUsers,
       segments: dashboard.userSegments,
@@ -235,101 +235,102 @@ class AdminDashboardAPI {
         name: segment.name,
         userCount: segment.userCount,
         avgRevenue: segment.averageRevenue,
-        retentionRate: segment.retentionRate
-      }))
+        retentionRate: segment.retentionRate,
+      })),
     };
   }
 
   private async getRevenueAnalytics(params: any, query: any): Promise<any> {
     const timeRange = parseInt(query.days) || 30;
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', timeRange);
-    
+
     return {
       ...dashboard.revenue,
       revenueInsights: dashboard.insights.filter(i => i.type === 'revenue'),
       projectedGrowth: dashboard.revenue.projectedRevenue - dashboard.revenue.totalRevenue,
       churnAnalysis: {
         churnRevenue: dashboard.revenue.churnRevenue,
-        churnRate: (dashboard.revenue.churnRevenue / dashboard.revenue.totalRevenue) * 100
-      }
+        churnRate: (dashboard.revenue.churnRevenue / dashboard.revenue.totalRevenue) * 100,
+      },
     };
   }
 
   private async getBreedingAnalytics(params: any, query: any): Promise<any> {
     const timeRange = parseInt(query.days) || 30;
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', timeRange);
-    
+
     return {
       ...dashboard.breeding,
       breedingInsights: dashboard.insights.filter(i => i.type === 'breeding_trends'),
       engagementMetrics: {
         totalSimulations: dashboard.breeding.totalSimulations,
         avgSimulationsPerUser: dashboard.breeding.userEngagement.avgSimulationsPerUser,
-        retentionByActivity: dashboard.breeding.userEngagement.retentionBySimulationCount
+        retentionByActivity: dashboard.breeding.userEngagement.retentionBySimulationCount,
       },
-      topCombinations: dashboard.breeding.popularCrosses.slice(0, 10)
+      topCombinations: dashboard.breeding.popularCrosses.slice(0, 10),
     };
   }
 
   private async getStrainPopularity(params: any, query: any): Promise<any> {
     const timeframe = parseInt(query.timeframe) || 30;
     const limit = parseInt(query.limit) || 50;
-    
+
     const strainData = await analyticsEngine.getStrainPopularityWithPrecision(timeframe);
-    
+
     return {
       strains: strainData.slice(0, limit),
       summary: {
         totalStrains: strainData.length,
         trendingUp: strainData.filter(s => s.trendDirection === 'up').length,
         trendingDown: strainData.filter(s => s.trendDirection === 'down').length,
-        avgSatisfaction: strainData.length > 0
-          ? strainData.reduce((sum, s) => sum + s.averageSatisfaction, 0) / strainData.length
-          : 0
-      }
+        avgSatisfaction:
+          strainData.length > 0
+            ? strainData.reduce((sum, s) => sum + s.averageSatisfaction, 0) / strainData.length
+            : 0,
+      },
     };
   }
 
   private async getUserSegments(params: any, query: any): Promise<any> {
     const timeRange = parseInt(query.days) || 30;
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', timeRange);
-    
+
     const segments = dashboard.userSegments.map(segment => ({
       ...segment,
       revenueContribution: segment.userCount * segment.averageRevenue,
-      averageEngagement: segment.retentionRate
+      averageEngagement: segment.retentionRate,
     }));
-    
+
     return {
       segments,
       segmentSummary: {
         totalSegments: segments.length,
         totalUsers: segments.reduce((sum, s) => sum + s.userCount, 0),
         totalRevenue: segments.reduce((sum, s) => sum + s.revenueContribution, 0),
-        avgRetention: segments.reduce((sum, s) => sum + s.retentionRate, 0) / segments.length
-      }
+        avgRetention: segments.reduce((sum, s) => sum + s.retentionRate, 0) / segments.length,
+      },
     };
   }
 
   private async getMemoryAnalytics(params: any, query: any): Promise<any> {
     const userId = query.userId || 'all';
-    
+
     if (userId === 'all') {
       const memoryInsights = await analyticsEngine.generateDashboardAnalytics('admin', 30);
       const memoryRelatedInsights = memoryInsights.insights.filter(i => i.id.includes('memory'));
-      
+
       return {
         adoption: {
           rate: 65, // This would come from actual analytics
           trend: 'up',
-          growth: 5
+          growth: 5,
         },
         usage: {
           totalConversations: 12500,
           avgConversationsPerUser: 8.5,
-          retentionRates: { day1: 89, day7: 67, day30: 45 }
+          retentionRates: { day1: 89, day7: 67, day30: 45 },
         },
-        insights: memoryRelatedInsights
+        insights: memoryRelatedInsights,
       };
     } else {
       const userAnalytics = await memoryService.getConversationAnalytics(userId);
@@ -340,43 +341,43 @@ class AdminDashboardAPI {
   private async getPerformanceMetrics(params: any, query: any): Promise<any> {
     const timeRange = parseInt(query.days) || 7;
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', timeRange);
-    
+
     return {
       ...dashboard.performance,
       systemHealth: {
         uptime: 99.9,
         responseTime: dashboard.performance.avgLoadTime,
         errorRate: dashboard.performance.errorRate,
-        throughput: 1500 // requests per minute
+        throughput: 1500, // requests per minute
       },
       alerts: dashboard.insights
         .filter(i => i.type === 'performance' && i.priority === 'high')
         .map(i => ({
           type: i.title,
           message: i.description,
-          severity: i.priority
-        }))
+          severity: i.priority,
+        })),
     };
   }
 
   private async exportAnalytics(params: any, query: any): Promise<any> {
     const format = params.format || 'json';
     const dateRange = parseInt(query.dateRange) || 90;
-    
+
     const dashboard = await analyticsEngine.generateDashboardAnalytics('admin', dateRange);
-    
+
     const exportData = {
       metadata: {
         exportDate: new Date().toISOString(),
         dateRange: `${dateRange} days`,
-        dataVersion: '1.0'
+        dataVersion: '1.0',
       },
       overview: dashboard.overview,
       insights: dashboard.insights,
       userSegments: dashboard.userSegments,
       revenue: dashboard.revenue,
       breeding: dashboard.breeding,
-      performance: dashboard.performance
+      performance: dashboard.performance,
     };
 
     if (format === 'json') {
@@ -398,9 +399,9 @@ class AdminDashboardAPI {
       systemLoad: {
         cpu: 45,
         memory: 67,
-        storage: 23
+        storage: 23,
       },
-      alerts: []
+      alerts: [],
     };
   }
 
@@ -413,9 +414,9 @@ class AdminDashboardAPI {
         database: 'operational',
         analytics: 'operational',
         memory: 'operational',
-        api: 'operational'
+        api: 'operational',
       },
-      lastCheck: new Date().toISOString()
+      lastCheck: new Date().toISOString(),
     };
   }
 
@@ -466,12 +467,12 @@ class AdminDashboardAPI {
   private checkRateLimit(headers: any, limit: number): boolean {
     const clientId = headers['x-client-id'] || 'anonymous';
     const now = Date.now();
-    const _windowStart = now - (60 * 1000); // 1 minute window
+    const _windowStart = now - 60 * 1000; // 1 minute window
 
     const clientLimit = this.rateLimitStore.get(clientId);
-    
+
     if (!clientLimit || clientLimit.resetTime < now) {
-      this.rateLimitStore.set(clientId, { count: 1, resetTime: now + (60 * 1000) });
+      this.rateLimitStore.set(clientId, { count: 1, resetTime: now + 60 * 1000 });
       return true;
     }
 
@@ -488,30 +489,30 @@ class AdminDashboardAPI {
       success: false,
       error: message,
       timestamp: new Date().toISOString(),
-      executionTime: Date.now() - startTime
+      executionTime: Date.now() - startTime,
     };
   }
 
   private convertToCSV(data: any): string {
     // Basic CSV conversion - would need proper CSV library for production
     const insights = data.insights || [];
-    
+
     let csv = 'Type,Title,Description,Value,Trend,Priority\n';
-    
+
     insights.forEach((insight: any) => {
       csv += `"${insight.type}","${insight.title}","${insight.description}","${insight.value}","${insight.trend}","${insight.priority}"\n`;
     });
-    
+
     return csv;
   }
 
   // PUBLIC INTERFACE FOR EXPRESS/FASTIFY INTEGRATION
   getExpressRoutes(): { method: string; path: string; handler: Function }[] {
     const routes: { method: string; path: string; handler: Function }[] = [];
-    
+
     for (const [key, _endpoint] of this.endpoints) {
       const [method, path] = key.split(':');
-      
+
       routes.push({
         method: method.toLowerCase(),
         path,
@@ -524,17 +525,22 @@ class AdminDashboardAPI {
             req.body,
             req.headers
           );
-          
-          const statusCode = result.success ? 200 : 
-            result.error?.includes('not found') ? 404 :
-            result.error?.includes('Unauthorized') ? 401 :
-            result.error?.includes('Rate limit') ? 429 : 500;
-          
+
+          const statusCode = result.success
+            ? 200
+            : result.error?.includes('not found')
+              ? 404
+              : result.error?.includes('Unauthorized')
+                ? 401
+                : result.error?.includes('Rate limit')
+                  ? 429
+                  : 500;
+
           res.status(statusCode).json(result);
-        }
+        },
       });
     }
-    
+
     return routes;
   }
 }

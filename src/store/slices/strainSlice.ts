@@ -61,7 +61,7 @@ const strainSlice = createSlice({
     setFilters: (state, action: PayloadAction<Partial<StrainState['filters']>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
-    clearFilters: (state) => {
+    clearFilters: state => {
       state.filters = initialState.filters;
     },
   },

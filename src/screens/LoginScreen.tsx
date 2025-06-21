@@ -8,17 +8,7 @@ import {
   Keyboard,
   ImageBackground,
 } from 'react-native';
-import {
-  VStack,
-  Input,
-  Button,
-  Text,
-  Heading,
-  useToast,
-  Icon,
-  HStack,
-  Divider,
-} from 'native-base';
+import { VStack, Input, Button, Text, Heading, useToast, Icon, HStack, Divider } from 'native-base';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
@@ -56,7 +46,7 @@ export default function LoginScreen() {
       const user = generateAnonymousUser(username);
       await saveUser(user);
       dispatch(loginSuccess(user));
-      
+
       toast.show({
         description: `Benvenuto ${username}!`,
         colorScheme: 'success',
@@ -99,12 +89,7 @@ export default function LoginScreen() {
           >
             <VStack space={8} alignItems="center" style={styles.form}>
               <View style={styles.logoContainer}>
-                <Icon
-                  as={MaterialIcons}
-                  name="eco"
-                  size={80}
-                  color={colors.primary}
-                />
+                <Icon as={MaterialIcons} name="eco" size={80} color={colors.primary} />
                 <View style={styles.glowEffect} />
               </View>
 
@@ -112,9 +97,7 @@ export default function LoginScreen() {
                 <Heading size="2xl" style={styles.title}>
                   GREED & GROSS
                 </Heading>
-                <Text style={styles.subtitle}>
-                  Cannabis Breeding Simulator
-                </Text>
+                <Text style={styles.subtitle}>Cannabis Breeding Simulator</Text>
               </VStack>
 
               <VStack space={4} width="100%" maxWidth={300}>
@@ -156,14 +139,7 @@ export default function LoginScreen() {
                   _text={{
                     fontFamily: 'Roboto-Bold',
                   }}
-                  leftIcon={
-                    <Icon
-                      as={MaterialIcons}
-                      name="login"
-                      size={5}
-                      color="white"
-                    />
-                  }
+                  leftIcon={<Icon as={MaterialIcons} name="login" size={5} color="white" />}
                 >
                   Accedi
                 </Button>
@@ -190,12 +166,7 @@ export default function LoginScreen() {
                     bg: 'rgba(255, 215, 0, 0.1)',
                   }}
                   leftIcon={
-                    <Icon
-                      as={MaterialIcons}
-                      name="visibility"
-                      size={5}
-                      color={colors.secondary}
-                    />
+                    <Icon as={MaterialIcons} name="visibility" size={5} color={colors.secondary} />
                   }
                 >
                   Modalità Ospite

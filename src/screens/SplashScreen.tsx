@@ -22,10 +22,7 @@ export default function SplashScreen() {
   const scale = useSharedValue(0.8);
 
   useEffect(() => {
-    rotation.value = withRepeat(
-      withTiming(360, { duration: 3000, easing: Easing.linear }),
-      -1
-    );
+    rotation.value = withRepeat(withTiming(360, { duration: 3000, easing: Easing.linear }), -1);
 
     scale.value = withSequence(
       withTiming(1, { duration: 500 }),
@@ -45,17 +42,11 @@ export default function SplashScreen() {
   }, []);
 
   const animatedDNAStyle = useAnimatedStyle(() => ({
-    transform: [
-      { rotate: `${rotation.value}deg` },
-      { scale: scale.value },
-    ],
+    transform: [{ rotate: `${rotation.value}deg` }, { scale: scale.value }],
   }));
 
   return (
-    <LinearGradient
-      colors={gradients.dark}
-      style={styles.container}
-    >
+    <LinearGradient colors={gradients.dark} style={styles.container}>
       <View style={styles.content}>
         <Animated.View style={[styles.logoContainer, animatedDNAStyle]}>
           <LottieView
@@ -79,14 +70,10 @@ export default function SplashScreen() {
               bg: 'linear-gradient(90deg, #4CAF50, #8BC34A)',
             }}
           />
-          <Text style={styles.progressText}>
-            {Math.round(loadingProgress * 100)}%
-          </Text>
+          <Text style={styles.progressText}>{Math.round(loadingProgress * 100)}%</Text>
         </View>
 
-        <Text style={styles.loadingText}>
-          Inizializzazione laboratorio genetico...
-        </Text>
+        <Text style={styles.loadingText}>Inizializzazione laboratorio genetico...</Text>
       </View>
 
       <View style={styles.footer}>
