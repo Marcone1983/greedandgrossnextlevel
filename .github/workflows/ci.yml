@@ -172,7 +172,13 @@ jobs:
         # Verify keystore exists
         ls -la android/app/greed-gross-release-key.keystore
         
-        # Keystore config already in gradle.properties
+        # Add keystore config to gradle.properties
+        cat >> android/gradle.properties << EOF
+        GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
+        GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+        GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+        EOF
     
     - name: 🏗️ Build APK
       if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
