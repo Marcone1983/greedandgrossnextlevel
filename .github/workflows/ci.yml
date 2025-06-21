@@ -93,7 +93,8 @@ jobs:
       run: |
         npm install --legacy-peer-deps
     
-    # Skip fix-gradle-wrapper.sh - let gradle-build-action handle it
+    - name: 🐘 Setup Gradle
+      uses: gradle/gradle-build-action@v2
     
     - name: 🔐 Create environment file
       run: |
@@ -178,18 +179,19 @@ jobs:
     - name: 🔧 Prepare Gradle build
       run: |
         cd GreedGross
-        # Create lasspath file that Gradle seems to look for
-        touch lasspath
+        # Make gradlew executable
         chmod +x gradlew
+        # Create gradle.properties if needed
+        touch gradle.properties
+        # Create empty lasspath in multiple locations
+        touch lasspath
+        touch ../lasspath
         
     - name: 🏗️ Build APK
       run: |
         cd GreedGross
-        # Download and run gradle directly to avoid wrapper issues
-        wget -q https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
-        unzip -q gradle-8.10.2-bin.zip
-        ./gradle-8.10.2/bin/gradle assembleRelease --no-daemon
-        rm -rf gradle-8.10.2*
+        # Run gradlew with explicit shell to avoid path interpretation issues
+        /bin/bash ./gradlew assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -204,11 +206,8 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        # Download and run gradle directly to avoid wrapper issues
-        wget -q https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
-        unzip -q gradle-8.10.2-bin.zip
-        ./gradle-8.10.2/bin/gradle bundleRelease --no-daemon
-        rm -rf gradle-8.10.2*
+        # Run gradlew with explicit shell to avoid path interpretation issues
+        /bin/bash ./gradlew bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
