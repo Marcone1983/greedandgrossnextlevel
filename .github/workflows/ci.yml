@@ -180,15 +180,18 @@ jobs:
       run: |
         echo "Building APK with Gradle..."
         cd android
+        # Debug: Check gradle wrapper files
+        echo "=== Checking gradle wrapper files ==="
+        ls -la gradle/wrapper/
+        echo "=== Current directory ==="
+        pwd
         # Clean CMake cache to avoid version conflicts
         rm -rf app/.cxx
         rm -rf app/build
         # Workaround: Create empty lasspath file if Gradle is looking for it
         touch lasspath
         chmod +x gradlew
-        # List available tasks to debug
-        ./gradlew tasks --no-daemon
-        # Try without clean task
+        # Try building directly
         ./gradlew assembleRelease --no-daemon
         
         # Verify APK was created
