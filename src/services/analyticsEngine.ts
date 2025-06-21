@@ -1120,7 +1120,7 @@ class AnalyticsEngine {
 
     docs.forEach(doc => {
       const data = doc.data();
-      const strains = data.strainsHentioned || [];
+      const strains = data.strainsMentioned || [];
       const userId = data.userId;
       const satisfaction = data.userFeedback === 'helpful' ? 5 : data.userFeedback === 'not_helpful' ? 1 : 3;
 
