@@ -185,7 +185,11 @@ jobs:
     - name: 🏗️ Build APK
       run: |
         cd GreedGross
-        ./gradlew assembleRelease --no-daemon
+        # Download and run gradle directly to avoid wrapper issues
+        wget -q https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+        unzip -q gradle-8.10.2-bin.zip
+        ./gradle-8.10.2/bin/gradle assembleRelease --no-daemon
+        rm -rf gradle-8.10.2*
         
     - name: 📦 Process APK
       run: |
@@ -200,7 +204,11 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        ./gradlew bundleRelease --no-daemon
+        # Download and run gradle directly to avoid wrapper issues
+        wget -q https://services.gradle.org/distributions/gradle-8.10.2-bin.zip
+        unzip -q gradle-8.10.2-bin.zip
+        ./gradle-8.10.2/bin/gradle bundleRelease --no-daemon
+        rm -rf gradle-8.10.2*
         
     - name: 📦 Process AAB
       run: |
