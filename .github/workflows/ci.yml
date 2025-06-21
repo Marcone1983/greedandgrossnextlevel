@@ -92,9 +92,16 @@ jobs:
     - name: 🔧 Install dependencies
       run: |
         npm install --legacy-peer-deps
+        # Debug: Check what's in node_modules
+        echo "=== Checking if React Native CLI is installed ==="
+        ls -la node_modules/@react-native-community/cli-platform-android/ || echo "NOT FOUND"
         # Create symlink so GreedGross can find node_modules
         cd GreedGross
-        ln -s ../node_modules node_modules
+        ln -sf ../node_modules node_modules
+        # Verify symlink
+        echo "=== Verifying symlink ==="
+        ls -la node_modules/ | head -5
+        ls -la node_modules/@react-native-community/cli-platform-android/ || echo "NOT ACCESSIBLE via symlink"
     
     - name: 🔐 Create environment file
       run: |

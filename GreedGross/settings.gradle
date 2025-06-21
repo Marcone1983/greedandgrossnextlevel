@@ -1,5 +1,5 @@
 pluginManagement {
-    includeBuild("../node_modules/@react-native/gradle-plugin")
+    includeBuild("node_modules/@react-native/gradle-plugin")
     repositories {
         google()
         mavenCentral()
@@ -9,36 +9,7 @@ pluginManagement {
 
 rootProject.name = 'GreedGross'
 
-def nodeModulesPath = findNodeModulesPath(settings.rootDir)
-if (nodeModulesPath != null) {
-    apply from: file("$nodeModulesPath/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
-}
-
-def findNodeModulesPath(rootDir) {
-    println "=== GRADLE: Looking for node_modules from rootDir: $rootDir ==="
-    def nodeModules = file("$rootDir/../node_modules")
-    println "=== GRADLE: Checking $nodeModules ==="
-    if (nodeModules.exists()) {
-        println "=== GRADLE: Found at $nodeModules.absolutePath ==="
-        def nativeModulesFile = file("$nodeModules.absolutePath/@react-native-community/cli-platform-android/native_modules.gradle")
-        println "=== GRADLE: Checking if native_modules.gradle exists: ${nativeModulesFile.exists()} ==="
-        if (nativeModulesFile.exists()) {
-            return nodeModules.absolutePath
-        }
-    }
-    nodeModules = file("$rootDir/node_modules")
-    println "=== GRADLE: Checking $nodeModules ==="
-    if (nodeModules.exists()) {
-        println "=== GRADLE: Found at $nodeModules.absolutePath ==="
-        def nativeModulesFile = file("$nodeModules.absolutePath/@react-native-community/cli-platform-android/native_modules.gradle")
-        println "=== GRADLE: Checking if native_modules.gradle exists: ${nativeModulesFile.exists()} ==="
-        if (nativeModulesFile.exists()) {
-            return nodeModules.absolutePath
-        }
-    }
-    println "=== GRADLE: node_modules NOT FOUND ==="
-    return null
-}
+// Con React Native 0.79.0, native_modules è gestito automaticamente dal plugin
 include ':app'
 
 dependencyResolutionManagement {

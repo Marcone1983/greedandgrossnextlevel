@@ -12,10 +12,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        def nodeModulesPath = file("$rootDir/../node_modules")
-        if (nodeModulesPath.exists()) {
-            maven { url("$nodeModulesPath/react-native/android") }
-        }
+        maven { url("$rootDir/node_modules/react-native/android") }
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.0")
@@ -31,10 +28,7 @@ allprojects {
         google()
         mavenCentral()
         maven { url "https://www.jitpack.io" }
-        def nodeModulesPath = file("$rootDir/../node_modules")
-        if (nodeModulesPath.exists()) {
-            maven { url("$nodeModulesPath/react-native/android") }
-        }
+        maven { url("$rootDir/node_modules/react-native/android") }
     }
 }
 
