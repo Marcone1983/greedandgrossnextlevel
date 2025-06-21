@@ -185,14 +185,16 @@ jobs:
         ls -la gradle/wrapper/
         echo "=== Current directory ==="
         pwd
+        echo "=== Available gradle tasks ==="
+        ./gradlew tasks --no-daemon || true
         # Clean CMake cache to avoid version conflicts
         rm -rf app/.cxx
         rm -rf app/build
         # Workaround: Create empty lasspath file if Gradle is looking for it
         touch lasspath
         chmod +x gradlew
-        # Try building directly
-        ./gradlew assembleRelease --no-daemon
+        # Try building with app module prefix
+        ./gradlew :app:assembleRelease --no-daemon --warning-mode all
         
         # Verify APK was created
         ls -la app/build/outputs/apk/release/
