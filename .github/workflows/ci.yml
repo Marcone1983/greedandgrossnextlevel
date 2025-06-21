@@ -81,10 +81,8 @@ jobs:
         distribution: 'temurin'
         java-version: ${{ env.JAVA_VERSION }}
     
-    - name: 🐘 Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: wrapper
+    # Skip gradle-build-action to avoid potential issues
+    # We'll use the gradle wrapper directly
     
     - name: 📱 Setup React Native CLI
       run: npm install -g @react-native-community/cli
@@ -212,12 +210,12 @@ jobs:
     - name: 🏗️ Build APK
       run: |
         cd GreedGross
-        # Use the gradle wrapper
-        ./gradlew --version
+        # Use the gradle wrapper with explicit settings file
+        ./gradlew --version -c settings.gradle
         
         # Debug: List available projects
         echo "=== Available Gradle projects ==="
-        ./gradlew projects
+        ./gradlew projects -c settings.gradle
         
         # Debug: Check if app directory exists
         echo "=== Checking app directory ==="
@@ -225,7 +223,7 @@ jobs:
         
         # Try different task formats
         echo "=== Trying to build APK ==="
-        ./gradlew assembleRelease --no-daemon --info
+        ./gradlew assembleRelease --no-daemon --info -c settings.gradle
         
     - name: 📦 Process APK
       run: |
@@ -240,7 +238,7 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        ./gradlew bundleRelease --no-daemon --info
+        ./gradlew bundleRelease --no-daemon --info -c settings.gradle
         
     - name: 📦 Process AAB
       run: |
