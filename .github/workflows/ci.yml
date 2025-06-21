@@ -65,10 +65,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     
-    strategy:
-      matrix:
-        build-type: [apk, aab]
-    
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
@@ -181,7 +177,6 @@ jobs:
         EOF
     
     - name: 🏗️ Build APK
-      if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
       run: |
         echo "Building APK with Gradle..."
         cd android
@@ -201,7 +196,6 @@ jobs:
         mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
     
     - name: 🏗️ Build AAB (App Bundle)
-      if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
       run: |
         echo "Building AAB with Gradle..."
         cd android
@@ -237,18 +231,16 @@ jobs:
         fi
     
     - name: 📤 Upload APK Artifact
-      if: matrix.build-type == 'apk' || github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both'
       uses: actions/upload-artifact@v4
       with:
-        name: greed-gross-apk-${{ matrix.build-type }}
+        name: greed-gross-apk
         path: android/app/build/outputs/apk/release/greed-gross-*.apk
         retention-days: 30
     
     - name: 📤 Upload AAB Artifact
-      if: matrix.build-type == 'aab' || github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both'
       uses: actions/upload-artifact@v4
       with:
-        name: greed-gross-aab-${{ matrix.build-type }}
+        name: greed-gross-aab
         path: android/app/build/outputs/bundle/release/greed-gross-*.aab
         retention-days: 30
     
