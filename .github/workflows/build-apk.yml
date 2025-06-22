@@ -112,13 +112,17 @@ jobs:
       - name: Build APK
         working-directory: ./GreedGross
         run: |
-          # Debug: mostra dove siamo
-          echo "=== Current directory ==="
-          pwd
-          echo "=== Directory contents ==="
-          ls -la
-          echo "=== Try to build ==="
           ./gradlew assembleRelease --no-daemon
+          
+      - name: Find APK
+        working-directory: ./GreedGross
+        run: |
+          echo "=== Searching for APK files ==="
+          find . -name "*.apk" -type f
+          echo "=== Check build outputs ==="
+          ls -la app/build/outputs/ || echo "No outputs directory"
+          ls -la app/build/outputs/apk/ || echo "No apk directory"
+          ls -la app/build/outputs/apk/release/ || echo "No release directory"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
