@@ -136,6 +136,25 @@ jobs:
           # Sostituisci la linea 165 che controlla hermesEnabled
           sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle
           
+      - name: Test Metro Bundler
+        run: |
+          echo "=== Testing Metro bundler directly ==="
+          npx react-native bundle \
+            --platform android \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output test-bundle.js \
+            --sourcemap-output test-bundle.map \
+            --assets-dest test-assets \
+            --verbose 2>&1 | tee metro-test.log || {
+              echo "=== Metro bundler failed! ==="
+              echo "=== Full error log ==="
+              cat metro-test.log
+              echo "=== Checking for module resolution errors ==="
+              grep -i "error\|cannot find\|module\|unable" metro-test.log || true
+              exit 1
+            }
+          
       - name: Verify JavaScript files
         run: |
           echo "=== Check index.js ==="
@@ -154,12 +173,25 @@ jobs:
           gradle -p GreedGross clean
           
           # Build con output dettagliato per vedere errori JavaScript
-          gradle -p GreedGross assembleRelease --no-daemon --info 2>&1 | tee build.log || true
+          gradle -p GreedGross assembleRelease --no-daemon --info --stacktrace 2>&1 | tee build.log || true
           
           # Se fallisce, mostra gli ultimi errori
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "=== BUILD FAILED - Ultimi 100 righe del log ==="
-            tail -100 build.log
+            echo "=== BUILD FAILED - Searching for JavaScript bundling errors ==="
+            echo "=== Last 200 lines of build log ==="
+            tail -200 build.log
+            echo ""
+            echo "=== Searching for Metro/Bundle/JavaScript errors ==="
+            grep -A 20 -B 10 -i "metro\|bundle\|javascript\|js\|SyntaxError\|TypeError\|ReferenceError\|Cannot find module" build.log || true
+            echo ""
+            echo "=== Metro config contents ==="
+            cat metro.config.js || echo "No metro.config.js found"
+            echo ""
+            echo "=== Babel config contents ==="
+            cat babel.config.js || echo "No babel.config.js found"
+            echo ""
+            echo "=== Package.json scripts ==="
+            cat package.json | grep -A 10 '"scripts"' || true
             exit 1
           fi
           
