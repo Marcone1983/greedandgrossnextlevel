@@ -270,7 +270,7 @@ jobs:
           cd GreedGross
           
           echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon 
           
           echo "=== Finding where the APK actually is ==="
           find app/build -name "*.apk" -type f
