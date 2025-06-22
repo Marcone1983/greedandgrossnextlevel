@@ -118,17 +118,17 @@ jobs:
         working-directory: ./GreedGross
         run: |
           echo "=== Searching for APK files ==="
-          find . -name "*.apk" -type f
+          find . -name "Greed&Gross.apk" -type f
           echo "=== Check build outputs ==="
           ls -la app/build/outputs/ || echo "No outputs directory"
           ls -la app/build/outputs/apk/ || echo "No apk directory"
-          ls -la app/build/outputs/apk/release/ || echo "No release directory"
+          ls -la app/build/outputs/apk/release/ || 
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: greed-gross-apk
-          path: GreedGross/app/build/outputs/apk/release/*.apk
+          path: GreedGross/app/build/outputs/apk/release/Greed&Gross.apk
           retention-days: 30
 
       - name: Build Summary
