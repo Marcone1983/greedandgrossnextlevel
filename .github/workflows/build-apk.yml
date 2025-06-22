@@ -136,6 +136,15 @@ jobs:
           # Sostituisci la linea 165 che controlla hermesEnabled
           sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle
           
+      - name: Verify JavaScript files
+        run: |
+          echo "=== Check index.js ==="
+          ls -la index.js
+          echo "=== Check Metro config ==="
+          ls -la metro.config.js || echo "No metro.config.js"
+          echo "=== Check babel config ==="
+          ls -la babel.config.js || echo "No babel.config.js"
+          
       - name: Build APK
         run: |
           # Pulisci autolinking generato precedentemente
@@ -143,7 +152,7 @@ jobs:
           
           # IMPORTANTE: Esegui dalla ROOT, non da GreedGross!
           gradle -p GreedGross clean
-          gradle -p GreedGross assembleRelease --no-daemon
+          gradle -p GreedGross assembleRelease --no-daemon --stacktrace
           
       - name: Find APK
         working-directory: ./GreedGross
