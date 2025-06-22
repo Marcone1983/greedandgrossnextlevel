@@ -108,13 +108,49 @@ jobs:
           echo "React Native plugin line after fix:"
           grep "react-native-gradle-plugin" build.gradle
           
+          echo "=== React Native plugin path ==="
+          RN_PLUGIN_PATH=""
+          if [ -d "../node_modules/@react-native/gradle-plugin" ]; then
+            RN_PLUGIN_PATH="../node_modules/@react-native/gradle-plugin"
+          elif [ -d "../node_modules/react-native/android" ]; then
+            RN_PLUGIN_PATH="../node_modules/react-native/android"
+          fi
+          
+          if [ -z "$RN_PLUGIN_PATH" ]; then
+            echo "React Native plugin not found"
+            exit 1
+          fi
+          
+          echo "Found React Native at: $RN_PLUGIN_PATH"
+          
           cat > lasspath << EOF
+          pluginManagement {
+              includeBuild("$RN_PLUGIN_PATH")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          
           rootProject.name = 'GreedGross'
           include ':app'
+          
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
           EOF
           
+          # Fix compileSdkVersion without problematic syntax
           if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
-            sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
+            echo "Adding compileSdkVersion to app/build.gradle"
+            # Use a safer approach
+            cp app/build.gradle app/build.gradle.backup
+            awk '/android \{/ { print; print "    compileSdkVersion 34"; next } { print }' app/build.gradle.backup > app/build.gradle
           fiimplementation.*:)" app/build.gradle || echo "No missing versions in APP"
           
           echo "=== FIXING ALL FOUND ISSUES ==="
