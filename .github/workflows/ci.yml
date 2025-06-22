@@ -94,42 +94,20 @@ jobs:
           
           chmod +x gradlew
           
-          echo "=== ANALISI COMPLETA DEGLI ERRORI ==="
-          
-          echo "1. CLASSPATH DEPENDENCIES ANALYSIS:"
-          echo "Checking ALL classpath dependencies for missing versions:"
-          grep -A 10 "dependencies {" build.gradle
-          
-          echo "2. REPOSITORY CONFIGURATION:"
-          echo "Checking if repositories are accessible:"
-          grep -A 10 "repositories {" build.gradle
-          
-          echo "3. REACT NATIVE VERSION:"
+          echo "=== React Native version ==="
           RN_VERSION=$(grep '"react-native"' ../package.json | sed 's/.*"react-native": *"\([^"]*\)".*/\1/' | sed 's/\^//')
           echo "Found React Native version: $RN_VERSION"
           
-          echo "=== FIXING ALL CLASSPATH ISSUES ==="
-          
+          echo "=== FIXING React Native plugin version ==="
           cp build.gradle build.gradle.backup
           
-          # Fix 1: React Native plugin missing version
+          # Fix React Native plugin missing version
           sed -i 's/classpath("com\.facebook\.react:react-native-gradle-plugin")/classpath("com.facebook.react:react-native-gradle-plugin:'$RN_VERSION'")/' build.gradle
           
-          # Fix 2: Check if there are other missing versions in classpath
-          echo "Checking for other classpath issues..."
-          grep "classpath.*:)" build.gradle && echo "Found other missing versions!" || echo "No other missing versions"
+          echo "=== Verification ==="
+          echo "React Native plugin line after fix:"
+          grep "react-native-gradle-plugin" build.gradle
           
-          # Fix 3: Add React Native repositories if missing
-          if ! grep -q "maven.*react-native" build.gradle; then
-            echo "Adding React Native repositories..."
-            sed -i '/repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }' build.gradle
-          fi
-          
-          echo "=== VERIFICATION ==="
-          echo "Fixed classpath dependencies:"
-          grep -A 10 "dependencies {" build.gradle
-          
-          echo "=== SETTINGS CONFIGURATION ==="
           cat > lasspath << EOF
           rootProject.name = 'GreedGross'
           include ':app'
