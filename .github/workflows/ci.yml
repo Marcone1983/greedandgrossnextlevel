@@ -295,6 +295,10 @@ jobs:
           echo "=== Testing gradle projects ==="
           ./gradlew projects --no-daemon || echo "Projects command failed, but continuing with build"
           
+          echo "=== Creating output directories ==="
+          mkdir -p app/build/outputs/apk/release/
+          mkdir -p app/build/outputs/bundle/release/
+          
           echo "=== Building APK ==="
           ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build_log.txt
           
@@ -317,6 +321,10 @@ jobs:
         if: (github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both') || (github.event_name != 'workflow_dispatch')
         run: |
           cd GreedGross
+          
+          echo "=== Creating output directories ==="
+          mkdir -p app/build/outputs/apk/release/
+          mkdir -p app/build/outputs/bundle/release/
           
           echo "=== Building AAB ==="
           ./gradlew bundleRelease --no-daemon --stacktrace --info 2>&1 | tee bundle_log.txt
