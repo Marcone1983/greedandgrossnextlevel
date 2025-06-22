@@ -123,8 +123,13 @@ jobs:
           
       - name: Build APK
         run: |
-          # Esegui dalla root del progetto
-          gradle -p GreedGross assembleRelease --no-daemon
+          # Pulisci autolinking generato precedentemente
+          rm -rf GreedGross/build/generated/autolinking/
+          
+          # Build dalla root del progetto
+          cd GreedGross
+          gradle clean
+          gradle assembleRelease --no-daemon
           
       - name: Find APK
         working-directory: ./GreedGross

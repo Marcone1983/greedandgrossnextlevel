@@ -1,7 +1,7 @@
 module.exports = {
   project: {
+    ios: {},
     android: {
-      sourceDir: './GreedGross',
       packageName: 'com.greedandgross.cannabisbreeding',
     },
   },
