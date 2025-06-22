@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "^15.0.0",
     "@react-native-community/eslint-config": "^3.2.0",
     "@react-native/babel-preset": "^0.79.0",
     "@react-native/gradle-plugin": "^0.79.0",
