@@ -128,31 +128,40 @@ jobs:
           
           # Create FULL lasspath with React Native
           cat > lasspath << EOF
-          pluginManagement {
-              includeBuild("$RN_PLUGIN_PATH")
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          
-          rootProject.name = 'GreedGross'
-          include ':app'
-          
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-              repositories {
-                  google()
-                  mavenCentral()
-                  jcenter() {
-                      content {
-                          includeModule("com.yqritc", "Android-ScalableVideoView")
-                      }
-                  }
-              }
-          }
-          EOF
+pluginManagement {
+    includeBuild("$RN_PLUGIN_PATH")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id("com.facebook.react.settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
+rootProject.name = 'GreedGross'
+include ':app'
+includeBuild('$RN_PLUGIN_PATH')
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() {
+            content {
+                includeModule("com.yqritc", "Android-ScalableVideoView")
+            }
+        }
+    }
+}
+EOF
           
           echo "=== What's wrong with app/build.gradle line 2? ==="
           sed -n '1,5p' app/build.gradle

@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply plugin: "com.facebook.react"
 apply plugin: "org.jetbrains.kotlin.android"
 
 import com.android.build.OutputFile
@@ -43,8 +44,8 @@ def isNewArchitectureEnabled() {
 
 android {
     ndkVersion rootProject.ext.ndkVersion ?: "25.1.8937393"
-    compileSdkVersion 35
-    buildToolsVersion "35.0.0"
+    compileSdkVersion = 35
+    buildToolsVersion = "35.0.0"
 
     namespace "com.greedandgross.cannabisbreeding"
     

@@ -14,9 +14,11 @@ buildscript {
         google()
         mavenCentral()
         maven { url("$rootDir/../node_modules/react-native/android") }
+        maven { url("$rootDir/../node_modules/@react-native/gradle-plugin/build") }
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.0")
+        classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.0")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.9")

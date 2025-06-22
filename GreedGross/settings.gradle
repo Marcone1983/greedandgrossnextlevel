@@ -7,10 +7,17 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'GreedGross'
+plugins {
+    id("com.facebook.react.settings")
+}
 
-// Con React Native 0.79.0, native_modules è gestito automaticamente dal plugin
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
+rootProject.name = 'GreedGross'
 include ':app'
+includeBuild('../node_modules/@react-native/gradle-plugin')
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
