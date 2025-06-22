@@ -134,6 +134,13 @@ jobs:
           echo "=== Java version ==="
           java -version
 
+      - name: Build React Native Gradle Plugin
+        run: |
+          # React Native 0.79 needs the gradle plugin to be built first
+          cd node_modules/@react-native/gradle-plugin
+          ./gradlew build || true
+          cd ../../..
+          
       - name: Fix React Native Reanimated
         run: |
           # Patch for react-native-reanimated compatibility with RN 0.79
