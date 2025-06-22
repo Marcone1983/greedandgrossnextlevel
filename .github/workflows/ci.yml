@@ -94,6 +94,12 @@ jobs:
           
           chmod +x gradlew
           
+          echo "Checking ROOT build.gradle for React Native plugin configuration"
+          cat build.gradle
+          
+          echo "Checking APP build.gradle for plugins"
+          head -20 app/build.gradle
+          
           echo "Finding React Native plugin"
           RN_PLUGIN_PATH=""
           if [ -d "../node_modules/@react-native/gradle-plugin" ]; then
@@ -104,12 +110,20 @@ jobs:
           
           if [ -z "$RN_PLUGIN_PATH" ]; then
             echo "React Native plugin not found"
-            find ../node_modules -name "*gradle*" -path "*react-native*" -type d | head -5
-            echo "Cannot build app without React Native"
             exit 1
           fi
           
           echo "Found React Native at: $RN_PLUGIN_PATH"
+          
+          echo "Checking what React Native version is in package.json"
+          grep "react-native" ../package.json
+          
+          echo "Checking if plugin needs to be in ROOT build.gradle instead of lasspath"
+          if grep -q "com.facebook.react" build.gradle; then
+            echo "React Native plugin already in ROOT build.gradle"
+          else
+            echo "React Native plugin NOT in ROOT build.gradle - may need to add it"
+          fi
           
           cat > lasspath << EOF
           pluginManagement {
@@ -142,7 +156,9 @@ jobs:
             sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
           fi
           
-          ./gradlew --version
+          echo "Testing gradle configuration"
+          ./gradlew --version || echo "Gradle version failed"
+          ./gradlew projects --no-daemon || echo "Gradle projects failed"
 
       - name: 🔐 Create environment file
         run: |
