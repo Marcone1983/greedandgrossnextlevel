@@ -130,6 +130,11 @@ jobs:
           echo "=== Run react-native config ==="
           npx react-native config
           
+      - name: Fix React Native Reanimated
+        run: |
+          # Patch per react-native-reanimated con RN 0.79
+          sed -i "s/project(':app').hermesEnabled/true/g" node_modules/react-native-reanimated/android/build.gradle
+          
       - name: Build APK
         run: |
           # Pulisci autolinking generato precedentemente

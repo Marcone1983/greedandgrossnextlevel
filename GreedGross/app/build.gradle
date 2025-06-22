@@ -34,6 +34,11 @@ def enableProguardInReleaseBuilds = true
  */
 project.ext.hermesEnabled = true
 
+// Assicuriamoci che hermesEnabled sia disponibile per tutti i moduli
+ext {
+    hermesEnabled = true
+}
+
 /**
  * The preferred build flavor of JavaScriptCore.
  */
