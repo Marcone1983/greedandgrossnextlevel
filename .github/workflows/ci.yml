@@ -94,55 +94,65 @@ jobs:
           
           chmod +x gradlew
           
-          echo "=== COMPLETE ROOT build.gradle content ==="
-          cat -n build.gradle
+          echo "=== ANALISI COMPLETA DEGLI ERRORI ==="
           
-          echo "=== Searching for ALL React Native plugin references ==="
-          grep -n "react-native" build.gradle || echo "No react-native references found"
-          grep -n "com.facebook.react" build.gradle || echo "No com.facebook.react references found"
+          echo "1. CLASSPATH DEPENDENCIES ANALYSIS:"
+          echo "Checking ALL classpath dependencies for missing versions:"
+          grep -A 10 "dependencies {" build.gradle
           
-          echo "=== React Native version from package.json ==="
+          echo "2. REPOSITORY CONFIGURATION:"
+          echo "Checking if repositories are accessible:"
+          grep -A 10 "repositories {" build.gradle
+          
+          echo "3. REACT NATIVE VERSION:"
           RN_VERSION=$(grep '"react-native"' ../package.json | sed 's/.*"react-native": *"\([^"]*\)".*/\1/' | sed 's/\^//')
           echo "Found React Native version: $RN_VERSION"
           
-          echo "=== Verifying React Native plugin version ==="
-          grep -n "react-native-gradle-plugin" build.gradle || echo "No plugin found"
+          echo "=== FIXING ALL CLASSPATH ISSUES ==="
+          
+          cp build.gradle build.gradle.backup
+          
+          # Fix 1: React Native plugin missing version
+          sed -i 's/classpath("com\.facebook\.react:react-native-gradle-plugin")/classpath("com.facebook.react:react-native-gradle-plugin:'$RN_VERSION'")/' build.gradle
+          
+          # Fix 2: Check if there are other missing versions in classpath
+          echo "Checking for other classpath issues..."
+          grep "classpath.*:)" build.gradle && echo "Found other missing versions!" || echo "No other missing versions"
+          
+          # Fix 3: Add React Native repositories if missing
+          if ! grep -q "maven.*react-native" build.gradle; then
+            echo "Adding React Native repositories..."
+            sed -i '/repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }' build.gradle
+          fi
+          
+          echo "=== VERIFICATION ==="
+          echo "Fixed classpath dependencies:"
+          grep -A 10 "dependencies {" build.gradle
+          
+          echo "=== SETTINGS CONFIGURATION ==="
+          cat > lasspath << EOF
+          rootProject.name = 'GreedGross'
+          include ':app'
+          EOF
+          
+          if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
+            sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
+          fiimplementation.*:)" app/build.gradle || echo "No missing versions in APP"
+          
+          echo "=== FIXING ALL FOUND ISSUES ==="
+          cp build.gradle build.gradle.backup
+          
+          # Fix ROOT build.gradle missing version
+          sed -i 's/classpath("com\.facebook\.react:react-native-gradle-plugin")/classpath("com.facebook.react:react-native-gradle-plugin:'$RN_VERSION'")/' build.gradle
+          
+          echo "=== Verification after fixes ==="
+          echo "ROOT build.gradle React Native line:"
+          grep -n "react-native-gradle-plugin" build.gradle
           
           cat > lasspath << EOF
-pluginManagement {
-    includeBuild("$RN_PLUGIN_PATH")
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-plugins {
-    id("com.facebook.react.settings")
-}
-
-extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-    ex.autolinkLibrariesFromCommand()
-}
-
-rootProject.name = 'GreedGross'
-include ':app'
-includeBuild('$RN_PLUGIN_PATH')
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() {
-            content {
-                includeModule("com.yqritc", "Android-ScalableVideoView")
-            }
-        }
-    }
-}
-EOF
+          rootProject.name = 'GreedGross'
+          include ':app'
+          EOF
           
           if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
             sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
