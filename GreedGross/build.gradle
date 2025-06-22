@@ -17,7 +17,6 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.0")
-        // React Native gradle plugin is loaded via includeBuild in settings.gradle
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.0")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.9")

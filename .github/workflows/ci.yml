@@ -127,31 +127,31 @@ jobs:
           
           # Create lasspath with FOUND React Native plugin
           cat > lasspath << EOF
-          pluginManagement {
-              includeBuild("$RN_PLUGIN_PATH")
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          
-          rootProject.name = 'GreedGross'
-          include ':app'
-          
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-              repositories {
-                  google()
-                  mavenCentral()
-                  jcenter() {
-                      content {
-                          includeModule("com.yqritc", "Android-ScalableVideoView")
-                      }
-                  }
-              }
-          }
-          EOF
+pluginManagement {
+    includeBuild("$RN_PLUGIN_PATH")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'GreedGross'
+include ':app'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() {
+            content {
+                includeModule("com.yqritc", "Android-ScalableVideoView")
+            }
+        }
+    }
+}
+EOF
           
           echo "🚀 Created lasspath with React Native at: $RN_PLUGIN_PATH"
           

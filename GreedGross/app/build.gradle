@@ -1,5 +1,4 @@
 apply plugin: "com.android.application"
-apply plugin: "com.facebook.react"
 apply plugin: "org.jetbrains.kotlin.android"
 
 import com.android.build.OutputFile
@@ -119,6 +118,11 @@ android {
     }
 }
 
+// React Native configuration
+repositories {
+    maven { url "$rootDir/../node_modules/react-native/android" }
+}
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
@@ -181,7 +185,7 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 
-// Con React Native 0.79.0, native_modules è gestito automaticamente dal plugin
+// React Native configuration for 0.79.0 without plugin
 
 // Apply Google Services plugin
 apply plugin: 'com.google.gms.google-services'
