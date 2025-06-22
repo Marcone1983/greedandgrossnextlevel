@@ -105,25 +105,44 @@ jobs:
           RN_VERSION=$(grep '"react-native"' ../package.json | sed 's/.*"react-native": *"\([^"]*\)".*/\1/' | sed 's/\^//')
           echo "Found React Native version: $RN_VERSION"
           
-          echo "=== Before fixing - looking for empty plugin declarations ==="
-          grep -n "react-native-gradle-plugin:$" build.gradle || echo "No empty plugin declarations found"
-          
-          echo "=== Creating backup and fixing ALL empty plugin versions ==="
-          cp build.gradle build.gradle.backup
-          
-          # Fix ALL occurrences of empty plugin version
-          sed -i "s/com\.facebook\.react:react-native-gradle-plugin:$/com.facebook.react:react-native-gradle-plugin:$RN_VERSION/g" build.gradle
-          
-          echo "=== After fixing - ROOT build.gradle content ==="
-          cat -n build.gradle
-          
-          echo "=== Verify no empty plugin declarations remain ==="
-          grep -n "react-native-gradle-plugin:$" build.gradle && echo "ERROR: Still found empty declarations!" || echo "Good: No empty declarations found"
+          echo "=== Verifying React Native plugin version ==="
+          grep -n "react-native-gradle-plugin" build.gradle || echo "No plugin found"
           
           cat > lasspath << EOF
-          rootProject.name = 'GreedGross'
-          include ':app'
-          EOF
+pluginManagement {
+    includeBuild("$RN_PLUGIN_PATH")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id("com.facebook.react.settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
+rootProject.name = 'GreedGross'
+include ':app'
+includeBuild('$RN_PLUGIN_PATH')
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() {
+            content {
+                includeModule("com.yqritc", "Android-ScalableVideoView")
+            }
+        }
+    }
+}
+EOF
           
           if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
             sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
