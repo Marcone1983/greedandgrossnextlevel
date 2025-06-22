@@ -120,21 +120,6 @@ jobs:
           echo "=== Verify no empty plugin declarations remain ==="
           grep -n "react-native-gradle-plugin:$" build.gradle && echo "ERROR: Still found empty declarations!" || echo "Good: No empty declarations found"
           
-          echo "=== Finding React Native plugin directory ==="
-          RN_PLUGIN_PATH=""
-          if [ -d "../node_modules/@react-native/gradle-plugin" ]; then
-            RN_PLUGIN_PATH="../node_modules/@react-native/gradle-plugin"
-          elif [ -d "../node_modules/react-native/android" ]; then
-            RN_PLUGIN_PATH="../node_modules/react-native/android"
-          fi
-          
-          if [ -z "$RN_PLUGIN_PATH" ]; then
-            echo "React Native plugin not found"
-            exit 1
-          fi
-          
-          echo "Found React Native at: $RN_PLUGIN_PATH"
-          
           cat > lasspath << EOF
           rootProject.name = 'GreedGross'
           include ':app'
@@ -143,9 +128,16 @@ jobs:
           if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
             sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
           fi
+
+      - name: 🧪 Test Gradle Configuration
+        run: |
+          cd GreedGross
           
-          echo "=== Testing gradle after fix ==="
+          echo "=== Testing gradle version after fix ==="
           ./gradlew --version
+          
+          echo "=== Testing gradle projects ==="
+          ./gradlew projects --no-daemon
 
       - name: 🔐 Create environment file
         run: |
