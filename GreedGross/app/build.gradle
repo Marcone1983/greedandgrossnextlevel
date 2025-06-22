@@ -5,7 +5,6 @@ apply plugin: "org.jetbrains.kotlin.android"
 import com.android.build.OutputFile
 
 project.ext.react = [
-    enableHermes: true,
     entryFile: "index.js",
     bundleAssetName: "index.android.bundle",
     root: "../../",
@@ -32,7 +31,7 @@ def enableProguardInReleaseBuilds = true
 /**
  * The preferred build flavor of JavaScriptCore.
  */
-def jscFlavor = 'org.webkit:android-jsc:+'
+// JSC is now handled automatically by React Native 0.79.0
 
 /**
  * Return the New Architecture enabled property
@@ -158,13 +157,7 @@ dependencies {
         exclude group:'com.facebook.flipper'
     }
 
-    if (enableHermes) {
-        def hermesPath = "../node_modules/hermes-engine/android/";
-        debugImplementation files(hermesPath + "hermes-debug.aar")
-        releaseImplementation files(hermesPath + "hermes-release.aar")
-    } else {
-        implementation jscFlavor
-    }
+    // Hermes is now handled automatically by React Native 0.79.0
 }
 
 if (isNewArchitectureEnabled()) {
