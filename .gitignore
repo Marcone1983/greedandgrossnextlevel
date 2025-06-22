@@ -111,7 +111,7 @@ firebase-debug.log
 *.swo
 
 # Gradle
-lasspath
+# lasspath - necessario per workaround Gradle
 
 # OS generated files
 Thumbs.db
