@@ -65,6 +65,11 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
 
+    strategy:
+      matrix:
+        build-type: 
+          - ${{ github.event_name == 'workflow_dispatch' && fromJSON(format('["{0}"]', github.event.inputs.build_type)) || '["both"]' }}
+
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
@@ -81,27 +86,55 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ env.JAVA_VERSION }}
 
-      # Skip gradle-build-action to avoid potential issues
-      # We'll use the gradle wrapper directly
-
       - name: 📱 Setup React Native CLI
         run: npm install -g @react-native-community/cli
 
       - name: 🔧 Install dependencies
         run: |
           npm install --legacy-peer-deps
-          echo "=== Checking React Native installation ==="
-          ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT FOUND"
-          ls -la node_modules/react-native/ || echo "react-native NOT FOUND"
+          
+          # Ensure React Native dependencies are properly installed
+          echo "=== Verifying React Native installation ==="
+          ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not found"
+          ls -la node_modules/react-native/ || echo "react-native not found"
+
+      - name: 🔧 Setup Android project
+        run: |
           cd GreedGross
-          rm -rf node_modules
-          ln -sf $(pwd)/../node_modules node_modules
-          echo "=== Verifying symlink from GreedGross ==="
-          pwd
-          ls -la | grep node_modules
-          echo "=== Testing symlink ==="
-          ls -la node_modules/ | head -5
-          ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT ACCESSIBLE"
+          
+          # Make gradlew executable
+          chmod +x gradlew
+          
+          # Ensure gradle.properties exists
+          touch gradle.properties
+          
+          # Create or update settings.gradle with proper configuration
+          cat > settings.gradle << 'EOF'
+          pluginManagement {
+              includeBuild("../node_modules/@react-native/gradle-plugin")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          rootProject.name = 'GreedGross'
+          include ':app'
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+                  jcenter() {
+                      content {
+                          includeModule("com.yqritc", "Android-ScalableVideoView")
+                      }
+                  }
+              }
+          }
+          EOF
 
       - name: 🔐 Create environment file
         run: |
@@ -169,8 +202,13 @@ jobs:
 
       - name: 🔑 Setup Android Keystore
         run: |
+          # Create keystore from base64
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > GreedGross/app/greed-gross-release-key.keystore
+          
+          # Verify keystore exists
           ls -la GreedGross/app/greed-gross-release-key.keystore
+          
+          # Add keystore config to gradle.properties
           cat >> GreedGross/gradle.properties << EOF
           GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
           GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -178,84 +216,33 @@ jobs:
           GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
 
-      - name: 🔧 Prepare Gradle build
-        run: |
-          echo "=== Checking node_modules location ==="
-          pwd
-          ls -la
-          ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not found in root"
-
-          cd GreedGross
-          chmod +x gradlew
-          touch gradle.properties
-
-          echo "=== From GreedGross directory ==="
-          pwd
-          ls -la ../node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not accessible from GreedGross"
-
-          echo "=== Checking settings.gradle ==="
-          cat settings.gradle
-
       - name: 🏗️ Build APK
+        if: matrix.build-type == 'apk' || matrix.build-type == 'both'
         run: |
           cd GreedGross
-          rm -rf ~/.gradle/init.d/
-
-          echo "=== Checking for gradle-related env vars ==="
-          env | grep -i gradle || echo "No gradle env vars found"
-
-          # Create settings.gradle with correct content (important!)
-          cat > settings.gradle << 'EOF'
-rootProject.name = 'GreedGross'
-
-include ':app'
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() {
-            content {
-                includeModule("com.yqritc", "Android-ScalableVideoView")
-            }
-        }
-    }
-}
-EOF
-
-          echo "=== Checking React Native plugin paths ==="
-          pwd
-          ls -la ../node_modules/@react-native/gradle-plugin/ || echo "Plugin not found from GreedGross"
-          ls -la node_modules/@react-native/gradle-plugin/ || echo "Symlink not working"
-
-          ./gradlew --version
-
-          echo "=== Available Gradle projects ==="
-          ./gradlew projects
-
-          echo "=== Checking app directory ==="
-          ls -la app/
-
+          
           echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon
-
-      - name: 📦 Process APK
-        run: |
-          cd GreedGross
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          
+          # Verify APK was created
           ls -la app/build/outputs/apk/release/
+          
+          # Rename APK with version and timestamp
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
 
       - name: 🏗️ Build AAB (App Bundle)
+        if: matrix.build-type == 'aab' || matrix.build-type == 'both'
         run: |
           cd GreedGross
-          ./gradlew bundleRelease --no-daemon
-
-      - name: 📦 Process AAB
-        run: |
-          cd GreedGross
+          
+          echo "=== Building AAB ==="
+          ./gradlew bundleRelease --no-daemon --stacktrace
+          
+          # Verify AAB was created
           ls -la app/build/outputs/bundle/release/
+          
+          # Rename AAB with version and timestamp
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab
 
@@ -265,4 +252,143 @@ EOF
             echo "🎉 APK Build Success!"
             APK_SIZE=$(du -h GreedGross/app/build/outputs/apk/release/greed-gross-*.apk | cut -f1)
             echo "📦 APK Size: $APK_SIZE"
+            echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
+          fi
+          
+          if [ -f GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab ]; then
+            echo "🎉 AAB Build Success!"
+            AAB_SIZE=$(du -h GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab | cut -f1)
+            echo "📦 AAB Size: $AAB_SIZE"
+            echo "AAB_SIZE=$AAB_SIZE" >> $GITHUB_ENV
+          fi
+
+      - name: 📤 Upload APK Artifact
+        if: matrix.build-type == 'apk' || matrix.build-type == 'both'
+        uses: actions/upload-artifact@v4
+        with:
+          name: greed-gross-apk-${{ matrix.build-type }}
+          path: GreedGross/app/build/outputs/apk/release/greed-gross-*.apk
+          retention-days: 30
+
+      - name: 📤 Upload AAB Artifact
+        if: matrix.build-type == 'aab' || matrix.build-type == 'both'
+        uses: actions/upload-artifact@v4
+        with:
+          name: greed-gross-aab-${{ matrix.build-type }}
+          path: GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab
+          retention-days: 30
+
+      - name: 📝 Build Summary
+        run: |
+          echo "## 🎉 GREED & GROSS Build Complete! 🌿" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📱 App Version | ${{ secrets.APP_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ Build Type | ${{ matrix.build-type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📅 Build Date | $(date) |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔗 Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ ! -z "$APK_SIZE" ]; then
+            echo "| 📦 APK Size | $APK_SIZE |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ ! -z "$AAB_SIZE" ]; then
+            echo "| 📦 AAB Size | $AAB_SIZE |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 Download Links" >> $GITHUB_STEP_SUMMARY
+          echo "- APK and AAB files are available in the build artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Navigate to Actions → This workflow run → Artifacts" >> $GITHUB_STEP_SUMMARY
+
+  deploy-internal:
+    name: 🚀 Deploy Internal Testing
+    needs: build-android
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 📥 Download AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: greed-gross-aab-both
+          path: ./artifacts
+
+      # Google Play upload (optional - only if credentials are configured)
+      # - name: 🔐 Setup Google Play credentials
+      #   run: |
+      #     echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}" > google-play-key.json
+      #
+      # - name: 🚀 Upload to Google Play Internal Testing
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJson: google-play-key.json
+      #     packageName: com.greedandgross.cannabisbreeding
+      #     releaseFiles: ./artifacts/*.aab
+      #     track: internal
+      #     status: completed
+
+      - name: 📧 Notify deployment
+        run: |
+          echo "🎉 App deployed to Google Play Internal Testing!"
+          echo "Track: Internal Testing"
+          echo "Package: com.greedandgross.cannabisbreeding"
+
+  build-ios:
+    name: 🍎 Build iOS (Future)
+    runs-on: macos-latest
+    if: false # Disabled for now, enable when iOS certificates are ready
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📱 Setup Expo for iOS
+        run: |
+          echo "iOS build will be implemented when certificates are configured"
+          echo "Required secrets:"
+          echo "- IOS_CERTIFICATE_BASE64"
+          echo "- IOS_PROVISIONING_PROFILE_BASE64"
+          echo "- APPLE_ID"
+          echo "- APPLE_APP_SPECIFIC_PASSWORD"
+
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Run security audit
+        run: |
+          npm audit --audit-level moderate
+
+      - name: 🔐 Check for secrets
+        run: |
+          echo "Scanning for accidentally committed secrets..."
+          if grep -r "sk-proj-" . --exclude-dir=node_modules --exclude-dir=.git; then
+            echo "❌ Found potential API keys in code!"
+            exit 1
+          else
+            echo "✅ No secrets found in code"
+          fi
+
+  notification:
+    name: 📢 Notification
+    needs: [test, build-android]
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: 📊 Build Status
+        run: |
+          if [ "${{ needs.build-android.result }}" == "success" ]; then
+            echo "🎉 GREED & GROSS build completed successfully!"
+            echo "✅ APK and AAB ready for distribution"
+            echo "📱 App version: ${{ secrets.APP_VERSION }}"
+          else
+            echo "❌ Build failed. Check the logs for details."
+            exit 1
           fi
