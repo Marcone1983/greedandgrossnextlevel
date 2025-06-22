@@ -213,6 +213,13 @@ jobs:
         # Remove any gradle init scripts that might interfere
         rm -rf ~/.gradle/init.d/
         
+        # Debug: Check environment variables
+        echo "=== Checking for gradle-related env vars ==="
+        env | grep -i gradle || echo "No gradle env vars found"
+        
+        # Create an empty lasspath file as workaround
+        touch lasspath
+        
         # Use the gradle wrapper
         ./gradlew --version
         
