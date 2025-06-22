@@ -113,16 +113,15 @@ jobs:
           GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
           EOF
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.10.2
+          
       - name: Build APK
         run: |
           cd GreedGross
-          # Debug gradle issue
-          echo "=== PWD ==="
-          pwd
-          echo "=== Check wrapper ==="
-          ls -la gradle/wrapper/
-          echo "=== Run with full path ==="
-          /bin/bash ./gradlew assembleRelease --no-daemon --stacktrace
+          gradle assembleRelease --no-daemon
           
       - name: Find APK
         working-directory: ./GreedGross
