@@ -123,8 +123,8 @@ jobs:
           
       - name: Build APK
         run: |
-          cd GreedGross
-          gradle assembleRelease --no-daemon
+          # Esegui dalla root del progetto
+          gradle -p GreedGross assembleRelease --no-daemon
           
       - name: Find APK
         working-directory: ./GreedGross
