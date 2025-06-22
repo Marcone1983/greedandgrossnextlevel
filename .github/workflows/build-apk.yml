@@ -121,15 +121,23 @@ jobs:
         with:
           gradle-version: 8.10.2
           
+      - name: Debug React Native Config
+        run: |
+          echo "=== Current directory ==="
+          pwd
+          echo "=== Check react-native.config.js ==="
+          cat react-native.config.js
+          echo "=== Run react-native config ==="
+          npx react-native config
+          
       - name: Build APK
         run: |
           # Pulisci autolinking generato precedentemente
           rm -rf GreedGross/build/generated/autolinking/
           
-          # Build dalla root del progetto
-          cd GreedGross
-          gradle clean
-          gradle assembleRelease --no-daemon
+          # IMPORTANTE: Esegui dalla ROOT, non da GreedGross!
+          gradle -p GreedGross clean
+          gradle -p GreedGross assembleRelease --no-daemon
           
       - name: Find APK
         working-directory: ./GreedGross
