@@ -134,60 +134,16 @@ jobs:
           echo "=== Java version ==="
           java -version
 
-      - name: Setup React Native Gradle Plugin
+      - name: Debug React Native Structure
         run: |
-          # React Native 0.79 needs the gradle plugin to be available
-          echo "=== Setting up React Native Gradle Plugin ==="
-          
-          # Check if the plugin directory exists
-          if [ -d "node_modules/@react-native/gradle-plugin" ]; then
-            echo "Found gradle plugin directory"
-            cd node_modules/@react-native/gradle-plugin
-            
-            # Try to build the plugin if gradlew exists
-            if [ -f "gradlew" ]; then
-              echo "Building gradle plugin..."
-              chmod +x gradlew
-              ./gradlew :react-native-gradle-plugin:build || echo "Gradle plugin build failed, continuing anyway"
-            fi
-            
-            # Create the expected directory structure
-            mkdir -p build/com/facebook/react/react-native-gradle-plugin/0.79.0
-            
-            # Look for the JAR in multiple possible locations
-            JAR_PATH=""
-            if [ -f "react-native-gradle-plugin/build/libs/react-native-gradle-plugin.jar" ]; then
-              JAR_PATH="react-native-gradle-plugin/build/libs/react-native-gradle-plugin.jar"
-            elif [ -f "build/libs/react-native-gradle-plugin.jar" ]; then
-              JAR_PATH="build/libs/react-native-gradle-plugin.jar"
-            fi
-            
-            if [ -n "$JAR_PATH" ]; then
-              echo "Found JAR at: $JAR_PATH"
-              cp "$JAR_PATH" build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.jar
-            else
-              echo "WARNING: Could not find gradle plugin JAR"
-            fi
-            
-            # Create a POM file
-            cat > build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.pom << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <project xmlns="http://maven.apache.org/POM/4.0.0">
-            <modelVersion>4.0.0</modelVersion>
-            <groupId>com.facebook.react</groupId>
-            <artifactId>react-native-gradle-plugin</artifactId>
-            <version>0.79.0</version>
-          </project>
-          EOF
-            
-            cd ../../..
-          else
-            echo "ERROR: Gradle plugin directory not found!"
-          fi
-          
-          # Debug: Check what's in the expected locations
-          echo "=== Checking gradle plugin locations ==="
-          ls -la node_modules/@react-native/gradle-plugin/build/com/facebook/react/react-native-gradle-plugin/0.79.0/ 2>/dev/null || echo "Plugin location not found"
+          echo "=== Checking React Native structure ==="
+          ls -la node_modules/@react-native/ || echo "No @react-native directory"
+          echo ""
+          echo "=== Checking for gradle plugin ==="
+          find node_modules -name "*gradle-plugin*.jar" -type f 2>/dev/null | head -20 || echo "No gradle plugin JARs found"
+          echo ""
+          echo "=== Checking React Native android directory ==="
+          ls -la node_modules/react-native/android/ || echo "No android directory"
           
       - name: Fix React Native Reanimated
         run: |
