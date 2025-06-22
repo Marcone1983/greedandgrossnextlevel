@@ -15,16 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          accept-android-sdk-licenses: true
-          packages: |
-            platform-tools
-            platforms;android-33
-            build-tools;34.0.0
-            cmdline-tools;latest
-            ndk;25.1.8937393
+      # Android SDK is pre-installed on GitHub Actions runners
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
