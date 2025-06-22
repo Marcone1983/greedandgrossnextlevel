@@ -111,6 +111,9 @@ jobs:
           echo "=== Existing gradle files ==="
           ls -la *.gradle* || echo "No gradle files found"
           
+          # Remove any problematic lasspath file that might exist
+          rm -f lasspath
+          
           # Backup existing settings.gradle if it exists
           if [ -f settings.gradle ]; then
             echo "=== Current settings.gradle ==="
@@ -118,7 +121,15 @@ jobs:
             cp settings.gradle settings.gradle.backup
           fi
           
-          # Create or update settings.gradle with proper configuration
+          # Check for any gradle.properties issues that might reference lasspath
+          echo "=== Checking gradle.properties for lasspath references ==="
+          grep -i "lasspath" gradle.properties || echo "No lasspath references found in gradle.properties"
+          
+          # Check build.gradle files for lasspath references  
+          echo "=== Checking build files for lasspath references ==="
+          grep -r "lasspath" . --exclude-dir=.gradle || echo "No lasspath references found"
+          
+          # Create clean settings.gradle - FULL configuration for production
           cat > settings.gradle << 'EOF'
           pluginManagement {
               includeBuild("../node_modules/@react-native/gradle-plugin")
@@ -146,32 +157,46 @@ jobs:
           }
           EOF
           
-          # Verify React Native plugin exists
-          echo "=== Verifying React Native plugin ==="
-          if [ ! -d "../node_modules/@react-native/gradle-plugin" ]; then
-            echo "❌ React Native gradle plugin NOT FOUND - using fallback settings"
-            cat > settings.gradle << 'EOF'
-          rootProject.name = 'GreedGross'
-          include ':app'
-          EOF
-          else
-            echo "✅ React Native gradle plugin found"
-            ls -la ../node_modules/@react-native/gradle-plugin/
-          fi
+          echo "=== Production settings.gradle created ==="
+          cat settings.gradle
           
-          # Check gradle wrapper
-          echo "=== Gradle wrapper ==="
-          ls -la gradle/wrapper/
+          # Ensure gradle.properties exists but DON'T clean production settings
+          echo "=== Current gradle.properties content ==="
+          cat gradle.properties
           
-          # Ensure gradle.properties exists
-          touch gradle.properties
+          # Only check for duplicate GREED_GROSS entries, don't remove production configs
+          echo "=== Checking for duplicate keystore entries ==="
+          grep -c "GREED_GROSS_UPLOAD" gradle.properties || echo "No keystore entries found yet"
           
           # Check build.gradle files
           echo "=== Build gradle files ==="
           ls -la build.gradle || echo "No root build.gradle"
           ls -la app/build.gradle || echo "No app build.gradle"
           
+          # Look for lasspath references in all gradle files - this is the real issue
+          echo "=== Searching for lasspath references in all files ==="
+          find . -name "*.gradle*" -o -name "*.properties" | xargs grep -l "lasspath" || echo "No lasspath references found in gradle files"
+          
+          # Check gradle.properties for any settings file override
+          echo "=== Checking for gradle settings file override ==="
+          grep -i "settings" gradle.properties || echo "No settings override in gradle.properties"
+          
+          # Check for gradle command line options that might be set
+          echo "=== Checking for gradle.properties that might affect settings ==="
+          grep -E "(gradle\.settings|settingsFile)" gradle.properties || echo "No settings file configuration found"
+          
+          # Show snippets of build files for debugging
+          echo "=== Root build.gradle content (first 20 lines) ==="
+          head -20 build.gradle || echo "Could not read root build.gradle"
+          echo "=== App build.gradle content (first 30 lines) ==="
+          head -30 app/build.gradle || echo "Could not read app build.gradle"
+          
+          # Test basic gradle functionality
+          echo "=== Testing basic gradle ==="
           ./gradlew --version
+          
+          echo "=== Testing gradle projects with simple settings ==="
+          ./gradlew projects --no-daemon || echo "Projects command failed"
 
       - name: 🔐 Create environment file
         run: |
@@ -245,13 +270,25 @@ jobs:
           # Verify keystore exists
           ls -la GreedGross/app/greed-gross-release-key.keystore
           
-          # Add keystore config to gradle.properties
-          cat >> GreedGross/gradle.properties << EOF
-          GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
-          GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
-          GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
-          EOF
+          # Only add keystore config if not already present (avoid duplicates)
+          if ! grep -q "GREED_GROSS_UPLOAD_STORE_FILE" GreedGross/gradle.properties; then
+            echo "" >> GreedGross/gradle.properties
+            echo "# Keystore configuration for release builds" >> GreedGross/gradle.properties
+            echo "GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore" >> GreedGross/gradle.properties
+            echo "GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> GreedGross/gradle.properties
+            echo "GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> GreedGross/gradle.properties
+            echo "GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> GreedGross/gradle.properties
+            echo "=== Keystore configuration added ==="
+          else
+            echo "=== Keystore configuration already exists, updating values ==="
+            # Update existing values
+            sed -i "s/GREED_GROSS_UPLOAD_STORE_PASSWORD=.*/GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}/" GreedGross/gradle.properties
+            sed -i "s/GREED_GROSS_UPLOAD_KEY_ALIAS=.*/GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}/" GreedGross/gradle.properties  
+            sed -i "s/GREED_GROSS_UPLOAD_KEY_PASSWORD=.*/GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}/" GreedGross/gradle.properties
+          fi
+          
+          echo "Final gradle.properties:"
+          tail -10 GreedGross/gradle.properties
 
       - name: 🏗️ Build APK
         if: (github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both') || (github.event_name != 'workflow_dispatch')
@@ -268,26 +305,8 @@ jobs:
           echo "=== Settings gradle ==="
           cat settings.gradle
           
-          echo "=== Testing gradle connection (with debug output) ==="
-          ./gradlew projects --no-daemon --stacktrace --debug 2>&1 | head -100
-          
-          if [ $? -ne 0 ]; then
-            echo "❌ Gradle projects failed, trying simple gradle version"
-            ./gradlew --version --no-daemon || echo "Basic gradle also failed"
-            echo "=== Checking if this is a React Native issue ==="
-            
-            # Try with minimal settings.gradle
-            cp settings.gradle settings.gradle.full-backup
-            cat > settings.gradle << 'EOF'
-          rootProject.name = 'GreedGross'
-          include ':app'
-          EOF
-            echo "=== Trying with minimal settings.gradle ==="
-            ./gradlew projects --no-daemon --stacktrace 2>&1 | head -50
-            
-            # Restore original
-            mv settings.gradle.full-backup settings.gradle
-          fi
+          echo "=== Testing gradle projects ==="
+          ./gradlew projects --no-daemon || echo "Projects command failed, but continuing with build"
           
           echo "=== Building APK ==="
           ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build_log.txt
