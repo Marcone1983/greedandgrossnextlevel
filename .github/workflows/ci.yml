@@ -43,11 +43,11 @@ jobs:
         run: |
           npm install --legacy-peer-deps
 
-      - name: 🔍 TypeScript check (temporarily disabled)
-        run: echo "TypeScript check temporarily disabled to reach Android build phase"
+      - name: 🔍 TypeScript check
+        run: npm run type-check
 
-      - name: 🎨 ESLint check (temporarily disabled)
-        run: echo "ESLint check temporarily disabled to reach Android build phase"
+      - name: 🎨 ESLint check
+        run: npm run lint
 
       - name: 🧪 Run tests (temporarily disabled)
         run: echo "Tests temporarily disabled to reach Android build phase"
