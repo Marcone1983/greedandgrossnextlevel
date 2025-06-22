@@ -217,15 +217,15 @@ jobs:
         echo "=== Checking for gradle-related env vars ==="
         env | grep -i gradle || echo "No gradle env vars found"
         
-        # Create lasspath but force Gradle to use settings.gradle
-        touch lasspath
+        # Copy settings.gradle content to lasspath
+        cp settings.gradle lasspath
         
-        # Use the gradle wrapper with explicit settings file
-        ./gradlew --version -c settings.gradle
+        # Use the gradle wrapper
+        ./gradlew --version
         
         # Debug: List available projects
         echo "=== Available Gradle projects ==="
-        ./gradlew projects -c settings.gradle
+        ./gradlew projects
         
         # Debug: Check if app directory exists
         echo "=== Checking app directory ==="
@@ -233,7 +233,7 @@ jobs:
         
         # Build APK
         echo "=== Building APK ==="
-        ./gradlew assembleRelease --no-daemon -c settings.gradle
+        ./gradlew assembleRelease --no-daemon
         
     - name: 📦 Process APK
       run: |
@@ -248,7 +248,7 @@ jobs:
     - name: 🏗️ Build AAB (App Bundle)
       run: |
         cd GreedGross
-        ./gradlew bundleRelease --no-daemon -c settings.gradle
+        ./gradlew bundleRelease --no-daemon
         
     - name: 📦 Process AAB
       run: |
