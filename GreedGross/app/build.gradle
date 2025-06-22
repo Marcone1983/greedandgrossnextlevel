@@ -29,6 +29,12 @@ def enableSeparateBuildPerCPUArchitecture = false
 def enableProguardInReleaseBuilds = true
 
 /**
+ * Hermes configuration for compatibility with older modules
+ * In React Native 0.79.0, Hermes is enabled by default
+ */
+project.ext.hermesEnabled = true
+
+/**
  * The preferred build flavor of JavaScriptCore.
  */
 // JSC is now handled automatically by React Native 0.79.0

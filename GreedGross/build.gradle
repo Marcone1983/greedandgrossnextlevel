@@ -1,5 +1,12 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+// Hermes compatibility for older React Native modules
+allprojects {
+    ext {
+        hermesEnabled = true
+    }
+}
+
 buildscript {
     ext {
         buildToolsVersion = "35.0.0"
