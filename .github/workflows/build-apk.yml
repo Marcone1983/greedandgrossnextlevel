@@ -57,6 +57,9 @@ jobs:
           # Create lasspath (Gradle cerca questo file) - COPIA ESATTA di settings.gradle
           cp settings.gradle lasspath
           
+          # COPIA gradle-wrapper.jar in GreedGross come hai detto tu
+          cp gradle/wrapper/gradle-wrapper.jar .
+          
           # Assicuriamoci che gradle.properties non abbia configurazioni strane
           echo "=== Check gradle.properties ==="
           cat gradle.properties || echo "No gradle.properties found"
