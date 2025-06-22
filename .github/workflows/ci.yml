@@ -124,52 +124,46 @@ jobs:
           echo "Found React Native at: $RN_PLUGIN_PATH"
           
           cat > lasspath << EOF
-          pluginManagement {
-              includeBuild("$RN_PLUGIN_PATH")
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
+pluginManagement {
+    includeBuild("$RN_PLUGIN_PATH")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id("com.facebook.react.settings")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
+
+rootProject.name = 'GreedGross'
+include ':app'
+includeBuild('$RN_PLUGIN_PATH')
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() {
+            content {
+                includeModule("com.yqritc", "Android-ScalableVideoView")
+            }
+        }
+    }
+}
+EOF
           
-          rootProject.name = 'GreedGross'
-          include ':app'
-          
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          EOF
-          
-          # Fix compileSdkVersion without problematic syntax
+          # Fix compileSdkVersion if missing
           if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
             echo "Adding compileSdkVersion to app/build.gradle"
-            # Use a safer approach
             cp app/build.gradle app/build.gradle.backup
-            awk '/android \{/ { print; print "    compileSdkVersion 34"; next } { print }' app/build.gradle.backup > app/build.gradle
-          fiimplementation.*:)" app/build.gradle || echo "No missing versions in APP"
-          
-          echo "=== FIXING ALL FOUND ISSUES ==="
-          cp build.gradle build.gradle.backup
-          
-          # Fix ROOT build.gradle missing version
-          sed -i 's/classpath("com\.facebook\.react:react-native-gradle-plugin")/classpath("com.facebook.react:react-native-gradle-plugin:'$RN_VERSION'")/' build.gradle
-          
-          echo "=== Verification after fixes ==="
-          echo "ROOT build.gradle React Native line:"
-          grep -n "react-native-gradle-plugin" build.gradle
-          
-          cat > lasspath << EOF
-          rootProject.name = 'GreedGross'
-          include ':app'
-          EOF
-          
-          if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
-            sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
+            awk '/android \{/ { print; print "    compileSdkVersion = 35"; next } { print }' app/build.gradle.backup > app/build.gradle
           fi
 
       - name: 🧪 Test Gradle Configuration
