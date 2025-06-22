@@ -2,7 +2,7 @@ name: GREED & GROSS CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -95,13 +95,28 @@ jobs:
 
       - name: 🔧 Setup Android project
         run: |
+          # Debug: Check project structure
+          echo "=== Project structure ==="
+          pwd
+          ls -la
+          echo "=== GreedGross directory ==="
+          ls -la GreedGross/
+          
           cd GreedGross
           
           # Make gradlew executable
           chmod +x gradlew
           
-          # Ensure gradle.properties exists
-          touch gradle.properties
+          # Debug: Check existing gradle files
+          echo "=== Existing gradle files ==="
+          ls -la *.gradle* || echo "No gradle files found"
+          
+          # Backup existing settings.gradle if it exists
+          if [ -f settings.gradle ]; then
+            echo "=== Current settings.gradle ==="
+            cat settings.gradle
+            cp settings.gradle settings.gradle.backup
+          fi
           
           # Create or update settings.gradle with proper configuration
           cat > settings.gradle << 'EOF'
@@ -130,6 +145,33 @@ jobs:
               }
           }
           EOF
+          
+          # Verify React Native plugin exists
+          echo "=== Verifying React Native plugin ==="
+          if [ ! -d "../node_modules/@react-native/gradle-plugin" ]; then
+            echo "❌ React Native gradle plugin NOT FOUND - using fallback settings"
+            cat > settings.gradle << 'EOF'
+          rootProject.name = 'GreedGross'
+          include ':app'
+          EOF
+          else
+            echo "✅ React Native gradle plugin found"
+            ls -la ../node_modules/@react-native/gradle-plugin/
+          fi
+          
+          # Check gradle wrapper
+          echo "=== Gradle wrapper ==="
+          ls -la gradle/wrapper/
+          
+          # Ensure gradle.properties exists
+          touch gradle.properties
+          
+          # Check build.gradle files
+          echo "=== Build gradle files ==="
+          ls -la build.gradle || echo "No root build.gradle"
+          ls -la app/build.gradle || echo "No app build.gradle"
+          
+          ./gradlew --version
 
       - name: 🔐 Create environment file
         run: |
@@ -216,15 +258,34 @@ jobs:
         run: |
           cd GreedGross
           
+          echo "=== Pre-build checks ==="
+          pwd
+          ls -la
+          echo "=== App directory ==="
+          ls -la app/
+          echo "=== Gradle properties ==="
+          cat gradle.properties || echo "No gradle.properties found"
+          
+          echo "=== Testing gradle connection ==="
+          ./gradlew projects --no-daemon
+          
           echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon --stacktrace --info --debug 2>&1 | tee build_log.txt
           
-          # Verify APK was created
-          ls -la app/build/outputs/apk/release/
+          echo "=== Build completed, checking outputs ==="
+          ls -la app/build/outputs/apk/release/ || echo "APK output directory not found"
           
-          # Rename APK with version and timestamp
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            # Rename APK with version and timestamp
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
+            echo "✅ APK build successful"
+          else
+            echo "❌ APK build failed - checking logs"
+            echo "=== Last 50 lines of build log ==="
+            tail -50 build_log.txt || echo "No build log found"
+            exit 1
+          fi
 
       - name: 🏗️ Build AAB (App Bundle)
         if: (github.event.inputs.build_type == 'aab' || github.event.inputs.build_type == 'both') || (github.event_name != 'workflow_dispatch')
@@ -232,14 +293,22 @@ jobs:
           cd GreedGross
           
           echo "=== Building AAB ==="
-          ./gradlew bundleRelease --no-daemon --stacktrace
+          ./gradlew bundleRelease --no-daemon --stacktrace --info 2>&1 | tee bundle_log.txt
           
-          # Verify AAB was created
-          ls -la app/build/outputs/bundle/release/
+          echo "=== Build completed, checking outputs ==="
+          ls -la app/build/outputs/bundle/release/ || echo "AAB output directory not found"
           
-          # Rename AAB with version and timestamp
-          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-          mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab
+          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+            # Rename AAB with version and timestamp
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab
+            echo "✅ AAB build successful"
+          else
+            echo "❌ AAB build failed - checking logs"
+            echo "=== Last 50 lines of bundle log ==="
+            tail -50 bundle_log.txt || echo "No bundle log found"
+            exit 1
+          fi
 
       - name: 📊 APK/AAB Analysis
         run: |
