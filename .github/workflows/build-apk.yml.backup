@@ -9,21 +9,10 @@ jobs:
   build:
     name: Build APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Prevent hanging builds
     
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-33
-            build-tools;34.0.0
-            cmdline-tools;latest
-            ndk;25.1.8937393
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -60,16 +49,16 @@ jobs:
           ENVIRONMENT=production
           EOF
 
-      - name: Setup Android project
+      - name: Setup Android
         run: |
           cd GreedGross
           chmod +x gradlew
           
-          # Create lasspath directory to fix Gradle error (CRITICAL!)
-          mkdir -p /home/runner/work/greedandgrossnextlevel/greedandgrossnextlevel/GreedGross/lasspath
-          echo "" > /home/runner/work/greedandgrossnextlevel/greedandgrossnextlevel/GreedGross/lasspath/settings.gradle
+          # NON rimuovere lasspath! Serve per un bug di Gradle
+          echo "=== Check lasspath exists ==="
+          ls -la lasspath || echo "lasspath not found"
           
-          # Create local.properties with SDK path
+          # Create local.properties con SDK path
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
           # Create google-services.json
@@ -115,10 +104,10 @@ jobs:
           }
           EOF
           
-          # Setup release keystore (manteniamo il nome esistente)
+          # Setup keystore
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/greed-gross-release-key.keystore
           
-          # Add signing config to gradle.properties
+          # Create gradle.properties with signing config
           cat >> gradle.properties << EOF
           
           GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
@@ -132,64 +121,106 @@ jobs:
         with:
           gradle-version: 8.10.2
           
-      - name: Verify environment
+      - name: Debug React Native Config
         run: |
-          echo "=== .env contents (without secrets) ==="
-          cat .env | grep -v 'KEY'  # Avoid printing secrets
-          echo "=== Android SDK ==="
-          echo $ANDROID_SDK_ROOT
-          echo "=== Java version ==="
-          java -version
-
+          echo "=== Current directory ==="
+          pwd
+          echo "=== Check react-native.config.js ==="
+          cat react-native.config.js
+          echo "=== Run react-native config ==="
+          npx react-native config
+          
       - name: Fix React Native Reanimated
         run: |
-          # Patch for react-native-reanimated compatibility with RN 0.79
+          # Patch per react-native-reanimated con RN 0.79
+          # Sostituisci la linea 165 che controlla hermesEnabled
           sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle
-
-      - name: Fix React Native Autolinking
-        run: |
-          # Fix autolinking issue with React Native 0.79
-          echo -e "\nandroid {\n  namespace \"com.facebook.react\"\n  defaultConfig {\n    applicationId \"com.facebook.react\"\n  }\n}" >> node_modules/react-native/ReactAndroid/build.gradle || true
-
-      - name: Build APK
-        run: |
-          cd GreedGross
-          ./gradlew clean
-          ./gradlew assembleRelease --no-daemon --stacktrace --info | tee build.log
           
-          # Capture build status
+      - name: Test Metro Bundler
+        run: |
+          echo "=== Testing Metro bundler directly ==="
+          npx react-native bundle \
+            --platform android \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output test-bundle.js \
+            --sourcemap-output test-bundle.map \
+            --assets-dest test-assets \
+            --verbose 2>&1 | tee metro-test.log || {
+              echo "=== Metro bundler failed! ==="
+              echo "=== Full error log ==="
+              cat metro-test.log
+              echo "=== Checking for module resolution errors ==="
+              grep -i "error\|cannot find\|module\|unable" metro-test.log || true
+              exit 1
+            }
+          
+      - name: Verify JavaScript files
+        run: |
+          echo "=== Check index.js ==="
+          ls -la index.js
+          echo "=== Check Metro config ==="
+          ls -la metro.config.js || echo "No metro.config.js"
+          echo "=== Check babel config ==="
+          ls -la babel.config.js || echo "No babel.config.js"
+          
+      - name: Build APK  
+        run: |
+          # Pulisci autolinking generato precedentemente
+          rm -rf GreedGross/build/generated/autolinking/
+          
+          # IMPORTANTE: Esegui dalla ROOT, non da GreedGross!
+          gradle -p GreedGross clean
+          
+          # Build con output dettagliato per vedere errori JavaScript
+          gradle -p GreedGross assembleRelease --no-daemon --info --stacktrace 2>&1 | tee build.log || true
+          
+          # Se fallisce, mostra gli ultimi errori
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "::error::Build failed! Check logs for details"
-            echo "=== LAST 200 LINES OF BUILD LOG ==="
+            echo "=== BUILD FAILED - Searching for JavaScript bundling errors ==="
+            echo "=== Last 200 lines of build log ==="
             tail -200 build.log
             echo ""
-            echo "=== Searching for Metro/JavaScript errors ==="
-            grep -A 20 -B 10 -i "metro\|bundle\|javascript\|js\|error" build.log || true
+            echo "=== Searching for Metro/Bundle/JavaScript errors ==="
+            grep -A 20 -B 10 -i "metro\|bundle\|javascript\|js\|SyntaxError\|TypeError\|ReferenceError\|Cannot find module" build.log || true
+            echo ""
+            echo "=== Metro config contents ==="
+            cat metro.config.js || echo "No metro.config.js found"
+            echo ""
+            echo "=== Babel config contents ==="
+            cat babel.config.js || echo "No babel.config.js found"
+            echo ""
+            echo "=== Package.json scripts ==="
+            cat package.json | grep -A 10 '"scripts"' || true
             exit 1
           fi
+          
+      - name: Find APK
+        working-directory: ./GreedGross
+        run: |
+          echo "=== Searching for APK files ==="
+          find . -name "*Greed&Gross.apk" -type f
+          echo "=== Check build outputs ==="
+          ls -la app/build/outputs/ || echo "No outputs directory"
+          ls -la app/build/outputs/apk/ || echo "No apk directory"
+          ls -la app/build/outputs/apk/release/ || 
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: greed-gross-apk
           path: GreedGross/app/build/outputs/apk/release/*Greed&Gross.apk
           retention-days: 30
 
-      - name: Create build summary
+      - name: Build Summary
         run: |
-          echo "## 🚀 GREED & GROSS APK Build Success" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 APK Info" >> $GITHUB_STEP_SUMMARY
-          APK_PATH=$(find GreedGross/app/build/outputs/apk/release -name "*Greed&Gross.apk" | head -1)
-          if [ -n "$APK_PATH" ]; then
-            echo "**Size:** $(ls -lh "$APK_PATH" | awk '{print $5}')" >> $GITHUB_STEP_SUMMARY
-            echo "**File:** $(basename "$APK_PATH")" >> $GITHUB_STEP_SUMMARY
-          fi
+          echo "## GREED & GROSS APK Build Complete ✅" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ✅ Features Included" >> $GITHUB_STEP_SUMMARY
-          echo "- AI Lab Chat (GPT-4o-mini)" >> $GITHUB_STEP_SUMMARY
-          echo "- Global Breeder Chat" >> $GITHUB_STEP_SUMMARY
-          echo "- Admin Panel" >> $GITHUB_STEP_SUMMARY
-          echo "- 5 Language Support" >> $GITHUB_STEP_SUMMARY
-          echo "- Premium Subscriptions" >> $GITHUB_STEP_SUMMARY
+          echo "### Features Included:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ AI Lab Chat (GPT-4o-mini)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Global Breeder Chat" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Admin Panel" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ 5 Languages" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Premium Subscriptions" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Download from Artifacts tab ↑**" >> $GITHUB_STEP_SUMMARY
+          echo "Download the APK from the artifacts above!" >> $GITHUB_STEP_SUMMARY
