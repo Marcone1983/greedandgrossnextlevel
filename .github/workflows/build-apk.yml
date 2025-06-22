@@ -54,6 +54,10 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
+          # NON rimuovere lasspath! Serve per un bug di Gradle
+          echo "=== Check lasspath exists ==="
+          ls -la lasspath || echo "lasspath not found"
+          
           # Create google-services.json
           cat > app/google-services.json << EOF
           {
