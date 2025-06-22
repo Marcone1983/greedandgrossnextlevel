@@ -142,11 +142,14 @@ jobs:
           echo "=== Gradle wrapper properties ==="
           cat gradle/wrapper/gradle-wrapper.properties
           
-          echo "=== Testing gradlew help ==="
-          ./gradlew help --no-daemon
+          echo "=== Check if jar is really there ==="
+          test -f gradle/wrapper/gradle-wrapper.jar && echo "JAR EXISTS" || echo "JAR MISSING"
           
-          echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          echo "=== Try with explicit settings file ==="
+          ./gradlew help --no-daemon --settings-file=settings.gradle
+          
+          echo "=== Building APK with settings file ==="
+          ./gradlew assembleRelease --no-daemon --stacktrace --settings-file=settings.gradle
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
