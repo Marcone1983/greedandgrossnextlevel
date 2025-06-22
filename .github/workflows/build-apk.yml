@@ -185,6 +185,10 @@ jobs:
             echo "ERROR: Gradle plugin directory not found!"
           fi
           
+          # Debug: Check what's in the expected locations
+          echo "=== Checking gradle plugin locations ==="
+          ls -la node_modules/@react-native/gradle-plugin/build/com/facebook/react/react-native-gradle-plugin/0.79.0/ 2>/dev/null || echo "Plugin location not found"
+          
       - name: Fix React Native Reanimated
         run: |
           # Patch for react-native-reanimated compatibility with RN 0.79
@@ -198,7 +202,13 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          ./gradlew clean
+          
+          # First, let's see what tasks are available
+          echo "=== Available Gradle tasks ==="
+          ./gradlew tasks --all || echo "Failed to list tasks"
+          
+          # Try to run assembleRelease directly without clean
+          echo "=== Starting build ==="
           ./gradlew assembleRelease --no-daemon --stacktrace --info | tee build.log
           
           # Capture build status
