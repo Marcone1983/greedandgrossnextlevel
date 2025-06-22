@@ -54,15 +54,8 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # RIMUOVI lasspath se esiste
-          rm -f lasspath
-          
-          # Assicuriamoci che gradle.properties non abbia configurazioni strane
-          echo "=== Check gradle.properties ==="
-          cat gradle.properties || echo "No gradle.properties found"
-          
-          # Forza gradle a usare settings.gradle
-          echo "org.gradle.projectsetupfile=settings.gradle" >> gradle.properties
+          # Crea lasspath come copia di settings.gradle
+          cp settings.gradle lasspath
           
           # Create google-services.json
           cat > app/google-services.json << EOF
