@@ -54,9 +54,6 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # Crea lasspath come copia di settings.gradle
-          cp settings.gradle lasspath
-          
           # Create google-services.json
           cat > app/google-services.json << EOF
           {
@@ -115,7 +112,13 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          ./gradlew assembleRelease --no-daemon
+          # Debug: mostra cosa c'è nella directory
+          echo "=== Directory contents ==="
+          ls -la
+          echo "=== Gradle wrapper contents ==="
+          ls -la gradle/wrapper/
+          # Prova con --info per capire meglio l'errore
+          ./gradlew assembleRelease --no-daemon --info 2>&1 | tail -100
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
