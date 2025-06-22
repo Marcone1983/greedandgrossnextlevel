@@ -54,42 +54,12 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # Create lasspath (Gradle cerca questo file)
-          cat > lasspath << EOF
-          pluginManagement {
-              includeBuild("../node_modules/@react-native/gradle-plugin")
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
+          # Create lasspath (Gradle cerca questo file) - COPIA ESATTA di settings.gradle
+          cp settings.gradle lasspath
           
-          plugins {
-              id("com.facebook.react.settings")
-          }
-          
-          extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-              ex.autolinkLibrariesFromCommand()
-          }
-          
-          rootProject.name = 'GreedGross'
-          include ':app'
-          includeBuild('../node_modules/@react-native/gradle-plugin')
-          
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-              repositories {
-                  google()
-                  mavenCentral()
-                  jcenter() {
-                      content {
-                          includeModule("com.yqritc", "Android-ScalableVideoView")
-                      }
-                  }
-              }
-          }
-          EOF
+          # Assicuriamoci che gradle.properties non abbia configurazioni strane
+          echo "=== Check gradle.properties ==="
+          cat gradle.properties || echo "No gradle.properties found"
           
           # Create google-services.json
           cat > app/google-services.json << EOF
@@ -149,7 +119,31 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          ./gradlew assembleRelease --no-daemon
+          
+          # Debug: mostra cosa c'è nella directory
+          echo "=== Current directory ==="
+          pwd
+          
+          echo "=== Files in current directory ==="
+          ls -la
+          
+          echo "=== Gradle wrapper check ==="
+          ls -la gradle/wrapper/
+          
+          echo "=== Content of gradlew ==="
+          head -5 gradlew
+          
+          echo "=== Checking gradlew script ==="
+          file gradlew
+          
+          echo "=== Gradle wrapper properties ==="
+          cat gradle/wrapper/gradle-wrapper.properties
+          
+          echo "=== Testing gradlew help ==="
+          ./gradlew help --no-daemon
+          
+          echo "=== Building APK ==="
+          ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
