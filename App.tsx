@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'react-native';
 import { NativeBaseProvider } from 'native-base';
 import { Provider } from 'react-redux';
 import { NavigationContainer } from '@react-navigation/native';
-import * as SplashScreen from 'expo-splash-screen';
-import * as Font from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
@@ -16,7 +14,7 @@ import { toastConfig } from '@/utils/toastConfig';
 import AnimatedSplashScreen from '@/components/AnimatedSplashScreen';
 import { errorLogger } from '@/services/errorLogger';
 
-SplashScreen.preventAutoHideAsync();
+// Splash screen handled by native code in React Native CLI
 
 export default function App() {
   const [appIsReady, setAppIsReady] = React.useState(false);
@@ -25,19 +23,15 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
-        await Font.loadAsync({
-          Roboto: require('@assets/fonts/Roboto-Regular.ttf'),
-          'Roboto-Bold': require('@assets/fonts/Roboto-Bold.ttf'),
-          Orbitron: require('@assets/fonts/Orbitron-Regular.ttf'),
-          'Orbitron-Bold': require('@assets/fonts/Orbitron-Bold.ttf'),
-        });
+        // Font loading is handled differently in React Native CLI
+        // Fonts should be linked using react-native link or manually
 
         await initializeServices();
       } catch (e) {
         errorLogger.error('Failed to prepare app', e, 'App.prepare');
       } finally {
         setAppIsReady(true);
-        await SplashScreen.hideAsync();
+        // Splash screen auto-hides in React Native CLI
       }
     }
 
@@ -53,7 +47,7 @@ export default function App() {
       <NativeBaseProvider theme={theme}>
         <SafeAreaProvider>
           <NavigationContainer>
-            <StatusBar style="light" />
+            <StatusBar barStyle="light-content" backgroundColor="#000000" />
             <RootNavigator />
             <Toast config={toastConfig} />
           </NavigationContainer>
