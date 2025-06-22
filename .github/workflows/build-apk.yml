@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: 21
+          java-version: 17
 
       - name: Install dependencies
         run: npm install --legacy-peer-deps
@@ -122,34 +122,7 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          
-          # Debug: mostra cosa c'è nella directory
-          echo "=== Current directory ==="
-          pwd
-          
-          echo "=== Files in current directory ==="
-          ls -la
-          
-          echo "=== Gradle wrapper check ==="
-          ls -la gradle/wrapper/
-          
-          echo "=== Content of gradlew ==="
-          head -5 gradlew
-          
-          echo "=== Checking gradlew script ==="
-          file gradlew
-          
-          echo "=== Gradle wrapper properties ==="
-          cat gradle/wrapper/gradle-wrapper.properties
-          
-          echo "=== Check if jar is really there ==="
-          test -f gradle/wrapper/gradle-wrapper.jar && echo "JAR EXISTS" || echo "JAR MISSING"
-          
-          echo "=== Try gradlew help ==="
-          ./gradlew help --no-daemon
-          
-          echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
