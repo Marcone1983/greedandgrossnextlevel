@@ -102,34 +102,52 @@ jobs:
           
           # Gradle cerca 'lasspath' per qualche motivo nel progetto
           # Soluzione semplice: diamo a Gradle quello che vuole!
+          # Create symlink to node_modules first
+          echo "=== Creating symlink from GreedGross to node_modules ==="
+          pwd
+          ln -sf $(pwd)/../node_modules node_modules
+          
+          # Verify symlink works
+          echo "=== Verifying node_modules symlink ==="
+          ls -la node_modules/@react-native/gradle-plugin/ || echo "ERROR: gradle-plugin not accessible via symlink"
+          
+          # Now create lasspath with correct paths
           cat > lasspath << 'EOF'
-          pluginManagement {
-              includeBuild("../node_modules/@react-native/gradle-plugin")
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
+pluginManagement {
+    includeBuild("node_modules/@react-native/gradle-plugin")
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
 
-          rootProject.name = 'GreedGross'
-          include ':app'
+rootProject.name = 'GreedGross'
+include ':app'
 
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-              repositories {
-                  google()
-                  mavenCentral()
-                  jcenter() {
-                      content {
-                          includeModule("com.yqritc", "Android-ScalableVideoView")
-                      }
-                  }
-              }
-          }
-          EOF
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() {
+            content {
+                includeModule("com.yqritc", "Android-ScalableVideoView")
+            }
+        }
+    }
+}
+EOF
           
           echo "✅ Created lasspath file with proper settings content"
+          
+          # Double check the React Native plugin is accessible
+          echo "=== Final check: React Native plugin structure ==="
+          ls -la node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build.gradle || echo "Plugin build.gradle not found"
+          
+          # Show the lasspath content for debugging
+          echo "=== Lasspath content ==="
+          cat lasspath | head -20
           
           # Test gradle
           ./gradlew --version
