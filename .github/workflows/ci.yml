@@ -107,6 +107,18 @@ jobs:
           # Make gradlew executable
           chmod +x gradlew
           
+          # CRITICAL: Check gradlew script for lasspath references
+          echo "=== Checking gradlew script for lasspath ==="
+          grep -n "lasspath" gradlew || echo "No lasspath in gradlew"
+          
+          # Check gradle wrapper properties
+          echo "=== Gradle wrapper properties ==="
+          cat gradle/wrapper/gradle-wrapper.properties
+          
+          # Check all gradle properties files for settings file override
+          echo "=== Checking for settings file overrides ==="
+          grep -r "settingsFile\|settings-file\|lasspath" . --exclude-dir=.gradle || echo "No settings overrides found"
+          
           # Debug: Check existing gradle files
           echo "=== Existing gradle files ==="
           ls -la *.gradle* || echo "No gradle files found"
@@ -121,15 +133,36 @@ jobs:
             cp settings.gradle settings.gradle.backup
           fi
           
-          # Check for any gradle.properties issues that might reference lasspath
-          echo "=== Checking gradle.properties for lasspath references ==="
-          grep -i "lasspath" gradle.properties || echo "No lasspath references found in gradle.properties"
+          # WORKAROUND: Create the lasspath file that Gradle is looking for
+          # This is a temporary fix while we debug the real issue
+          cat > lasspath << 'EOF'
+          pluginManagement {
+              includeBuild("../node_modules/@react-native/gradle-plugin")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          rootProject.name = 'GreedGross'
+          include ':app'
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+                  jcenter() {
+                      content {
+                          includeModule("com.yqritc", "Android-ScalableVideoView")
+                      }
+                  }
+              }
+          }
+          EOF
           
-          # Check build.gradle files for lasspath references  
-          echo "=== Checking build files for lasspath references ==="
-          grep -r "lasspath" . --exclude-dir=.gradle || echo "No lasspath references found"
-          
-          # Create clean settings.gradle - FULL configuration for production
+          # ALSO create proper settings.gradle 
           cat > settings.gradle << 'EOF'
           pluginManagement {
               includeBuild("../node_modules/@react-native/gradle-plugin")
@@ -157,7 +190,10 @@ jobs:
           }
           EOF
           
-          echo "=== Production settings.gradle created ==="
+          echo "=== Created both lasspath and settings.gradle ==="
+          echo "lasspath content:"
+          cat lasspath
+          echo "=== settings.gradle content:"
           cat settings.gradle
           
           # Ensure gradle.properties exists but DON'T clean production settings
@@ -174,22 +210,22 @@ jobs:
           ls -la app/build.gradle || echo "No app build.gradle"
           
           # Look for lasspath references in all gradle files - this is the real issue
-          echo "=== Searching for lasspath references in all files ==="
-          find . -name "*.gradle*" -o -name "*.properties" | xargs grep -l "lasspath" || echo "No lasspath references found in gradle files"
+          echo "=== Deep search for lasspath configuration ==="
+          find . -type f \( -name "*.gradle*" -o -name "*.properties" -o -name "gradlew*" \) -exec echo "=== Checking {} ===" \; -exec grep -Hn "lasspath\|settingsFile\|settings-file" {} \; || echo "No lasspath/settingsFile references found"
           
-          # Check gradle.properties for any settings file override
-          echo "=== Checking for gradle settings file override ==="
-          grep -i "settings" gradle.properties || echo "No settings override in gradle.properties"
+          # Check environment variables that might affect gradle
+          echo "=== Environment variables ==="
+          env | grep -i gradle || echo "No gradle environment variables"
           
-          # Check for gradle command line options that might be set
-          echo "=== Checking for gradle.properties that might affect settings ==="
-          grep -E "(gradle\.settings|settingsFile)" gradle.properties || echo "No settings file configuration found"
+          # Check if there are any gradle init scripts
+          echo "=== Gradle init scripts ==="
+          ls -la ~/.gradle/init.d/ 2>/dev/null || echo "No gradle init scripts"
           
           # Show snippets of build files for debugging
-          echo "=== Root build.gradle content (first 20 lines) ==="
-          head -20 build.gradle || echo "Could not read root build.gradle"
-          echo "=== App build.gradle content (first 30 lines) ==="
-          head -30 app/build.gradle || echo "Could not read app build.gradle"
+          echo "=== Root build.gradle content (first 30 lines) ==="
+          head -30 build.gradle || echo "Could not read root build.gradle"
+          echo "=== App build.gradle content (first 50 lines) ==="
+          head -50 app/build.gradle || echo "Could not read app build.gradle"
           
           # Test basic gradle functionality
           echo "=== Testing basic gradle ==="
