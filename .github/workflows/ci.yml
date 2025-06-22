@@ -94,13 +94,15 @@ jobs:
           
           chmod +x gradlew
           
-          echo "Checking ROOT build.gradle for React Native plugin configuration"
+          echo "Checking ROOT build.gradle content"
           cat build.gradle
           
-          echo "Checking APP build.gradle for plugins"
-          head -20 app/build.gradle
+          echo "Checking React Native version in package.json"
+          grep "react-native" ../package.json || echo "No React Native in package.json"
           
           echo "Finding React Native plugin"
+          find ../node_modules -name "*react-native*gradle*" -type f 2>/dev/null | head -5
+          
           RN_PLUGIN_PATH=""
           if [ -d "../node_modules/@react-native/gradle-plugin" ]; then
             RN_PLUGIN_PATH="../node_modules/@react-native/gradle-plugin"
@@ -115,15 +117,20 @@ jobs:
           
           echo "Found React Native at: $RN_PLUGIN_PATH"
           
-          echo "Checking what React Native version is in package.json"
-          grep "react-native" ../package.json
+          echo "Fixing ROOT build.gradle - adding React Native version"
           
-          echo "Checking if plugin needs to be in ROOT build.gradle instead of lasspath"
-          if grep -q "com.facebook.react" build.gradle; then
-            echo "React Native plugin already in ROOT build.gradle"
-          else
-            echo "React Native plugin NOT in ROOT build.gradle - may need to add it"
+          # Get React Native version from package.json
+          RN_VERSION=$(grep '"react-native"' ../package.json | sed 's/.*"react-native": *"\([^"]*\)".*/\1/' | sed 's/\^//')
+          echo "React Native version: $RN_VERSION"
+          
+          # Fix the ROOT build.gradle by adding proper version
+          if grep -q "com.facebook.react:react-native-gradle-plugin:$" build.gradle; then
+            echo "Fixing empty React Native plugin version in ROOT build.gradle"
+            sed -i "s/com.facebook.react:react-native-gradle-plugin:$/com.facebook.react:react-native-gradle-plugin:$RN_VERSION/" build.gradle
           fi
+          
+          echo "Updated ROOT build.gradle:"
+          cat build.gradle
           
           cat > lasspath << EOF
           pluginManagement {
@@ -157,8 +164,7 @@ jobs:
           fi
           
           echo "Testing gradle configuration"
-          ./gradlew --version || echo "Gradle version failed"
-          ./gradlew projects --no-daemon || echo "Gradle projects failed"
+          ./gradlew --version
 
       - name: 🔐 Create environment file
         run: |
