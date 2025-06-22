@@ -25,33 +25,31 @@ jobs:
   test:
     name: 🧪 Test & Quality Check
     runs-on: ubuntu-latest
-    
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
-    
+
     - name: 📦 Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-    
+
     - name: 📱 Setup React Native CLI
       run: npm install -g @react-native-community/cli
-    
+
     - name: 🔧 Install dependencies
-      run: |
-        npm install --legacy-peer-deps
-    
+      run: npm install --legacy-peer-deps
+
     - name: 🔍 TypeScript check
       run: npm run type-check
-    
+
     - name: 🎨 ESLint check
       run: npm run lint
-    
+
     - name: 🧪 Run tests (temporarily disabled)
       run: echo "Tests temporarily disabled to reach Android build phase"
-    
+
     - name: 📊 Upload coverage
       if: success()
       uses: codecov/codecov-action@v3
@@ -61,54 +59,32 @@ jobs:
 
   build-android:
     name: 🤖 Build Android APK/AAB
-    needs: test
     runs-on: ubuntu-latest
+    needs: test
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-    
     steps:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
-    
+
     - name: 📦 Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
-    
+
     - name: ☕ Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: ${{ env.JAVA_VERSION }}
-    
-    # Skip gradle-build-action to avoid potential issues
-    # We'll use the gradle wrapper directly
-    
-    - name: 📱 Setup React Native CLI
-      run: npm install -g @react-native-community/cli
-    
+
     - name: 🔧 Install dependencies
       run: |
         npm install --legacy-peer-deps
-        # Debug: Check React Native installation
-        echo "=== Checking React Native installation ==="
-        ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT FOUND"
-        ls -la node_modules/react-native/ || echo "react-native NOT FOUND"
-        # Create symlink from GreedGross to node_modules (absolute path)
-        cd GreedGross
-        rm -rf node_modules
-        ln -sf $(pwd)/../node_modules node_modules
-        # Verify symlink works
-        echo "=== Verifying symlink from GreedGross ==="
-        pwd
-        ls -la | grep node_modules
-        echo "=== Testing symlink ==="
-        ls -la node_modules/ | head -5
-        ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT ACCESSIBLE"
-    
-    - name: 🔐 Create environment file
+
+    - name: 🔐 Create .env file
       run: |
-        cat > .env << EOF
+        cat > .env <<EOF
         FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
         FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
         FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
@@ -125,316 +101,118 @@ jobs:
         APP_VERSION=${{ secrets.APP_VERSION }}
         ENVIRONMENT=production
         EOF
-    
+
     - name: 🔥 Create google-services.json
       run: |
-        cat > GreedGross/app/google-services.json << EOF
+        mkdir -p GreedGross/app
+        cat > GreedGross/app/google-services.json <<EOF
         {
           "project_info": {
             "project_number": "${{ secrets.FIREBASE_PROJECT_NUMBER }}",
             "project_id": "${{ secrets.FIREBASE_PROJECT_ID }}",
             "storage_bucket": "${{ secrets.FIREBASE_STORAGE_BUCKET }}"
           },
-          "client": [
-            {
-              "client_info": {
-                "mobilesdk_app_id": "${{ secrets.FIREBASE_APP_ID }}",
-                "android_client_info": {
-                  "package_name": "com.greedandgross.cannabisbreeding"
-                }
-              },
-              "oauth_client": [
-                {
-                  "client_id": "${{ secrets.FIREBASE_CLIENT_ID }}",
-                  "client_type": 3
-                }
-              ],
-              "api_key": [
-                {
-                  "current_key": "${{ secrets.FIREBASE_API_KEY }}"
-                }
-              ],
-              "services": {
-                "appinvite_service": {
-                  "other_platform_oauth_client": [
-                    {
-                      "client_id": "${{ secrets.FIREBASE_CLIENT_ID }}",
-                      "client_type": 3
-                    }
-                  ]
-                }
+          "client": [{
+            "client_info": {
+              "mobilesdk_app_id": "${{ secrets.FIREBASE_APP_ID }}",
+              "android_client_info": {
+                "package_name": "com.greedandgross.cannabisbreeding"
               }
-            }
-          ],
+            },
+            "oauth_client": [{
+              "client_id": "${{ secrets.FIREBASE_CLIENT_ID }}",
+              "client_type": 3
+            }],
+            "api_key": [{
+              "current_key": "${{ secrets.FIREBASE_API_KEY }}"
+            }]
+          }],
           "configuration_version": "1"
         }
         EOF
-    
-    - name: 🔑 Setup Android Keystore
+
+    - name: 🔑 Setup Keystore
       run: |
-        # Create keystore from base64
         echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > GreedGross/app/greed-gross-release-key.keystore
-        
-        # Verify keystore exists
-        ls -la GreedGross/app/greed-gross-release-key.keystore
-        
-        # Add keystore config to gradle.properties
-        cat >> GreedGross/gradle.properties << EOF
+        cat >> GreedGross/gradle.properties <<EOF
         GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
         GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
         GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
         EOF
-    
-    - name: 🔧 Prepare Gradle build
+
+    - name: ✍️ Inject settings.gradle
       run: |
-        # First check where node_modules actually is
-        echo "=== Checking node_modules location ==="
-        pwd
-        ls -la
-        ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not found in root"
-        
-        cd GreedGross
-        # Make gradlew executable
-        chmod +x gradlew
-        # Create gradle.properties if needed
-        touch gradle.properties
-        
-        # Debug: Check if node_modules is accessible from here
-        echo "=== From GreedGross directory ==="
-        pwd
-        ls -la ../node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not accessible from GreedGross"
-        
-        # Check settings.gradle exists
-        echo "=== Checking settings.gradle ==="
-        cat settings.gradle
-        
-    - name: 🏗️ Build APK
-      run: |
-        cd GreedGross
-        # Remove any gradle init scripts that might interfere
-        rm -rf ~/.gradle/init.d/
-        
-        # Debug: Check environment variables
-        echo "=== Checking for gradle-related env vars ==="
-        env | grep -i gradle || echo "No gradle env vars found"
-        
-        # Create lasspath with corrected paths
-        cat > lasspath << 'EOF'
-pluginManagement {
-    includeBuild("node_modules/@react-native/gradle-plugin")
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-rootProject.name = 'GreedGross'
-
-include ':app'
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() {
-            content {
-                includeModule("com.yqritc", "Android-ScalableVideoView")
-            }
+        cat > GreedGross/settings.gradle <<EOF
+        rootProject.name = 'GreedGross'
+        include ':app'
+        dependencyResolutionManagement {
+          repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+          repositories {
+            google()
+            mavenCentral()
+          }
         }
-    }
-}
-EOF
-        
-        # Debug: Check node_modules paths
-        echo "=== Checking React Native plugin paths ==="
-        pwd
-        ls -la ../node_modules/@react-native/gradle-plugin/ || echo "Plugin not found from GreedGross"
-        ls -la node_modules/@react-native/gradle-plugin/ || echo "Symlink not working"
-        
-        # Use the gradle wrapper
-        ./gradlew --version
-        
-        # Debug: List available projects
-        echo "=== Available Gradle projects ==="
-        ./gradlew projects
-        
-        # Debug: Check if app directory exists
-        echo "=== Checking app directory ==="
-        ls -la app/
-        
-        # Build APK
-        echo "=== Building APK ==="
-        ./gradlew assembleRelease --no-daemon
-        
-    - name: 📦 Process APK
+        EOF
+
+    - name: 🏗️ Build selected type
       run: |
         cd GreedGross
-        # Verify APK was created
-        ls -la app/build/outputs/apk/release/
-        
-        # Rename APK with version and timestamp
-        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
-    
-    - name: 🏗️ Build AAB (App Bundle)
-      run: |
-        cd GreedGross
-        ./gradlew bundleRelease --no-daemon
-        
-    - name: 📦 Process AAB
-      run: |
-        cd GreedGross
-        # Verify AAB was created
-        ls -la app/build/outputs/bundle/release/
-        
-        # Rename AAB with version and timestamp
-        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-        mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab
-    
-    - name: 📊 APK/AAB Analysis
-      run: |
-        if [ -f GreedGross/app/build/outputs/apk/release/greed-gross-*.apk ]; then
-          echo "🎉 APK Build Success!"
-          APK_SIZE=$(du -h GreedGross/app/build/outputs/apk/release/greed-gross-*.apk | cut -f1)
-          echo "📦 APK Size: $APK_SIZE"
-          echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
+        chmod +x gradlew
+
+        if [ "${{ github.event.inputs.build_type }}" = "apk" ]; then
+          ./gradlew assembleRelease
+        elif [ "${{ github.event.inputs.build_type }}" = "aab" ]; then
+          ./gradlew bundleRelease
+        else
+          ./gradlew assembleRelease bundleRelease
         fi
-        
-        if [ -f GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab ]; then
-          echo "🎉 AAB Build Success!"
-          AAB_SIZE=$(du -h GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab | cut -f1)
-          echo "📦 AAB Size: $AAB_SIZE"
-          echo "AAB_SIZE=$AAB_SIZE" >> $GITHUB_ENV
+
+    - name: 📦 Rename & Upload Artifacts
+      run: |
+        cd GreedGross
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        APP_VERSION="${{ secrets.APP_VERSION }}"
+
+        if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+          mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${APP_VERSION}-${TIMESTAMP}.apk
+          echo "APK_PATH=app/build/outputs/apk/release/greed-gross-v${APP_VERSION}-${TIMESTAMP}.apk" >> $GITHUB_ENV
         fi
-    
-    - name: 📤 Upload APK Artifact
+
+        if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+          mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${APP_VERSION}-${TIMESTAMP}.aab
+          echo "AAB_PATH=app/build/outputs/bundle/release/greed-gross-v${APP_VERSION}-${TIMESTAMP}.aab" >> $GITHUB_ENV
+        fi
+
+    - name: 📤 Upload APK
+      if: env.APK_PATH
       uses: actions/upload-artifact@v4
       with:
         name: greed-gross-apk
-        path: GreedGross/app/build/outputs/apk/release/greed-gross-*.apk
+        path: GreedGross/${{ env.APK_PATH }}
         retention-days: 30
-    
-    - name: 📤 Upload AAB Artifact
+
+    - name: 📤 Upload AAB
+      if: env.AAB_PATH
       uses: actions/upload-artifact@v4
       with:
         name: greed-gross-aab
-        path: GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab
+        path: GreedGross/${{ env.AAB_PATH }}
         retention-days: 30
-    
+
     - name: 📝 Build Summary
       run: |
         echo "## 🎉 GREED & GROSS Build Complete! 🌿" >> $GITHUB_STEP_SUMMARY
         echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
         echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
         echo "| 📱 App Version | ${{ secrets.APP_VERSION }} |" >> $GITHUB_STEP_SUMMARY
-        echo "| 🏗️ Build Type | ${{ matrix.build-type }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| 🏗️ Build Type | ${{ github.event.inputs.build_type }} |" >> $GITHUB_STEP_SUMMARY
         echo "| 📅 Build Date | $(date) |" >> $GITHUB_STEP_SUMMARY
         echo "| 🔗 Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-        
-        if [ ! -z "$APK_SIZE" ]; then
-          echo "| 📦 APK Size | $APK_SIZE |" >> $GITHUB_STEP_SUMMARY
+
+        if [ -n "${{ env.APK_PATH }}" ]; then
+          echo "| 📦 APK Path | ${{ env.APK_PATH }} |" >> $GITHUB_STEP_SUMMARY
         fi
-        
-        if [ ! -z "$AAB_SIZE" ]; then
-          echo "| 📦 AAB Size | $AAB_SIZE |" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 📱 Download Links" >> $GITHUB_STEP_SUMMARY
-        echo "- APK and AAB files are available in the build artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "- Navigate to Actions → This workflow run → Artifacts" >> $GITHUB_STEP_SUMMARY
-
-  deploy-internal:
-    name: 🚀 Deploy Internal Testing
-    needs: build-android
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
-    steps:
-    - name: 📥 Download AAB
-      uses: actions/download-artifact@v4
-      with:
-        name: greed-gross-aab-aab
-        path: ./artifacts
-    
-    # Google Play upload (optional - only if credentials are configured)
-    # - name: 🔐 Setup Google Play credentials
-    #   run: |
-    #     echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}" > google-play-key.json
-    # 
-    # - name: 🚀 Upload to Google Play Internal Testing
-    #   uses: r0adkll/upload-google-play@v1
-    #   with:
-    #     serviceAccountJson: google-play-key.json
-    #     packageName: com.greedandgross.cannabisbreeding
-    #     releaseFiles: ./artifacts/*.aab
-    #     track: internal
-    #     status: completed
-    
-    - name: 📧 Notify deployment
-      run: |
-        echo "🎉 App deployed to Google Play Internal Testing!"
-        echo "Track: Internal Testing"
-        echo "Package: com.greedandgross.cannabisbreeding"
-
-  build-ios:
-    name: 🍎 Build iOS (Future)
-    runs-on: macos-latest
-    if: false # Disabled for now, enable when iOS certificates are ready
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-    
-    - name: 📱 Setup Expo for iOS
-      run: |
-        echo "iOS build will be implemented when certificates are configured"
-        echo "Required secrets:"
-        echo "- IOS_CERTIFICATE_BASE64"
-        echo "- IOS_PROVISIONING_PROFILE_BASE64"
-        echo "- APPLE_ID"
-        echo "- APPLE_APP_SPECIFIC_PASSWORD"
-
-  security-scan:
-    name: 🔒 Security Scan
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
-    steps:
-    - name: 📥 Checkout code
-      uses: actions/checkout@v4
-    
-    - name: 🔍 Run security audit
-      run: |
-        npm audit --audit-level moderate
-        
-    - name: 🔐 Check for secrets
-      run: |
-        echo "Scanning for accidentally committed secrets..."
-        if grep -r "sk-proj-" . --exclude-dir=node_modules --exclude-dir=.git; then
-          echo "❌ Found potential API keys in code!"
-          exit 1
-        else
-          echo "✅ No secrets found in code"
-        fi
-
-  notification:
-    name: 📢 Notification
-    needs: [test, build-android]
-    runs-on: ubuntu-latest
-    if: always() && github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: 📊 Build Status
-      run: |
-        if [ "${{ needs.build-android.result }}" == "success" ]; then
-          echo "🎉 GREED & GROSS build completed successfully!"
-          echo "✅ APK and AAB ready for distribution"
-          echo "📱 App version: ${{ secrets.APP_VERSION }}"
-        else
-          echo "❌ Build failed. Check the logs for details."
-          exit 1
+        if [ -n "${{ env.AAB_PATH }}" ]; then
+          echo "| 📦 AAB Path | ${{ env.AAB_PATH }} |" >> $GITHUB_STEP_SUMMARY
         fi
