@@ -1,0 +1,135 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Create .env file
+        run: |
+          cat > .env << EOF
+          FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+          FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL=${{ secrets.OPENAI_MODEL }}
+          REVENUECAT_API_KEY_IOS=${{ secrets.REVENUECAT_API_KEY_IOS }}
+          REVENUECAT_API_KEY_ANDROID=${{ secrets.REVENUECAT_API_KEY_ANDROID }}
+          API_BASE_URL=${{ secrets.API_BASE_URL }}
+          WEBSOCKET_URL=${{ secrets.WEBSOCKET_URL }}
+          ADMIN_SECRET=${{ secrets.ADMIN_SECRET }}
+          APP_VERSION=${{ secrets.APP_VERSION }}
+          ENVIRONMENT=production
+          EOF
+
+      - name: Setup Android
+        run: |
+          cd GreedGross
+          chmod +x gradlew
+          
+          # Create google-services.json
+          cat > app/google-services.json << EOF
+          {
+            "project_info": {
+              "project_number": "${{ secrets.FIREBASE_PROJECT_NUMBER }}",
+              "project_id": "${{ secrets.FIREBASE_PROJECT_ID }}",
+              "storage_bucket": "${{ secrets.FIREBASE_STORAGE_BUCKET }}"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "${{ secrets.FIREBASE_APP_ID }}",
+                  "android_client_info": {
+                    "package_name": "com.greedandgross.cannabisbreeding"
+                  }
+                },
+                "oauth_client": [
+                  {
+                    "client_id": "${{ secrets.FIREBASE_CLIENT_ID }}",
+                    "client_type": 3
+                  }
+                ],
+                "api_key": [
+                  {
+                    "current_key": "${{ secrets.FIREBASE_API_KEY }}"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": [
+                      {
+                        "client_id": "${{ secrets.FIREBASE_CLIENT_ID }}",
+                        "client_type": 3
+                      }
+                    ]
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          
+          # Setup keystore
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/greed-gross-release-key.keystore
+          
+          # Create gradle.properties with signing config
+          cat >> gradle.properties << EOF
+          
+          GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
+          GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+
+      - name: Build APK
+        run: |
+          cd GreedGross
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: greed-gross-apk
+          path: GreedGross/app/build/outputs/apk/release/*.apk
+          retention-days: 30
+
+      - name: Build Summary
+        run: |
+          echo "## GREED & GROSS APK Build Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Features Included:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ AI Lab Chat (GPT-4o-mini)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Global Breeder Chat" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Admin Panel" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ 5 Languages" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Premium Subscriptions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download the APK from the artifacts above!" >> $GITHUB_STEP_SUMMARY
