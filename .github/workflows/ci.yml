@@ -87,29 +87,14 @@ jobs:
       - name: 🔧 Install dependencies
         run: |
           npm install --legacy-peer-deps
-          
-          # Ensure React Native dependencies are properly installed
-          echo "=== Verifying React Native installation ==="
-          ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin not found"
-          ls -la node_modules/react-native/ || echo "react-native not found"
 
       - name: 🔧 Setup Android project
         run: |
           cd GreedGross
           
-          # Make gradlew executable
           chmod +x gradlew
           
-          # FIND React Native plugin - MUST EXIST for production
-          echo "=== FINDING React Native plugin (REQUIRED for full app) ==="
-          
-          # Check React Native version
-          echo "=== React Native setup ==="
-          grep "react-native" ../package.json || echo "No RN in package.json"
-          ls -la ../node_modules/@react-native/ || echo "No @react-native"
-          ls -la ../node_modules/react-native/ || echo "No react-native"
-          
-          # Find the correct React Native gradle plugin path
+          echo "Finding React Native plugin"
           RN_PLUGIN_PATH=""
           if [ -d "../node_modules/@react-native/gradle-plugin" ]; then
             RN_PLUGIN_PATH="../node_modules/@react-native/gradle-plugin"
@@ -118,98 +103,46 @@ jobs:
           fi
           
           if [ -z "$RN_PLUGIN_PATH" ]; then
-            echo "❌ React Native plugin not found - searching deeper"
+            echo "React Native plugin not found"
             find ../node_modules -name "*gradle*" -path "*react-native*" -type d | head -5
-            echo "🚨 CANNOT BUILD COMPLETE APP WITHOUT REACT NATIVE"
+            echo "Cannot build app without React Native"
             exit 1
           fi
           
           echo "Found React Native at: $RN_PLUGIN_PATH"
           
-          # Create FULL lasspath with React Native
           cat > lasspath << EOF
-pluginManagement {
-    includeBuild("$RN_PLUGIN_PATH")
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-plugins {
-    id("com.facebook.react.settings")
-}
-
-extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-    ex.autolinkLibrariesFromCommand()
-}
-
-rootProject.name = 'GreedGross'
-include ':app'
-includeBuild('$RN_PLUGIN_PATH')
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() {
-            content {
-                includeModule("com.yqritc", "Android-ScalableVideoView")
-            }
-        }
-    }
-}
-EOF
+          pluginManagement {
+              includeBuild("$RN_PLUGIN_PATH")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
           
-          echo "=== What's wrong with app/build.gradle line 2? ==="
-          sed -n '1,5p' app/build.gradle
+          rootProject.name = 'GreedGross'
+          include ':app'
+          
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+                  jcenter() {
+                      content {
+                          includeModule("com.yqritc", "Android-ScalableVideoView")
+                      }
+                  }
+              }
+          }
+          EOF
           
           if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
             sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
-            echo "Added compileSdkVersion"
           fi
           
           ./gradlew --version
-          
-          # Ensure gradle.properties exists but DON'T clean production settings
-          echo "=== Current gradle.properties content ==="
-          cat gradle.properties
-          
-          # Only check for duplicate GREED_GROSS entries, don't remove production configs
-          echo "=== Checking for duplicate keystore entries ==="
-          grep -c "GREED_GROSS_UPLOAD" gradle.properties || echo "No keystore entries found yet"
-          
-          # Check build.gradle files
-          echo "=== Build gradle files ==="
-          ls -la build.gradle || echo "No root build.gradle"
-          ls -la app/build.gradle || echo "No app build.gradle"
-          
-          # Look for lasspath references in all gradle files - this is the real issue
-          echo "=== Deep search for lasspath configuration ==="
-          find . -type f \( -name "*.gradle*" -o -name "*.properties" -o -name "gradlew*" \) -exec echo "=== Checking {} ===" \; -exec grep -Hn "lasspath\|settingsFile\|settings-file" {} \; || echo "No lasspath/settingsFile references found"
-          
-          # Check environment variables that might affect gradle
-          echo "=== Environment variables ==="
-          env | grep -i gradle || echo "No gradle environment variables"
-          
-          # Check if there are any gradle init scripts
-          echo "=== Gradle init scripts ==="
-          ls -la ~/.gradle/init.d/ 2>/dev/null || echo "No gradle init scripts"
-          
-          # Show snippets of build files for debugging
-          echo "=== Root build.gradle content (first 30 lines) ==="
-          head -30 build.gradle || echo "Could not read root build.gradle"
-          echo "=== App build.gradle content (first 50 lines) ==="
-          head -50 app/build.gradle || echo "Could not read app build.gradle"
-          
-          # Test basic gradle functionality
-          echo "=== Testing basic gradle ==="
-          ./gradlew --version
-          
-          echo "=== Testing gradle projects with simple settings ==="
-          ./gradlew projects --no-daemon || echo "Projects command failed"
 
       - name: 🔐 Create environment file
         run: |
@@ -277,13 +210,10 @@ EOF
 
       - name: 🔑 Setup Android Keystore
         run: |
-          # Create keystore from base64
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > GreedGross/app/greed-gross-release-key.keystore
           
-          # Verify keystore exists
           ls -la GreedGross/app/greed-gross-release-key.keystore
           
-          # Only add keystore config if not already present (avoid duplicates)
           if ! grep -q "GREED_GROSS_UPLOAD_STORE_FILE" GreedGross/gradle.properties; then
             echo "" >> GreedGross/gradle.properties
             echo "# Keystore configuration for release builds" >> GreedGross/gradle.properties
@@ -291,60 +221,27 @@ EOF
             echo "GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> GreedGross/gradle.properties
             echo "GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> GreedGross/gradle.properties
             echo "GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> GreedGross/gradle.properties
-            echo "Keystore configuration added"
           else
-            echo "Keystore configuration already exists, updating values"
             sed -i "s/GREED_GROSS_UPLOAD_STORE_PASSWORD=.*/GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}/" GreedGross/gradle.properties
             sed -i "s/GREED_GROSS_UPLOAD_KEY_ALIAS=.*/GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}/" GreedGross/gradle.properties  
             sed -i "s/GREED_GROSS_UPLOAD_KEY_PASSWORD=.*/GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}/" GreedGross/gradle.properties
           fi
-          
-          echo "Final gradle.properties:"
-          tail -10 GreedGross/gradle.properties
 
       - name: 🏗️ Build APK
         if: (github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both') || (github.event_name != 'workflow_dispatch')
         run: |
           cd GreedGross
           
-          echo "Building APK"
           ./gradlew assembleRelease --no-daemon --stacktrace
-          
-          echo "Finding where the APK actually is"
-          find app/build -name "*.apk" -type f
           
           APK_FILE=$(find app/build -name "*.apk" -type f | head -1)
           
           if [ -n "$APK_FILE" ]; then
-            echo "Found APK at: $APK_FILE"
             mkdir -p app/build/outputs/apk/release/
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             cp "$APK_FILE" "app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
-            echo "APK ready: greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
           else
             echo "No APK found"
-            exit 1
-          fi Settings gradle ==="
-          cat settings.gradle
-          
-          echo "=== Testing gradle projects ==="
-          ./gradlew projects --no-daemon || echo "Projects command failed, but continuing with build"
-          
-          echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build_log.txt
-          
-          echo "=== Build completed, checking outputs ==="
-          ls -la app/build/outputs/apk/release/ || echo "APK output directory not found"
-          
-          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
-            # Rename APK with version and timestamp
-            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-            mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
-            echo "✅ APK build successful"
-          else
-            echo "❌ APK build failed - checking logs"
-            echo "=== Last 100 lines of build log ==="
-            tail -100 build_log.txt || echo "No build log found"
             exit 1
           fi
 
@@ -358,7 +255,6 @@ EOF
           AAB_FILE=$(find app/build -name "*.aab" -type f | head -1)
           
           if [ -n "$AAB_FILE" ]; then
-            echo "Found AAB at: $AAB_FILE"
             mkdir -p app/build/outputs/bundle/release/
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             cp "$AAB_FILE" "app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab"
@@ -419,36 +315,6 @@ EOF
           path: GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab
           retention-days: 30
 
-      - name: 📝 Build Summary
-        run: |
-          BUILD_TYPE="${{ github.event.inputs.build_type || 'both' }}"
-          echo "## 🎉 GREED & GROSS Build Complete! 🌿" >> $GITHUB_STEP_SUMMARY
-          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 📱 App Version | ${{ secrets.APP_VERSION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🏗️ Build Type | $BUILD_TYPE |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📅 Build Date | $(date) |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔗 Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
-          
-          if [ ! -z "$APK_SIZE" ]; then
-            echo "| 📦 APK Size | $APK_SIZE |" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          if [ ! -z "$AAB_SIZE" ]; then
-            echo "| 📦 AAB Size | $AAB_SIZE |" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📱 Download Links" >> $GITHUB_STEP_SUMMARY
-          echo "- APK and AAB files are available in the build artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- Navigate to Actions → This workflow run → Artifacts" >> $GITHUB_STEP_SUMMARY
-
-  deploy-internal:
-    name: 🚀 Deploy Internal Testing
-    needs: build-android
-    runs-on: ubuntu-latest
-    if: false # DISABLED - no real deployment configured
-
   security-scan:
     name: 🔒 Security Scan
     runs-on: ubuntu-latest
@@ -466,10 +332,10 @@ EOF
         run: |
           echo "Scanning for accidentally committed secrets..."
           if grep -r "sk-proj-" . --exclude-dir=node_modules --exclude-dir=.git; then
-            echo "❌ Found potential API keys in code!"
+            echo "Found potential API keys in code!"
             exit 1
           else
-            echo "✅ No secrets found in code"
+            echo "No secrets found in code"
           fi
 
   notification:
