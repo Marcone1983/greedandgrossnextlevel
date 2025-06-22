@@ -124,40 +124,40 @@ jobs:
           echo "Found React Native at: $RN_PLUGIN_PATH"
           
           cat > lasspath << EOF
-pluginManagement {
-    includeBuild("$RN_PLUGIN_PATH")
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-plugins {
-    id("com.facebook.react.settings")
-}
-
-extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-    ex.autolinkLibrariesFromCommand()
-}
-
-rootProject.name = 'GreedGross'
-include ':app'
-includeBuild('$RN_PLUGIN_PATH')
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() {
-            content {
-                includeModule("com.yqritc", "Android-ScalableVideoView")
-            }
-        }
-    }
-}
-EOF
+          pluginManagement {
+              includeBuild("$RN_PLUGIN_PATH")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          
+          plugins {
+              id("com.facebook.react.settings")
+          }
+          
+          extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+              ex.autolinkLibrariesFromCommand()
+          }
+          
+          rootProject.name = 'GreedGross'
+          include ':app'
+          includeBuild('$RN_PLUGIN_PATH')
+          
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+                  jcenter() {
+                      content {
+                          includeModule("com.yqritc", "Android-ScalableVideoView")
+                      }
+                  }
+              }
+          }
+          EOF
           
           # Fix compileSdkVersion if missing
           if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
