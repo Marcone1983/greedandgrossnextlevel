@@ -133,7 +133,8 @@ jobs:
       - name: Fix React Native Reanimated
         run: |
           # Patch per react-native-reanimated con RN 0.79
-          sed -i "s/project(':app').hermesEnabled/true/g" node_modules/react-native-reanimated/android/build.gradle
+          # Sostituisci il check di hermesEnabled con true (Hermes è sempre attivo in RN 0.79)
+          sed -i '165s/appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean()/true/' node_modules/react-native-reanimated/android/build.gradle
           
       - name: Build APK
         run: |
