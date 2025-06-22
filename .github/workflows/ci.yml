@@ -263,14 +263,34 @@ jobs:
           ls -la
           echo "=== App directory ==="
           ls -la app/
-          echo "=== Gradle properties ==="
-          cat gradle.properties || echo "No gradle.properties found"
+          echo "=== Final Gradle properties ==="
+          cat gradle.properties
+          echo "=== Settings gradle ==="
+          cat settings.gradle
           
-          echo "=== Testing gradle connection ==="
-          ./gradlew projects --no-daemon
+          echo "=== Testing gradle connection (with debug output) ==="
+          ./gradlew projects --no-daemon --stacktrace --debug 2>&1 | head -100
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ Gradle projects failed, trying simple gradle version"
+            ./gradlew --version --no-daemon || echo "Basic gradle also failed"
+            echo "=== Checking if this is a React Native issue ==="
+            
+            # Try with minimal settings.gradle
+            cp settings.gradle settings.gradle.full-backup
+            cat > settings.gradle << 'EOF'
+          rootProject.name = 'GreedGross'
+          include ':app'
+          EOF
+            echo "=== Trying with minimal settings.gradle ==="
+            ./gradlew projects --no-daemon --stacktrace 2>&1 | head -50
+            
+            # Restore original
+            mv settings.gradle.full-backup settings.gradle
+          fi
           
           echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace --info --debug 2>&1 | tee build_log.txt
+          ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build_log.txt
           
           echo "=== Build completed, checking outputs ==="
           ls -la app/build/outputs/apk/release/ || echo "APK output directory not found"
@@ -282,8 +302,8 @@ jobs:
             echo "✅ APK build successful"
           else
             echo "❌ APK build failed - checking logs"
-            echo "=== Last 50 lines of build log ==="
-            tail -50 build_log.txt || echo "No build log found"
+            echo "=== Last 100 lines of build log ==="
+            tail -100 build_log.txt || echo "No build log found"
             exit 1
           fi
 
