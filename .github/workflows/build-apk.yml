@@ -54,15 +54,15 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # Create lasspath (Gradle cerca questo file) - COPIA ESATTA di settings.gradle
-          cp settings.gradle lasspath
-          
-          # COPIA gradle-wrapper.jar in GreedGross come hai detto tu
-          cp gradle/wrapper/gradle-wrapper.jar .
+          # RIMUOVI lasspath se esiste
+          rm -f lasspath
           
           # Assicuriamoci che gradle.properties non abbia configurazioni strane
           echo "=== Check gradle.properties ==="
           cat gradle.properties || echo "No gradle.properties found"
+          
+          # Forza gradle a usare settings.gradle
+          echo "org.gradle.projectsetupfile=settings.gradle" >> gradle.properties
           
           # Create google-services.json
           cat > app/google-services.json << EOF
@@ -145,11 +145,11 @@ jobs:
           echo "=== Check if jar is really there ==="
           test -f gradle/wrapper/gradle-wrapper.jar && echo "JAR EXISTS" || echo "JAR MISSING"
           
-          echo "=== Try with explicit settings file ==="
-          ./gradlew help --no-daemon --settings-file=settings.gradle
+          echo "=== Try gradlew help ==="
+          ./gradlew help --no-daemon
           
-          echo "=== Building APK with settings file ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace --settings-file=settings.gradle
+          echo "=== Building APK ==="
+          ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
