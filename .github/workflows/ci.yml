@@ -101,67 +101,67 @@ jobs:
           chmod +x gradlew
           
           # FIND React Native plugin - MUST EXIST for production
-          echo "=== FINDING React Native plugin (REQUIRED) ==="
+          echo "=== FINDING React Native plugin (REQUIRED for full app) ==="
           
+          # Check React Native version
+          echo "=== React Native setup ==="
+          grep "react-native" ../package.json || echo "No RN in package.json"
+          ls -la ../node_modules/@react-native/ || echo "No @react-native"
+          ls -la ../node_modules/react-native/ || echo "No react-native"
+          
+          # Find the correct React Native gradle plugin path
           RN_PLUGIN_PATH=""
-          
-          # Check all possible locations
           if [ -d "../node_modules/@react-native/gradle-plugin" ]; then
             RN_PLUGIN_PATH="../node_modules/@react-native/gradle-plugin"
-            echo "✅ Found React Native plugin at: $RN_PLUGIN_PATH"
           elif [ -d "../node_modules/react-native/android" ]; then
             RN_PLUGIN_PATH="../node_modules/react-native/android"
-            echo "✅ Found React Native at: $RN_PLUGIN_PATH"
-          elif [ -d "../node_modules/@react-native/cli-platform-android" ]; then
-            RN_PLUGIN_PATH="../node_modules/@react-native/cli-platform-android"
-            echo "✅ Found React Native CLI platform at: $RN_PLUGIN_PATH"
-          else
-            echo "❌ CRITICAL ERROR: React Native plugin NOT FOUND!"
-            echo "=== Searched locations: ==="
-            ls -la ../node_modules/@react-native/ 2>/dev/null || echo "No @react-native directory"
-            ls -la ../node_modules/react-native/ 2>/dev/null || echo "No react-native directory"
-            find ../node_modules -name "*react-native*" -type d | head -10
-            echo "🚨 CANNOT BUILD PRODUCTION APP WITHOUT REACT NATIVE!"
+          fi
+          
+          if [ -z "$RN_PLUGIN_PATH" ]; then
+            echo "❌ React Native plugin not found - searching deeper"
+            find ../node_modules -name "*gradle*" -path "*react-native*" -type d | head -5
+            echo "🚨 CANNOT BUILD COMPLETE APP WITHOUT REACT NATIVE"
             exit 1
           fi
           
-          # Create lasspath with FOUND React Native plugin
+          echo "Found React Native at: $RN_PLUGIN_PATH"
+          
+          # Create FULL lasspath with React Native
           cat > lasspath << EOF
-pluginManagement {
-    includeBuild("$RN_PLUGIN_PATH")
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
-
-rootProject.name = 'GreedGross'
-include ':app'
-
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() {
-            content {
-                includeModule("com.yqritc", "Android-ScalableVideoView")
-            }
-        }
-    }
-}
-EOF
+          pluginManagement {
+              includeBuild("$RN_PLUGIN_PATH")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
           
-          echo "🚀 Created lasspath with React Native at: $RN_PLUGIN_PATH"
+          rootProject.name = 'GreedGross'
+          include ':app'
           
-          # Fix missing compileSdkVersion if needed
-          if ! grep -q "compileSdkVersion\|compileSdk" app/build.gradle; then
-            echo "=== Adding missing compileSdkVersion ==="
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+                  jcenter() {
+                      content {
+                          includeModule("com.yqritc", "Android-ScalableVideoView")
+                      }
+                  }
+              }
+          }
+          EOF
+          
+          echo "=== What's wrong with app/build.gradle line 2? ==="
+          sed -n '1,5p' app/build.gradle
+          
+          if ! grep -q "compileSdk\|compileSdkVersion" app/build.gradle; then
             sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
+            echo "Added compileSdkVersion"
           fi
           
-          # Test gradle
           ./gradlew --version
           
           # Ensure gradle.properties exists but DON'T clean production settings
@@ -282,10 +282,9 @@ EOF
             echo "GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> GreedGross/gradle.properties
             echo "GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}" >> GreedGross/gradle.properties
             echo "GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}" >> GreedGross/gradle.properties
-            echo "=== Keystore configuration added ==="
+            echo "Keystore configuration added"
           else
-            echo "=== Keystore configuration already exists, updating values ==="
-            # Update existing values
+            echo "Keystore configuration already exists, updating values"
             sed -i "s/GREED_GROSS_UPLOAD_STORE_PASSWORD=.*/GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}/" GreedGross/gradle.properties
             sed -i "s/GREED_GROSS_UPLOAD_KEY_ALIAS=.*/GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}/" GreedGross/gradle.properties  
             sed -i "s/GREED_GROSS_UPLOAD_KEY_PASSWORD=.*/GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}/" GreedGross/gradle.properties
@@ -299,32 +298,44 @@ EOF
         run: |
           cd GreedGross
           
-          echo "=== Creating output directories ==="
-          mkdir -p app/build/outputs/apk/release/
-          mkdir -p app/build/outputs/bundle/release/
-          
-          echo "=== Building APK ==="
+          echo "Building APK"
           ./gradlew assembleRelease --no-daemon --stacktrace
           
-          echo "=== Finding where the APK actually is ==="
+          echo "Finding where the APK actually is"
           find app/build -name "*.apk" -type f
           
-          # Find the actual APK wherever it is
           APK_FILE=$(find app/build -name "*.apk" -type f | head -1)
           
           if [ -n "$APK_FILE" ]; then
-            echo "✅ Found APK at: $APK_FILE"
-            # Copy to expected location with timestamp
+            echo "Found APK at: $APK_FILE"
+            mkdir -p app/build/outputs/apk/release/
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             cp "$APK_FILE" "app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
-            echo "✅ APK ready: greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
-            ls -la app/build/outputs/apk/release/
+            echo "APK ready: greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
           else
-            echo "❌ No APK found anywhere"
-            echo "=== Checking all build directories ==="
-            find . -name "build" -type d
-            echo "=== Checking for any APK files ==="
-            find . -name "*.apk" -type f
+            echo "No APK found"
+            exit 1
+          fi Settings gradle ==="
+          cat settings.gradle
+          
+          echo "=== Testing gradle projects ==="
+          ./gradlew projects --no-daemon || echo "Projects command failed, but continuing with build"
+          
+          echo "=== Building APK ==="
+          ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build_log.txt
+          
+          echo "=== Build completed, checking outputs ==="
+          ls -la app/build/outputs/apk/release/ || echo "APK output directory not found"
+          
+          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
+            # Rename APK with version and timestamp
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
+            echo "✅ APK build successful"
+          else
+            echo "❌ APK build failed - checking logs"
+            echo "=== Last 100 lines of build log ==="
+            tail -100 build_log.txt || echo "No build log found"
             exit 1
           fi
 
@@ -333,50 +344,55 @@ EOF
         run: |
           cd GreedGross
           
-          echo "=== Creating output directories ==="
-          mkdir -p app/build/outputs/apk/release/
-          mkdir -p app/build/outputs/bundle/release/
-          
-          echo "=== Building AAB ==="
           ./gradlew bundleRelease --no-daemon --stacktrace
           
-          echo "=== Finding where the AAB actually is ==="
-          find app/build -name "*.aab" -type f
-          
-          # Find the actual AAB wherever it is
           AAB_FILE=$(find app/build -name "*.aab" -type f | head -1)
           
           if [ -n "$AAB_FILE" ]; then
-            echo "✅ Found AAB at: $AAB_FILE"
-            # Copy to expected location with timestamp
+            echo "Found AAB at: $AAB_FILE"
+            mkdir -p app/build/outputs/bundle/release/
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             cp "$AAB_FILE" "app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab"
-            echo "✅ AAB ready: greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab"
-            ls -la app/build/outputs/bundle/release/
           else
-            echo "❌ No AAB found anywhere"
-            echo "=== Checking all build directories ==="
-            find . -name "build" -type d
-            echo "=== Checking for any AAB files ==="
-            find . -name "*.aab" -type f
+            echo "No AAB found"
             exit 1
           fi
 
       - name: 📊 APK/AAB Analysis
         run: |
           if [ -f GreedGross/app/build/outputs/apk/release/greed-gross-*.apk ]; then
-            echo "🎉 APK Build Success!"
             APK_SIZE=$(du -h GreedGross/app/build/outputs/apk/release/greed-gross-*.apk | cut -f1)
-            echo "📦 APK Size: $APK_SIZE"
             echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
           fi
           
           if [ -f GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab ]; then
-            echo "🎉 AAB Build Success!"
             AAB_SIZE=$(du -h GreedGross/app/build/outputs/bundle/release/greed-gross-*.aab | cut -f1)
-            echo "📦 AAB Size: $AAB_SIZE"
             echo "AAB_SIZE=$AAB_SIZE" >> $GITHUB_ENV
           fi
+
+      - name: 📝 Build Summary
+        run: |
+          BUILD_TYPE="${{ github.event.inputs.build_type || 'both' }}"
+          echo "## GREED & GROSS Build Complete" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| App Version | ${{ secrets.APP_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Type | $BUILD_TYPE |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build Date | $(date) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ ! -z "$APK_SIZE" ]; then
+            echo "| APK Size | $APK_SIZE |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ ! -z "$AAB_SIZE" ]; then
+            echo "| AAB Size | $AAB_SIZE |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Download Links" >> $GITHUB_STEP_SUMMARY
+          echo "- APK and AAB files are available in the build artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Navigate to Actions → This workflow run → Artifacts" >> $GITHUB_STEP_SUMMARY
 
       - name: 📤 Upload APK Artifact
         if: (github.event.inputs.build_type == 'apk' || github.event.inputs.build_type == 'both') || (github.event_name != 'workflow_dispatch')
@@ -422,52 +438,7 @@ EOF
     name: 🚀 Deploy Internal Testing
     needs: build-android
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: 📥 Download AAB
-        uses: actions/download-artifact@v4
-        with:
-          name: greed-gross-aab
-          path: ./artifacts
-
-      # Google Play upload (optional - only if credentials are configured)
-      # - name: 🔐 Setup Google Play credentials
-      #   run: |
-      #     echo "${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}" > google-play-key.json
-      #
-      # - name: 🚀 Upload to Google Play Internal Testing
-      #   uses: r0adkll/upload-google-play@v1
-      #   with:
-      #     serviceAccountJson: google-play-key.json
-      #     packageName: com.greedandgross.cannabisbreeding
-      #     releaseFiles: ./artifacts/*.aab
-      #     track: internal
-      #     status: completed
-
-      - name: 📧 Notify deployment
-        run: |
-          echo "🎉 App deployed to Google Play Internal Testing!"
-          echo "Track: Internal Testing"
-          echo "Package: com.greedandgross.cannabisbreeding"
-
-  build-ios:
-    name: 🍎 Build iOS (Future)
-    runs-on: macos-latest
-    if: false # Disabled for now, enable when iOS certificates are ready
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📱 Setup Expo for iOS
-        run: |
-          echo "iOS build will be implemented when certificates are configured"
-          echo "Required secrets:"
-          echo "- IOS_CERTIFICATE_BASE64"
-          echo "- IOS_PROVISIONING_PROFILE_BASE64"
-          echo "- APPLE_ID"
-          echo "- APPLE_APP_SPECIFIC_PASSWORD"
+    if: false # DISABLED - no real deployment configured
 
   security-scan:
     name: 🔒 Security Scan
@@ -502,10 +473,10 @@ EOF
       - name: 📊 Build Status
         run: |
           if [ "${{ needs.build-android.result }}" == "success" ]; then
-            echo "🎉 GREED & GROSS build completed successfully!"
-            echo "✅ APK and AAB ready for distribution"
-            echo "📱 App version: ${{ secrets.APP_VERSION }}"
+            echo "GREED & GROSS build completed successfully"
+            echo "APK and AAB ready for distribution"
+            echo "App version: ${{ secrets.APP_VERSION }}"
           else
-            echo "❌ Build failed. Check the logs for details."
+            echo "Build failed. Check the logs for details."
             exit 1
           fi
