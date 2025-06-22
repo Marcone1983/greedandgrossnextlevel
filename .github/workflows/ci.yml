@@ -94,14 +94,16 @@ jobs:
         echo "=== Checking React Native installation ==="
         ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT FOUND"
         ls -la node_modules/react-native/ || echo "react-native NOT FOUND"
-        # Create symlink from GreedGross to node_modules
+        # Create symlink from GreedGross to node_modules (absolute path)
         cd GreedGross
-        rm -f node_modules
-        ln -sf ../node_modules node_modules
+        rm -rf node_modules
+        ln -sf $(pwd)/../node_modules node_modules
         # Verify symlink works
         echo "=== Verifying symlink from GreedGross ==="
         pwd
         ls -la | grep node_modules
+        echo "=== Testing symlink ==="
+        ls -la node_modules/ | head -5
         ls -la node_modules/@react-native/gradle-plugin/ || echo "gradle-plugin NOT ACCESSIBLE"
     
     - name: 🔐 Create environment file
@@ -219,6 +221,12 @@ jobs:
         
         # Copy settings.gradle content to lasspath
         cp settings.gradle lasspath
+        
+        # Debug: Check node_modules paths
+        echo "=== Checking React Native plugin paths ==="
+        pwd
+        ls -la ../node_modules/@react-native/gradle-plugin/ || echo "Plugin not found from GreedGross"
+        ls -la node_modules/@react-native/gradle-plugin/ || echo "Symlink not working"
         
         # Use the gradle wrapper
         ./gradlew --version
