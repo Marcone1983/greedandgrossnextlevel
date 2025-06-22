@@ -17,6 +17,7 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:8.7.0")
+        classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.0")
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.9")
@@ -24,8 +25,15 @@ buildscript {
     }
 }
 
-// Repositories are managed by settings.gradle with dependencyResolutionManagement
-// Remove allprojects block to avoid conflicts
+// Need allprojects for React Native plugin resolution
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://www.jitpack.io" }
+        maven { url("$rootDir/../node_modules/react-native/android") }
+    }
+}
 
 // Root tasks that delegate to app module
 task assembleRelease {
