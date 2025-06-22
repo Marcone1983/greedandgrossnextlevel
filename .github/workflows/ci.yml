@@ -299,6 +299,10 @@ jobs:
         run: |
           cd GreedGross
           
+          echo "=== Creating output directories ==="
+          mkdir -p app/build/outputs/apk/release/
+          mkdir -p app/build/outputs/bundle/release/
+          
           echo "=== Building APK ==="
           ./gradlew assembleRelease --no-daemon --stacktrace
           
@@ -310,36 +314,17 @@ jobs:
           
           if [ -n "$APK_FILE" ]; then
             echo "✅ Found APK at: $APK_FILE"
-            # Create release directory 
-            mkdir -p app/build/outputs/apk/release/
-            # Copy to expected location
+            # Copy to expected location with timestamp
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             cp "$APK_FILE" "app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
             echo "✅ APK ready: greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
+            ls -la app/build/outputs/apk/release/
           else
             echo "❌ No APK found anywhere"
-            exit 1
-          fi Settings gradle ==="
-          cat settings.gradle
-          
-          echo "=== Testing gradle projects ==="
-          ./gradlew projects --no-daemon || echo "Projects command failed, but continuing with build"
-          
-          echo "=== Building APK ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build_log.txt
-          
-          echo "=== Build completed, checking outputs ==="
-          ls -la app/build/outputs/apk/release/ || echo "APK output directory not found"
-          
-          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
-            # Rename APK with version and timestamp
-            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-            mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk
-            echo "✅ APK build successful"
-          else
-            echo "❌ APK build failed - checking logs"
-            echo "=== Last 100 lines of build log ==="
-            tail -100 build_log.txt || echo "No build log found"
+            echo "=== Checking all build directories ==="
+            find . -name "build" -type d
+            echo "=== Checking for any APK files ==="
+            find . -name "*.apk" -type f
             exit 1
           fi
 
@@ -348,21 +333,32 @@ jobs:
         run: |
           cd GreedGross
           
+          echo "=== Creating output directories ==="
+          mkdir -p app/build/outputs/apk/release/
+          mkdir -p app/build/outputs/bundle/release/
+          
           echo "=== Building AAB ==="
-          ./gradlew bundleRelease --no-daemon --stacktrace --info 2>&1 | tee bundle_log.txt
+          ./gradlew bundleRelease --no-daemon --stacktrace
           
-          echo "=== Build completed, checking outputs ==="
-          ls -la app/build/outputs/bundle/release/ || echo "AAB output directory not found"
+          echo "=== Finding where the AAB actually is ==="
+          find app/build -name "*.aab" -type f
           
-          if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
-            # Rename AAB with version and timestamp
+          # Find the actual AAB wherever it is
+          AAB_FILE=$(find app/build -name "*.aab" -type f | head -1)
+          
+          if [ -n "$AAB_FILE" ]; then
+            echo "✅ Found AAB at: $AAB_FILE"
+            # Copy to expected location with timestamp
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-            mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab
-            echo "✅ AAB build successful"
+            cp "$AAB_FILE" "app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab"
+            echo "✅ AAB ready: greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab"
+            ls -la app/build/outputs/bundle/release/
           else
-            echo "❌ AAB build failed - checking logs"
-            echo "=== Last 50 lines of bundle log ==="
-            tail -50 bundle_log.txt || echo "No bundle log found"
+            echo "❌ No AAB found anywhere"
+            echo "=== Checking all build directories ==="
+            find . -name "build" -type d
+            echo "=== Checking for any AAB files ==="
+            find . -name "*.aab" -type f
             exit 1
           fi
 
