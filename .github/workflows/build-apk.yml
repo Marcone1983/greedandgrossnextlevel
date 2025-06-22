@@ -58,7 +58,8 @@ jobs:
           chmod +x gradlew
           
           # Create lasspath directory to fix Gradle error (CRITICAL!)
-          # Use -p flag to not fail if directory exists
+          # Remove if exists as file, then create as directory
+          rm -f lasspath 2>/dev/null || true
           mkdir -p lasspath
           touch lasspath/settings.gradle
           
