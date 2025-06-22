@@ -54,6 +54,43 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
+          # Create lasspath (Gradle cerca questo file)
+          cat > lasspath << EOF
+          pluginManagement {
+              includeBuild("../node_modules/@react-native/gradle-plugin")
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          
+          plugins {
+              id("com.facebook.react.settings")
+          }
+          
+          extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+              ex.autolinkLibrariesFromCommand()
+          }
+          
+          rootProject.name = 'GreedGross'
+          include ':app'
+          includeBuild('../node_modules/@react-native/gradle-plugin')
+          
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+              repositories {
+                  google()
+                  mavenCentral()
+                  jcenter() {
+                      content {
+                          includeModule("com.yqritc", "Android-ScalableVideoView")
+                      }
+                  }
+              }
+          }
+          EOF
+          
           # Create google-services.json
           cat > app/google-services.json << EOF
           {
