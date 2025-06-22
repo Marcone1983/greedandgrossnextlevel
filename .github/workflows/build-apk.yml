@@ -58,8 +58,9 @@ jobs:
           chmod +x gradlew
           
           # Create lasspath directory to fix Gradle error (CRITICAL!)
-          mkdir -p /home/runner/work/greedandgrossnextlevel/greedandgrossnextlevel/GreedGross/lasspath
-          echo "" > /home/runner/work/greedandgrossnextlevel/greedandgrossnextlevel/GreedGross/lasspath/settings.gradle
+          # Use -p flag to not fail if directory exists
+          mkdir -p lasspath
+          touch lasspath/settings.gradle
           
           # Create local.properties with SDK path
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
