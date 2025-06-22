@@ -58,6 +58,9 @@ jobs:
           echo "=== Check lasspath exists ==="
           ls -la lasspath || echo "lasspath not found"
           
+          # Create local.properties con SDK path
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          
           # Create google-services.json
           cat > app/google-services.json << EOF
           {
