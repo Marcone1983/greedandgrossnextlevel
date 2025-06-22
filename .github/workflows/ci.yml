@@ -95,46 +95,13 @@ jobs:
 
       - name: 🔧 Setup Android project
         run: |
-          # Debug: Check project structure
-          echo "=== Project structure ==="
-          pwd
-          ls -la
-          echo "=== GreedGross directory ==="
-          ls -la GreedGross/
-          
           cd GreedGross
           
           # Make gradlew executable
           chmod +x gradlew
           
-          # CRITICAL: Check gradlew script for lasspath references
-          echo "=== Checking gradlew script for lasspath ==="
-          grep -n "lasspath" gradlew || echo "No lasspath in gradlew"
-          
-          # Check gradle wrapper properties
-          echo "=== Gradle wrapper properties ==="
-          cat gradle/wrapper/gradle-wrapper.properties
-          
-          # Check all gradle properties files for settings file override
-          echo "=== Checking for settings file overrides ==="
-          grep -r "settingsFile\|settings-file\|lasspath" . --exclude-dir=.gradle || echo "No settings overrides found"
-          
-          # Debug: Check existing gradle files
-          echo "=== Existing gradle files ==="
-          ls -la *.gradle* || echo "No gradle files found"
-          
-          # Remove any problematic lasspath file that might exist
-          rm -f lasspath
-          
-          # Backup existing settings.gradle if it exists
-          if [ -f settings.gradle ]; then
-            echo "=== Current settings.gradle ==="
-            cat settings.gradle
-            cp settings.gradle settings.gradle.backup
-          fi
-          
-          # WORKAROUND: Create the lasspath file that Gradle is looking for
-          # This is a temporary fix while we debug the real issue
+          # Gradle cerca 'lasspath' per qualche motivo nel progetto
+          # Soluzione semplice: diamo a Gradle quello che vuole!
           cat > lasspath << 'EOF'
           pluginManagement {
               includeBuild("../node_modules/@react-native/gradle-plugin")
@@ -162,39 +129,10 @@ jobs:
           }
           EOF
           
-          # ALSO create proper settings.gradle 
-          cat > settings.gradle << 'EOF'
-          pluginManagement {
-              includeBuild("../node_modules/@react-native/gradle-plugin")
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-
-          rootProject.name = 'GreedGross'
-          include ':app'
-
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-              repositories {
-                  google()
-                  mavenCentral()
-                  jcenter() {
-                      content {
-                          includeModule("com.yqritc", "Android-ScalableVideoView")
-                      }
-                  }
-              }
-          }
-          EOF
+          echo "✅ Created lasspath file with proper settings content"
           
-          echo "=== Created both lasspath and settings.gradle ==="
-          echo "lasspath content:"
-          cat lasspath
-          echo "=== settings.gradle content:"
-          cat settings.gradle
+          # Test gradle
+          ./gradlew --version
           
           # Ensure gradle.properties exists but DON'T clean production settings
           echo "=== Current gradle.properties content ==="
@@ -331,14 +269,27 @@ jobs:
         run: |
           cd GreedGross
           
-          echo "=== Pre-build checks ==="
-          pwd
-          ls -la
-          echo "=== App directory ==="
-          ls -la app/
-          echo "=== Final Gradle properties ==="
-          cat gradle.properties
-          echo "=== Settings gradle ==="
+          echo "=== Building APK ==="
+          ./gradlew assembleRelease --no-daemon --stacktrace
+          
+          echo "=== Finding where the APK actually is ==="
+          find app/build -name "*.apk" -type f
+          
+          # Find the actual APK wherever it is
+          APK_FILE=$(find app/build -name "*.apk" -type f | head -1)
+          
+          if [ -n "$APK_FILE" ]; then
+            echo "✅ Found APK at: $APK_FILE"
+            # Create release directory 
+            mkdir -p app/build/outputs/apk/release/
+            # Copy to expected location
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            cp "$APK_FILE" "app/build/outputs/apk/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
+            echo "✅ APK ready: greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.apk"
+          else
+            echo "❌ No APK found anywhere"
+            exit 1
+          fi Settings gradle ==="
           cat settings.gradle
           
           echo "=== Testing gradle projects ==="
