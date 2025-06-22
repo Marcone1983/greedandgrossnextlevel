@@ -268,9 +268,10 @@ EOF
           TIMESTAMP=$(date +%Y%m%d_%H%M%S)
           mv app/build/outputs/bundle/release/app-release.aab app/build/outputs/bundle/release/greed-gross-v${{ secrets.APP_VERSION }}-${TIMESTAMP}.aab
 
-      - name: 📊 APK/AAB Analysis
+      - - name: 📊 APK/AAB Analysis
         run: |
           if [ -f GreedGross/app/build/outputs/apk/release/greed-gross-*.apk ]; then
             echo "🎉 APK Build Success!"
             APK_SIZE=$(du -h GreedGross/app/build/outputs/apk/release/greed-gross-*.apk | cut -f1)
-            echo "📦 APK Size: $APK
+            echo "📦 APK Size: $APK_SIZE"
+          fi
