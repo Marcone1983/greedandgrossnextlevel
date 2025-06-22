@@ -145,14 +145,23 @@ jobs:
           echo "=== Check babel config ==="
           ls -la babel.config.js || echo "No babel.config.js"
           
-      - name: Build APK
+      - name: Build APK  
         run: |
           # Pulisci autolinking generato precedentemente
           rm -rf GreedGross/build/generated/autolinking/
           
           # IMPORTANTE: Esegui dalla ROOT, non da GreedGross!
           gradle -p GreedGross clean
-          gradle -p GreedGross assembleRelease --no-daemon --stacktrace
+          
+          # Build con output dettagliato per vedere errori JavaScript
+          gradle -p GreedGross assembleRelease --no-daemon --info 2>&1 | tee build.log || true
+          
+          # Se fallisce, mostra gli ultimi errori
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "=== BUILD FAILED - Ultimi 100 righe del log ==="
+            tail -100 build.log
+            exit 1
+          fi
           
       - name: Find APK
         working-directory: ./GreedGross
