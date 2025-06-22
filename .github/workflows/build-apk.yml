@@ -110,15 +110,15 @@ jobs:
           EOF
 
       - name: Build APK
+        working-directory: ./GreedGross
         run: |
-          cd GreedGross
-          # Debug: mostra cosa c'è nella directory
+          # Debug: mostra dove siamo
+          echo "=== Current directory ==="
+          pwd
           echo "=== Directory contents ==="
           ls -la
-          echo "=== Gradle wrapper contents ==="
-          ls -la gradle/wrapper/
-          # Prova con --info per capire meglio l'errore
-          ./gradlew assembleRelease --no-daemon --info 2>&1 | tail -100
+          echo "=== Try to build ==="
+          ./gradlew assembleRelease --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
