@@ -114,9 +114,15 @@ jobs:
           EOF
 
       - name: Build APK
-        working-directory: ./GreedGross
         run: |
-          ./gradlew assembleRelease --no-daemon
+          cd GreedGross
+          # Debug gradle issue
+          echo "=== PWD ==="
+          pwd
+          echo "=== Check wrapper ==="
+          ls -la gradle/wrapper/
+          echo "=== Run with full path ==="
+          /bin/bash ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Find APK
         working-directory: ./GreedGross
