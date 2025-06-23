@@ -1,6 +1,7 @@
 import Purchases from 'react-native-purchases';
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
+// TODO: Replace with react-native-push-notification or @notifee/react-native
+// import * as Notifications from 'expo-notifications';
 import { REVENUECAT_APPLE_KEY, REVENUECAT_GOOGLE_KEY } from '@env';
 import { getUser } from './storage';
 import { saveUserToFirebase, logAnalytics } from './firebase';
@@ -57,6 +58,9 @@ async function initializeRevenueCat() {
 }
 
 async function initializeNotifications() {
+  // TODO: Implement with react-native-push-notification
+  // Temporarily disabled - notifications will be implemented later
+  /*
   try {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -79,6 +83,7 @@ async function initializeNotifications() {
   } catch (error) {
     // Notifications initialization error
   }
+  */
 }
 
 async function restoreUserSession() {
