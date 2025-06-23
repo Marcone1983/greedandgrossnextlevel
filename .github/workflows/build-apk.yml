@@ -124,7 +124,7 @@ jobs:
               cd temp-jar && jar cf ../build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.jar * && cd ..
             fi
             
-            cat > build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.pom << 'POMEOF'
+            cat > build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.pom << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
@@ -132,7 +132,7 @@ jobs:
   <artifactId>react-native-gradle-plugin</artifactId>
   <version>0.79.0</version>
 </project>
-POMEOF
+EOF
             
             cd ../../..
           fi
