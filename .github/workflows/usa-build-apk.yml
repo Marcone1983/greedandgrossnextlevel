@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: action/checkout@v4
+      - uses: actions/checkout@v4
       
-      - uses: action/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
           
-      - uses: action/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
@@ -59,6 +59,6 @@ jobs:
           mkdir -p node_modules/@react-native-firebase/storage/android/src/main/res
       
       - name: usa-build-apk action
-        uses: ./github/action/usa-build-apk
+        uses: ./github/actions/usa-build-apk
         with:
           flavour: release
