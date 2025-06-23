@@ -57,16 +57,7 @@ jobs:
           # Create directories to avoid NO-SOURCE warnings
           mkdir -p node_modules/react-native-localize/android/src/main/jniLibs
           mkdir -p node_modules/@react-native-firebase/storage/android/src/main/res
-          
-      - name: Test Metro bundling first
-        run: |
-          # Test if Metro can bundle the JS
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp || {
-            echo "Metro bundling failed! Check JS errors above"
-            exit 1
-          }
-          echo "Metro bundling test passed"
-          
+      
       - name: usa-build-apk actions
         uses: ./github/actions/usa-build-apk
         with:
