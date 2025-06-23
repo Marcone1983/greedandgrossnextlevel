@@ -57,10 +57,9 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # Create lasspath file to fix Gradle error (CRITICAL!)
-          # It needs to be a FILE, not a directory!
+          # DO NOT create lasspath - it confuses Gradle!
+          # Gradle thinks it's a settings file!
           rm -rf lasspath 2>/dev/null || true
-          touch lasspath
           
           # Create local.properties with SDK path
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
