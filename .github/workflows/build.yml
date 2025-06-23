@@ -51,8 +51,7 @@ jobs:
           chmod +x gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          # Move gradle-wrapper.jar to where it's being looked for
-          mv gradle/wrapper/gradle-wrapper.jar gradle-wrapper.jar
+          # Don't move the jar - gradlew needs it in gradle/wrapper/
           
       - name: Create google services
         run: |
@@ -133,9 +132,11 @@ jobs:
           # Debug environment
           env | grep -i gradle || true
           env | grep -i classpath || true
-          # Clear any gradle-related env vars
+          # Clear ALL gradle-related env vars
           unset GRADLE_OPTS
           unset CLASSPATH
+          unset GRADLE_HOME
+          unset GRADLE_USER_HOME
           # Run gradle
           ./gradlew assembleRelease --no-daemon --stacktrace
           
