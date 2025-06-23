@@ -103,8 +103,6 @@ const styles = StyleSheet.create({
   lottie: {
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   title: {
     fontFamily: 'Orbitron-Bold',
