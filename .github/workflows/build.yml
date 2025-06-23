@@ -51,6 +51,8 @@ jobs:
           chmod +x gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          # Copy gradle-wrapper.jar to where it's being looked for
+          cp gradle/wrapper/gradle-wrapper.jar gradle-wrapper.jar
           
       - name: Create google services
         run: |
