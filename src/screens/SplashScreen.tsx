@@ -49,9 +49,11 @@ export default function SplashScreen() {
     <LinearGradient colors={gradients.dark} style={styles.container}>
       <View style={styles.content}>
         <Animated.View style={[styles.logoContainer, animatedDNAStyle]}>
-          <View style={styles.lottie}>
-            <Text style={styles.dnaText}>🧬</Text>
-          </View>
+          <Animated.Image 
+            source={{ uri: 'https://i.imgur.com/XfGpCpR.png' }}
+            style={styles.lottie}
+            resizeMode="contain"
+          />
         </Animated.View>
 
         <Text style={styles.title}>GREED & GROSS</Text>
@@ -101,12 +103,6 @@ const styles = StyleSheet.create({
   lottie: {
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dnaText: {
-    fontSize: 100,
-    textAlign: 'center',
   },
   title: {
     fontFamily: 'Orbitron-Bold',
