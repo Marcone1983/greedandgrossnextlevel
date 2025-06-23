@@ -31,6 +31,18 @@ jobs:
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
+      - name: Setup RN gradle plugin
+        run: |
+          if [ -d "node_modules/@react-native/gradle-plugin" ]; then
+            cd node_modules/@react-native/gradle-plugin
+            mkdir -p build/com/facebook/react/react-native-gradle-plugin/0.79.0
+            mkdir -p temp-jar/META-INF
+            echo "Manifest-Version: 1.0" > temp-jar/META-INF/MANIFEST.MF
+            cd temp-jar && jar cf ../build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.jar * && cd ..
+            echo '<?xml version="1.0" encoding="UTF-8"?><project><modelVersion>4.0.0</modelVersion><groupId>com.facebook.react</groupId><artifactId>react-native-gradle-plugin</artifactId><version>0.79.0</version></project>' > build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.pom
+            cd ../../..
+          fi
+          
       - name: Usa Build apk action
         uses: ./.github/actions/build-apk
         with:
