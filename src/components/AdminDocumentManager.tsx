@@ -26,7 +26,7 @@ import storage from '@react-native-firebase/storage';
 import { colors } from '@/constants/theme';
 import { LANGUAGES, SupportedLanguage } from '@/i18n';
 import { logAnalytics } from '@/services/firebase';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { Haptics } from '@/utils/expoCompat';
 
 interface DocumentUploadProgress {
   [key: string]: {
@@ -189,10 +189,7 @@ export default function AdminDocumentManager() {
 </html>`;
 
     setDocumentContent(defaultContent);
-    ReactNativeHapticFeedback.trigger('impactLight', {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false
-    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const validateContent = (content: string): boolean => {
@@ -282,10 +279,7 @@ export default function AdminDocumentManager() {
             colorScheme: 'success',
           });
 
-          ReactNativeHapticFeedback.trigger('notificationSuccess', {
-            enableVibrateFallback: true,
-            ignoreAndroidSystemSettings: false
-          });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
           logAnalytics('admin_document_uploaded', {
             document_type: selectedDocumentType,

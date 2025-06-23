@@ -18,7 +18,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, SupportedLanguage, changeLanguage } from '@/i18n';
 import { colors } from '@/constants/theme';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { Haptics } from '@/utils/expoCompat';
 
 interface LanguageSelectorProps {
   currentLanguage: SupportedLanguage;
@@ -39,10 +39,7 @@ export default function LanguageSelector({
 
   const handleLanguageSelect = (language: SupportedLanguage) => {
     setSelectedLanguage(language);
-    ReactNativeHapticFeedback.trigger('selection', {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false
-    });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
   };
 
   const confirmLanguageChange = () => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, Animated, Dimensions, StyleSheet, StatusBar, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors } from '@/constants/theme';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { Haptics } from '@/utils/expoCompat';
 
 interface AnimatedSplashScreenProps {
   onFinish: () => void;
@@ -51,10 +51,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
       }),
     ]).start(() => {
       // Haptic feedback when logo appears
-      ReactNativeHapticFeedback.trigger('impactMedium', {
-        enableVibrateFallback: true,
-        ignoreAndroidSystemSettings: false
-      });
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       // Step 2: Text slide up
       setTimeout(() => {
@@ -129,10 +126,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
         // Haptic feedback for each step
         if (currentStep < loadingSteps.length - 1) {
           setTimeout(() => {
-            ReactNativeHapticFeedback.trigger('selection', {
-              enableVibrateFallback: true,
-              ignoreAndroidSystemSettings: false
-            });
+            Haptics.selectionAsync();
           }, step.duration / 2);
         }
 
@@ -141,10 +135,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
         clearInterval(progressInterval);
         // Final haptic and finish
         setTimeout(() => {
-          ReactNativeHapticFeedback.trigger('notificationSuccess', {
-            enableVibrateFallback: true,
-            ignoreAndroidSystemSettings: false
-          });
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           finishSplash();
         }, 500);
       }
