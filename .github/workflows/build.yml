@@ -51,8 +51,8 @@ jobs:
           chmod +x gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          # Fix potential CLASSPATH issues
-          unset CLASSPATH
+          # Copy gradle-wrapper.jar to root where it's being looked for
+          cp gradle/wrapper/gradle-wrapper.jar .
           
       - name: Create google services
         run: |
