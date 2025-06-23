@@ -51,7 +51,6 @@ jobs:
           chmod +x gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          # Don't move the jar - gradlew needs it in gradle/wrapper/
           
       - name: Create google services
         run: |
