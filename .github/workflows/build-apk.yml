@@ -57,8 +57,8 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # Create lasspath as empty file - Gradle wants it!
-          touch lasspath
+          # Create lasspath as TRULY EMPTY file - Gradle wants it but it must be empty!
+          > lasspath  # This creates a truly empty file
           
           # Create local.properties with SDK path
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
