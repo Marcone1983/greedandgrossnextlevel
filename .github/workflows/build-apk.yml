@@ -135,21 +135,20 @@ jobs:
           echo "=== Java version ==="
           java -version
 
-      - name: Build React Native Gradle Plugin
+      - name: Check React Native Gradle Plugin
         run: |
-          echo "=== Building React Native Gradle Plugin ==="
+          echo "=== Checking React Native Gradle Plugin ==="
           if [ -d "node_modules/@react-native/gradle-plugin" ]; then
-            cd node_modules/@react-native/gradle-plugin
-            if [ -f "gradlew" ]; then
-              chmod +x gradlew
-              ./gradlew :react-native-gradle-plugin:build :react-native-gradle-plugin:publishToMavenLocal || {
-                echo "Failed to build gradle plugin, trying without publishToMavenLocal"
-                ./gradlew :react-native-gradle-plugin:build || echo "Gradle plugin build failed"
-              }
+            echo "Gradle plugin directory exists"
+            ls -la node_modules/@react-native/gradle-plugin/
+            
+            # Check if it's already built
+            if [ -d "node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build" ]; then
+              echo "Plugin appears to be already built"
+              ls -la node_modules/@react-native/gradle-plugin/react-native-gradle-plugin/build/
             else
-              echo "No gradlew found in gradle plugin directory"
+              echo "Plugin not built, but React Native 0.79 should handle this automatically"
             fi
-            cd ../../..
           else
             echo "ERROR: React Native gradle plugin directory not found!"
           fi
@@ -164,27 +163,6 @@ jobs:
           # Fix autolinking issue with React Native 0.79
           echo -e "\nandroid {\n  namespace \"com.facebook.react\"\n  defaultConfig {\n    applicationId \"com.facebook.react\"\n  }\n}" >> node_modules/react-native/ReactAndroid/build.gradle || true
 
-      - name: Build React Native Gradle Plugin
-        run: |
-          echo "=== Building React Native Gradle Plugin ==="
-          cd node_modules/@react-native/gradle-plugin
-          
-          # First clean any previous builds
-          ./gradlew clean --no-daemon || true
-          
-          # Build and publish to local repository
-          ./gradlew build publishToMavenLocal --no-daemon --stacktrace || {
-            echo "::error::Failed to build React Native gradle plugin"
-            echo "=== Checking for error details ==="
-            find . -name "*.log" -exec tail -50 {} \; 2>/dev/null || true
-            exit 1
-          }
-          echo "=== Gradle plugin build completed ==="
-          ls -la build/
-          
-          # Verify the plugin was published
-          echo "=== Checking Maven local repository ==="
-          ls -la ~/.m2/repository/com/facebook/react/ 2>/dev/null || echo "No React plugin in Maven local"
           
       - name: Verify Gradle Setup
         run: |
