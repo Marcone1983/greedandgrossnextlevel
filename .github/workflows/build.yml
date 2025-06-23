@@ -128,8 +128,8 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Run with completely clean environment to avoid arg duplication
-          env -i PATH="$PATH" JAVA_HOME="$JAVA_HOME" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" HOME="$HOME" USER="$USER" ./gradlew assembleRelease --no-daemon --stacktrace || {
+          # Run gradle directly without the wrapper to avoid the jar path issue
+          java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --stacktrace || {
             echo "Build failed!"
             exit 1
           }
