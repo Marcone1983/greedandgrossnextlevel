@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dimensions, SafeAreaView, StyleSheet } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {
   VStack,
   HStack,
@@ -12,11 +13,10 @@ import {
   useColorModeValue,
 } from 'native-base';
 import { WebView } from 'react-native-webview';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/constants/theme';
 import { useDocumentCache } from '@/hooks/useDocumentCache';
-import { Haptics } from '@/utils/expoCompat';
 
 interface DocumentViewerProps {
   documentType: 'privacy-policy' | 'terms-service' | 'disclaimer' | 'support-info';
@@ -56,7 +56,7 @@ export default function DocumentViewer({ documentType, language, onClose }: Docu
   const handleLoadError = () => {
     setIsLoading(false);
     setHasError(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    ReactNativeHapticFeedback.trigger('notificationError');
   };
 
   const handleRetry = async () => {
@@ -66,7 +66,7 @@ export default function DocumentViewer({ documentType, language, onClose }: Docu
   };
 
   const handleGoBack = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight');
     onClose();
   };
 

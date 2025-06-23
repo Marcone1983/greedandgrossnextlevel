@@ -1,6 +1,7 @@
 import { errorLogger } from '@/services/errorLogger';
 import React, { useState } from 'react';
 import { Alert } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {
   VStack,
   HStack,
@@ -14,11 +15,10 @@ import {
   Radio,
   useColorModeValue,
 } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES, SupportedLanguage, changeLanguage } from '@/i18n';
 import { colors } from '@/constants/theme';
-import { Haptics } from '@/utils/expoCompat';
 
 interface LanguageSelectorProps {
   currentLanguage: SupportedLanguage;
@@ -39,7 +39,7 @@ export default function LanguageSelector({
 
   const handleLanguageSelect = (language: SupportedLanguage) => {
     setSelectedLanguage(language);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight');
   };
 
   const confirmLanguageChange = () => {
@@ -65,7 +65,7 @@ export default function LanguageSelector({
           text: t('common.confirm'),
           onPress: async () => {
             setIsChanging(true);
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            ReactNativeHapticFeedback.trigger('impactMedium');
 
             try {
               await changeLanguage(selectedLanguage);

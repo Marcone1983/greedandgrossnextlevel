@@ -1,6 +1,7 @@
 import { errorLogger } from '@/services/errorLogger';
 import React, { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {
   VStack,
   HStack,
@@ -20,13 +21,12 @@ import {
   Modal,
   Alert as NBAlert,
 } from 'native-base';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import { useTranslation } from 'react-i18next';
 import storage from '@react-native-firebase/storage';
 import { colors } from '@/constants/theme';
 import { LANGUAGES, SupportedLanguage } from '@/i18n';
 import { logAnalytics } from '@/services/firebase';
-import { Haptics } from '@/utils/expoCompat';
 
 interface DocumentUploadProgress {
   [key: string]: {
@@ -189,7 +189,7 @@ export default function AdminDocumentManager() {
 </html>`;
 
     setDocumentContent(defaultContent);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight');
   };
 
   const validateContent = (content: string): boolean => {
@@ -279,7 +279,7 @@ export default function AdminDocumentManager() {
             colorScheme: 'success',
           });
 
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          ReactNativeHapticFeedback.trigger('notificationSuccess');
 
           logAnalytics('admin_document_uploaded', {
             document_type: selectedDocumentType,

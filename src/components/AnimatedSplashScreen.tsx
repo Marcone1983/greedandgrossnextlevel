@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, Animated, Dimensions, StyleSheet, StatusBar, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { colors } from '@/constants/theme';
-import { Haptics } from '@/utils/expoCompat';
 
 interface AnimatedSplashScreenProps {
   onFinish: () => void;
@@ -51,7 +51,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
       }),
     ]).start(() => {
       // Haptic feedback when logo appears
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      ReactNativeHapticFeedback.trigger('impactMedium');
 
       // Step 2: Text slide up
       setTimeout(() => {
@@ -126,7 +126,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
         // Haptic feedback for each step
         if (currentStep < loadingSteps.length - 1) {
           setTimeout(() => {
-            Haptics.selectionAsync();
+            ReactNativeHapticFeedback.trigger('selection');
           }, step.duration / 2);
         }
 
@@ -135,7 +135,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
         clearInterval(progressInterval);
         // Final haptic and finish
         setTimeout(() => {
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          ReactNativeHapticFeedback.trigger('notificationSuccess');
           finishSplash();
         }, 500);
       }

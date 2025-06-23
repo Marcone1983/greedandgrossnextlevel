@@ -22,7 +22,7 @@ import {
   StatHelpText,
   StatArrow,
 } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/constants/theme';
 import { analyticsEngine, AnalyticsInsight, UserSegment } from '@/services/analyticsEngine';

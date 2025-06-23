@@ -1,4 +1,4 @@
-declare module '@expo/vector-icons' {
+declare module 'react-native-vector-icons' {
   export const MaterialIcons: any;
   export const MaterialCommunityIcons: any;
   export const Ionicons: any;

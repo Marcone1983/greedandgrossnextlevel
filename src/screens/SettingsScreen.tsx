@@ -17,12 +17,12 @@ import {
   useColorModeValue,
   useToast,
 } from 'native-base';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import * as Notifications from 'expo-notifications';
+// import * as Notifications from 'expo-notifications'; // TODO: Replace with react-native-push-notification
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { colors } from '@/constants/theme';
@@ -187,7 +187,8 @@ export default function SettingsScreen() {
     if (key === 'push') {
       // Request notification permissions if enabling
       if (!notificationSettings.push) {
-        const { status } = await Notifications.requestPermissionsAsync();
+        // const { status } = await Notifications.requestPermissionsAsync();
+        const status = 'granted'; // TODO: Implement with react-native-push-notification
         if (status !== 'granted') {
           toast.show({
             title: t('errors.permissionDenied'),

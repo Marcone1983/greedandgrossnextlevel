@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { BaseToast, ErrorToast, InfoToast } from 'react-native-toast-message';
 import { Icon } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import { colors } from '@/constants/theme';
 
 export const toastConfig = {

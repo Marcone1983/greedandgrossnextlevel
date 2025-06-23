@@ -1,5 +1,6 @@
 import { errorLogger } from '@/services/errorLogger';
 import React, { useState } from 'react';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {
   VStack,
   HStack,
@@ -15,11 +16,10 @@ import {
   useColorModeValue,
   useToast,
 } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/constants/theme';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
-import { Haptics } from '@/utils/expoCompat';
 
 interface MemoryIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
@@ -101,13 +101,13 @@ export default function MemoryIndicator({
     } else {
       setIsModalOpen(true);
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight');
   };
 
   const handleToggleMemory = async () => {
     try {
       await updateMemorySettings({ enabled: !isEnabled });
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      ReactNativeHapticFeedback.trigger('impactMedium');
 
       toast.show({
         title: isEnabled ? 'Memory disabilitata' : 'Memory abilitata',
@@ -126,7 +126,7 @@ export default function MemoryIndicator({
     try {
       await clearAllMemory();
       setIsModalOpen(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      ReactNativeHapticFeedback.trigger('notificationSuccess');
 
       toast.show({
         title: 'Memory cancellata',

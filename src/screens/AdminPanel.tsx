@@ -13,7 +13,7 @@ import {
   useToast,
   Divider,
 } from 'native-base';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import RNFS from 'react-native-fs';

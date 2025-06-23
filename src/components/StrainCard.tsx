@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { VStack, HStack, Text, Badge, Icon, Progress } from 'native-base';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import LinearGradient from 'react-native-linear-gradient';
 import { Strain } from '@/types';
 import { colors, gradients, shadows } from '@/constants/theme';

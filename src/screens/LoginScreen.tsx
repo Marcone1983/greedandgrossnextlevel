@@ -8,12 +8,12 @@ import {
   Keyboard,
   ImageBackground,
 } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { VStack, Input, Button, Text, Heading, useToast, Icon, HStack, Divider } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import { useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { Haptics } from '@/utils/expoCompat';
 
 import { colors, gradients } from '@/constants/theme';
 import { loginSuccess } from '@/store/slices/authSlice';
@@ -30,7 +30,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!validateUsername(username)) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      ReactNativeHapticFeedback.trigger('notificationError');
       toast.show({
         description: 'Username deve essere 3-20 caratteri alfanumerici',
         colorScheme: 'error',
@@ -40,7 +40,7 @@ export default function LoginScreen() {
     }
 
     setIsLoading(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    ReactNativeHapticFeedback.trigger('impactMedium');
 
     try {
       const user = generateAnonymousUser(username);
@@ -65,7 +65,7 @@ export default function LoginScreen() {
 
   const handleGuestMode = async () => {
     setIsLoading(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight');
 
     const guestUser = generateAnonymousUser(`Guest${Date.now()}`);
     await saveUser(guestUser);

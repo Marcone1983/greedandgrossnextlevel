@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, FlatList, TextInput } from 'react-native';
 import { VStack, HStack, Text, IconButton, Icon, Badge, Divider } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import LinearGradient from 'react-native-linear-gradient';
 import { colors, gradients } from '@/constants/theme';
 import { debounce } from '@/utils/helpers';

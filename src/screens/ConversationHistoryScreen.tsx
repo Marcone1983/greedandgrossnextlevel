@@ -18,7 +18,7 @@ import {
   FlatList,
   Spinner,
 } from 'native-base';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons } from 'react-native-vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/constants/theme';

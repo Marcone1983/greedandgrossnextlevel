@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Icon } from 'native-base';
-import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from 'react-native-vector-icons';
 import { colors } from '@/constants/theme';
 import LabChatScreen from '@/screens/LabChatScreen';
 import GlobalChatScreen from '@/screens/GlobalChatScreen';
