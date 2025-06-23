@@ -48,7 +48,10 @@ jobs:
       - name: Setup Android
         run: |
           cd GreedGross
-          chmod +x gradlew
+          # Download a fresh gradlew to avoid the duplicate args issue
+          curl -s https://raw.githubusercontent.com/gradle/gradle/v8.10.2/gradlew > gradlew.new
+          chmod +x gradlew.new
+          mv gradlew.new gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
@@ -128,13 +131,7 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Debug environment first
-          echo "=== Environment check ==="
-          env | sort | grep -E "(GRADLE|JAVA|PATH|CLASSPATH)" || true
-          echo "=== Files check ==="
-          ls -la gradle/wrapper/
-          echo "=== Run with debug ==="
-          bash -x ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | grep -E "(exec|java|classpath|wrapper)" | head -20
+          ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
