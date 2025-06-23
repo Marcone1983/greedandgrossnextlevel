@@ -128,15 +128,16 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Make sure gradlew is clean
-          dos2unix gradlew 2>/dev/null || true
           # Clear ALL potential problematic env vars
           unset GRADLE_OPTS
           unset CLASSPATH
           unset GRADLE_HOME
           unset GRADLE_USER_HOME
-          # Run gradlew with explicit bash
-          /bin/bash ./gradlew assembleRelease --no-daemon --stacktrace
+          # First list available tasks to see what's happening
+          echo "=== Listing available tasks ==="
+          ./gradlew tasks --all
+          echo "=== Now trying to build ==="
+          ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
