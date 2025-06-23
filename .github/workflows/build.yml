@@ -51,8 +51,6 @@ jobs:
           chmod +x gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          # Copy gradle-wrapper.jar to root where it's being looked for
-          cp gradle/wrapper/gradle-wrapper.jar .
           
       - name: Create google services
         run: |
@@ -113,8 +111,15 @@ jobs:
           
       - name: Setup RN gradle plugin
         run: |
-          # Skip - let's see if this is causing the issue
-          echo "Skipping RN gradle plugin setup for now"
+          if [ -d "node_modules/@react-native/gradle-plugin" ]; then
+            cd node_modules/@react-native/gradle-plugin
+            mkdir -p build/com/facebook/react/react-native-gradle-plugin/0.79.0
+            mkdir -p temp-jar/META-INF
+            echo "Manifest-Version: 1.0" > temp-jar/META-INF/MANIFEST.MF
+            cd temp-jar && jar cf ../build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.jar * && cd ..
+            echo '<?xml version="1.0" encoding="UTF-8"?><project><modelVersion>4.0.0</modelVersion><groupId>com.facebook.react</groupId><artifactId>react-native-gradle-plugin</artifactId><version>0.79.0</version></project>' > build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.pom
+            cd ../../..
+          fi
           
       - name: Fix reanimated
         run: |
@@ -123,13 +128,14 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Create a simple wrapper to avoid argument issues
-          cat > build-apk.sh << 'BUILDEOF'
-          #!/bin/bash
-          exec ./gradlew assembleRelease --no-daemon --stacktrace
-          BUILDEOF
-          chmod +x build-apk.sh
-          ./build-apk.sh
+          # Debug environment
+          env | grep -i gradle || true
+          env | grep -i classpath || true
+          # Clear any gradle-related env vars
+          unset GRADLE_OPTS
+          unset CLASSPATH
+          # Run gradle
+          ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
