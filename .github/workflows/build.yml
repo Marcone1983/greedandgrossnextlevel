@@ -128,11 +128,13 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Debug what gradlew is doing
-          echo "=== Debug gradlew execution ==="
-          bash -x ./gradlew --version 2>&1 | head -50
-          echo "=== Now run normally ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          # Debug environment first
+          echo "=== Environment check ==="
+          env | sort | grep -E "(GRADLE|JAVA|PATH|CLASSPATH)" || true
+          echo "=== Files check ==="
+          ls -la gradle/wrapper/
+          echo "=== Run with debug ==="
+          bash -x ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | grep -E "(exec|java|classpath|wrapper)" | head -20
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
