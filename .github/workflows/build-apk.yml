@@ -205,19 +205,21 @@ jobs:
           
           # Try to run assembleRelease
           echo "=== Starting build ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build.log || {
-            echo "::error::Build failed with exit code $?"
-            echo "=== FULL BUILD LOG ==="
+          ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build.log
+          
+          # Check if build actually created an APK
+          echo "=== Checking if APK was created ==="
+          if [ -f "app/build/outputs/apk/release/app-release.apk" ] || [ -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
+            echo "APK found!"
+            ls -la app/build/outputs/apk/release/
+          else
+            echo "::error::No APK was created! Build may have succeeded but produced no output"
+            echo "=== Build log contents ==="
             cat build.log
-            echo ""
-            echo "=== Searching for errors ==="
-            grep -i "error\|failed\|exception\|could not" build.log | head -50 || true
-            
-            # Also check gradle daemon logs
-            echo "=== Gradle daemon logs ==="
-            find ~/.gradle/daemon -name "*.log" -exec tail -100 {} \; 2>/dev/null || true
+            echo "=== Checking what Gradle actually did ==="
+            grep -i "BUILD SUCCESSFUL\|Task :\|UP-TO-DATE\|SKIPPED" build.log || true
             exit 1
-          }
+          fi
 
       - name: Check build outputs
         if: always()
