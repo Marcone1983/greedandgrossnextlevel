@@ -28,6 +28,7 @@ jobs:
         run: |
           cd GreedGross
           chmod +x gradlew
+          echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
       - name: Usa Build apk action
