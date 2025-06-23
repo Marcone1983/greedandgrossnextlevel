@@ -63,6 +63,9 @@ jobs:
           # Create local.properties with SDK path
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
+          # Ensure gradle wrapper is executable
+          chmod +x ../node_modules/@react-native/gradle-plugin/gradlew
+          
           # Create google-services.json
           cat > app/google-services.json << EOF
           {
@@ -132,16 +135,24 @@ jobs:
           echo "=== Java version ==="
           java -version
 
-      - name: Debug React Native Structure
+      - name: Build React Native Gradle Plugin
         run: |
-          echo "=== Checking React Native structure ==="
-          ls -la node_modules/@react-native/ || echo "No @react-native directory"
-          echo ""
-          echo "=== Checking for gradle plugin ==="
-          find node_modules -name "*gradle-plugin*.jar" -type f 2>/dev/null | head -20 || echo "No gradle plugin JARs found"
-          echo ""
-          echo "=== Checking React Native android directory ==="
-          ls -la node_modules/react-native/android/ || echo "No android directory"
+          echo "=== Building React Native Gradle Plugin ==="
+          if [ -d "node_modules/@react-native/gradle-plugin" ]; then
+            cd node_modules/@react-native/gradle-plugin
+            if [ -f "gradlew" ]; then
+              chmod +x gradlew
+              ./gradlew :react-native-gradle-plugin:build :react-native-gradle-plugin:publishToMavenLocal || {
+                echo "Failed to build gradle plugin, trying without publishToMavenLocal"
+                ./gradlew :react-native-gradle-plugin:build || echo "Gradle plugin build failed"
+              }
+            else
+              echo "No gradlew found in gradle plugin directory"
+            fi
+            cd ../../..
+          else
+            echo "ERROR: React Native gradle plugin directory not found!"
+          fi
           
       - name: Fix React Native Reanimated
         run: |
@@ -152,6 +163,40 @@ jobs:
         run: |
           # Fix autolinking issue with React Native 0.79
           echo -e "\nandroid {\n  namespace \"com.facebook.react\"\n  defaultConfig {\n    applicationId \"com.facebook.react\"\n  }\n}" >> node_modules/react-native/ReactAndroid/build.gradle || true
+
+      - name: Build React Native Gradle Plugin
+        run: |
+          echo "=== Building React Native Gradle Plugin ==="
+          cd node_modules/@react-native/gradle-plugin
+          
+          # First clean any previous builds
+          ./gradlew clean --no-daemon || true
+          
+          # Build and publish to local repository
+          ./gradlew build publishToMavenLocal --no-daemon --stacktrace || {
+            echo "::error::Failed to build React Native gradle plugin"
+            echo "=== Checking for error details ==="
+            find . -name "*.log" -exec tail -50 {} \; 2>/dev/null || true
+            exit 1
+          }
+          echo "=== Gradle plugin build completed ==="
+          ls -la build/
+          
+          # Verify the plugin was published
+          echo "=== Checking Maven local repository ==="
+          ls -la ~/.m2/repository/com/facebook/react/ 2>/dev/null || echo "No React plugin in Maven local"
+          
+      - name: Verify Gradle Setup
+        run: |
+          cd GreedGross
+          echo "=== Testing Gradle wrapper ==="
+          ./gradlew --version || {
+            echo "::error::Gradle wrapper not working"
+            exit 1
+          }
+          
+          echo "=== Checking Gradle properties ==="
+          ./gradlew properties --no-daemon 2>&1 | grep -E "rootProject|buildDir|android.compileSdk" | head -20 || true
 
       - name: Build APK
         run: |
@@ -172,19 +217,27 @@ jobs:
             echo "ERROR: settings.gradle NOT FOUND!"
           fi
           
-          # First, let's see what tasks are available
-          echo "=== Available Gradle tasks ==="
-          ./gradlew -c settings.gradle tasks --all --stacktrace || echo "Failed to list tasks"
+          # First clean any previous builds
+          echo "=== Cleaning project ==="
+          ./gradlew clean --no-daemon --stacktrace || echo "Clean failed, continuing anyway"
           
-          # Try to run assembleRelease directly without clean
+          # List available tasks WITHOUT -c flag (let Gradle find settings.gradle naturally)
+          echo "=== Available Gradle tasks ==="
+          ./gradlew tasks --all --no-daemon --stacktrace || echo "Failed to list tasks"
+          
+          # Try to run assembleRelease
           echo "=== Starting build ==="
-          ./gradlew -c settings.gradle assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build.log || {
+          ./gradlew assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build.log || {
             echo "::error::Build failed with exit code $?"
             echo "=== FULL BUILD LOG ==="
             cat build.log
             echo ""
             echo "=== Searching for errors ==="
             grep -i "error\|failed\|exception\|could not" build.log | head -50 || true
+            
+            # Also check gradle daemon logs
+            echo "=== Gradle daemon logs ==="
+            find ~/.gradle/daemon -name "*.log" -exec tail -100 {} \; 2>/dev/null || true
             exit 1
           }
 
