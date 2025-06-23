@@ -23,7 +23,7 @@ runs:
       run: |
         cd GreedGross
         # Run with more verbose output to see JS errors
-        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assemble"$INPUT_FLAVOUR" --no-daemon --stacktrace --console=plain || {
+        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assemble"$INPUT_FLAVOUR" --no-daemon -q || {
           echo "Build failed! Checking for JS bundle errors..."
           # Try to run the bundler manually to see the error
           cd ..
