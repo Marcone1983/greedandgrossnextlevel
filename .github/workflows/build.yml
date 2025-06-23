@@ -128,18 +128,15 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Debug Java version
-          echo "=== Java version ==="
-          java -version
-          echo "JAVA_HOME=$JAVA_HOME"
-          which java
-          # Clear ALL gradle-related env vars
+          # Make sure gradlew is clean
+          dos2unix gradlew 2>/dev/null || true
+          # Clear ALL potential problematic env vars
           unset GRADLE_OPTS
           unset CLASSPATH
           unset GRADLE_HOME
           unset GRADLE_USER_HOME
-          # Use only our gradle wrapper
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          # Run gradlew with explicit bash
+          /bin/bash ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
