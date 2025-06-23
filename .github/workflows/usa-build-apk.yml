@@ -68,6 +68,6 @@ jobs:
           echo "Metro bundling test passed"
           
       - name: usa-build-apk action
-        uses: ./.github/actions/usa-build-apk
+        uses: ./github/actions/usa-build-apk
         with:
           flavour: release
