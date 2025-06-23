@@ -34,3 +34,12 @@ runs:
         DIR="app/build/outputs/apk/$INPUT_FLAVOUR"
         echo "apk-path=$(echo $PATH)" >> $GITHUB_OUTPUT
         echo "apk-directory=$(echo $DIR)" >> $GITHUB_OUTPUT
+        
+        # Check if APK was actually created
+        if [ -f "$PATH" ]; then
+          echo "✅ BUILD SUCCESS! APK created at: $PATH"
+          ls -lh "$PATH"
+        else
+          echo "❌ BUILD FAILED! APK not found at: $PATH"
+          exit 1
+        fi
