@@ -1,0 +1,40 @@
+﻿2025-06-23T13:47:26.0054778Z Current runner version: '2.325.0'
+2025-06-23T13:47:26.0094581Z ##[group]Operating System
+2025-06-23T13:47:26.0095946Z Ubuntu
+2025-06-23T13:47:26.0096891Z 24.04.2
+2025-06-23T13:47:26.0097825Z LTS
+2025-06-23T13:47:26.0098547Z ##[endgroup]
+2025-06-23T13:47:26.0099435Z ##[group]Runner Image
+2025-06-23T13:47:26.0100434Z Image: ubuntu-24.04
+2025-06-23T13:47:26.0101229Z Version: 20250615.1.0
+2025-06-23T13:47:26.0103181Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250615.1/images/ubuntu/Ubuntu2404-Readme.md
+2025-06-23T13:47:26.0105647Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250615.1
+2025-06-23T13:47:26.0107503Z ##[endgroup]
+2025-06-23T13:47:26.0108488Z ##[group]Runner Image Provisioner
+2025-06-23T13:47:26.0109426Z 2.0.437.1
+2025-06-23T13:47:26.0110158Z ##[endgroup]
+2025-06-23T13:47:26.0111995Z ##[group]GITHUB_TOKEN Permissions
+2025-06-23T13:47:26.0114877Z Contents: read
+2025-06-23T13:47:26.0115895Z Metadata: read
+2025-06-23T13:47:26.0116781Z Packages: read
+2025-06-23T13:47:26.0118546Z ##[endgroup]
+2025-06-23T13:47:26.0122012Z Secret source: Actions
+2025-06-23T13:47:26.0123709Z Prepare workflow directory
+2025-06-23T13:47:26.0617426Z Prepare all required actions
+2025-06-23T13:47:26.0675808Z Getting action download info
+2025-06-23T13:47:27.4521161Z ##[group]Download immutable action package 'actions/checkout@v4'
+2025-06-23T13:47:27.4522540Z Version: 4.2.2
+2025-06-23T13:47:27.4523944Z Digest: sha256:ccb2698953eaebd21c7bf6268a94f9c26518a7e38e27e0b83c1fe1ad049819b1
+2025-06-23T13:47:27.4525685Z Source commit SHA: 11bd71901bbe5b1630ceea73d27597364c9af683
+2025-06-23T13:47:27.4526759Z ##[endgroup]
+2025-06-23T13:47:27.5608644Z ##[group]Download immutable action package 'actions/setup-java@v4'
+2025-06-23T13:47:27.5610373Z Version: 4.7.1
+2025-06-23T13:47:27.5611980Z Digest: sha256:23223d64943473efb4336f60463c0429cd4f422cd5fc6c48a5cf0d5907c1aeac
+2025-06-23T13:47:27.5614385Z Source commit SHA: c5195efecf7bdfc987ee8bae7a71cb8b11521c00
+2025-06-23T13:47:27.5616071Z ##[endgroup]
+2025-06-23T13:47:27.9143138Z ##[group]Download immutable action package 'actions/setup-node@v4'
+2025-06-23T13:47:27.9144193Z Version: 4.4.0
+2025-06-23T13:47:27.9145306Z Digest: sha256:9427cefe82346e992fb5b949e3569b39d537ae41aa3086483b14eceebfc16bc1
+2025-06-23T13:47:27.9146492Z Source commit SHA: 49933ea5288caeca8642d1e84afbd3f7d6820020
+2025-06-23T13:47:27.9148045Z ##[endgroup]
+2025-06-23T13:47:28.1592707Z Complete job name: build

@@ -1,0 +1,25 @@
+﻿2025-06-23T13:47:29.3855079Z ##[group]Run actions/setup-node@v4
+2025-06-23T13:47:29.3855416Z with:
+2025-06-23T13:47:29.3855619Z   node-version: 20
+2025-06-23T13:47:29.3855838Z   cache: npm
+2025-06-23T13:47:29.3856049Z   always-auth: false
+2025-06-23T13:47:29.3856287Z   check-latest: false
+2025-06-23T13:47:29.3856719Z   token: ***
+2025-06-23T13:47:29.3856926Z env:
+2025-06-23T13:47:29.3857488Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
+2025-06-23T13:47:29.3857989Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
+2025-06-23T13:47:29.3858376Z ##[endgroup]
+2025-06-23T13:47:29.5591929Z Found in cache @ /opt/hostedtoolcache/node/20.19.2/x64
+2025-06-23T13:47:29.5598298Z ##[group]Environment details
+2025-06-23T13:47:31.7043363Z node: v20.19.2
+2025-06-23T13:47:31.7043942Z npm: 10.8.2
+2025-06-23T13:47:31.7069450Z yarn: 1.22.22
+2025-06-23T13:47:31.7070380Z ##[endgroup]
+2025-06-23T13:47:31.7070758Z [command]/opt/hostedtoolcache/node/20.19.2/x64/bin/npm config get cache
+2025-06-23T13:47:31.9712430Z /home/runner/.npm
+2025-06-23T13:47:32.1549187Z Cache hit for: node-cache-Linux-x64-npm-51b6507192cfc9888ac455a8470f1d8e4c729167b7b7598c67b536443e216404
+2025-06-23T13:47:33.1369598Z Received 128041116 of 128041116 (100.0%), 138.4 MBs/sec
+2025-06-23T13:47:33.1371399Z Cache Size: ~122 MB (128041116 B)
+2025-06-23T13:47:33.1421861Z [command]/usr/bin/tar -xf /home/runner/work/_temp/2caec6c5-2a95-4201-be6b-b9763f3bf8d3/cache.tzst -P -C /home/runner/work/greedandgrossnextlevel/greedandgrossnextlevel --use-compress-program unzstd
+2025-06-23T13:47:33.5214551Z Cache restored successfully
+2025-06-23T13:47:33.5469323Z Cache restored from key: node-cache-Linux-x64-npm-51b6507192cfc9888ac455a8470f1d8e4c729167b7b7598c67b536443e216404

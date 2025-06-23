@@ -1,0 +1,15 @@
+﻿2025-06-23T13:47:53.9201968Z ##[group]Run cd GreedGross
+2025-06-23T13:47:53.9202288Z [36;1mcd GreedGross[0m
+2025-06-23T13:47:53.9202501Z [36;1mchmod +x gradlew[0m
+2025-06-23T13:47:53.9202727Z [36;1mecho -n > lasspath[0m
+2025-06-23T13:47:53.9203031Z [36;1mecho "sdk.dir=$ANDROID_SDK_ROOT" > local.properties[0m
+2025-06-23T13:47:53.9203376Z [36;1m# Download gradle wrapper jar if missing[0m
+2025-06-23T13:47:53.9203706Z [36;1mif [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then[0m
+2025-06-23T13:47:53.9204034Z [36;1m  mkdir -p gradle/wrapper[0m
+2025-06-23T13:47:53.9204605Z [36;1m  curl -L https://github.com/gradle/gradle/raw/v8.10.2/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar[0m
+2025-06-23T13:47:53.9205188Z [36;1mfi[0m
+2025-06-23T13:47:53.9274132Z shell: /usr/bin/bash -e {0}
+2025-06-23T13:47:53.9274387Z env:
+2025-06-23T13:47:53.9274676Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
+2025-06-23T13:47:53.9275154Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
+2025-06-23T13:47:53.9275547Z ##[endgroup]

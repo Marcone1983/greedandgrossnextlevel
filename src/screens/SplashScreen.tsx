@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { Text, Progress } from 'native-base';
-import LottieView from 'lottie-react-native';
+// import LottieView from 'lottie-react-native'; // Removed - animation file missing
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -49,12 +49,9 @@ export default function SplashScreen() {
     <LinearGradient colors={gradients.dark} style={styles.container}>
       <View style={styles.content}>
         <Animated.View style={[styles.logoContainer, animatedDNAStyle]}>
-          <LottieView
-            source={require('@assets/animations/cannabis-dna.json')}
-            autoPlay
-            loop
-            style={styles.lottie}
-          />
+          <View style={styles.lottie}>
+            <Text style={styles.dnaText}>🧬</Text>
+          </View>
         </Animated.View>
 
         <Text style={styles.title}>GREED & GROSS</Text>
@@ -104,6 +101,12 @@ const styles = StyleSheet.create({
   lottie: {
     width: '100%',
     height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dnaText: {
+    fontSize: 100,
+    textAlign: 'center',
   },
   title: {
     fontFamily: 'Orbitron-Bold',

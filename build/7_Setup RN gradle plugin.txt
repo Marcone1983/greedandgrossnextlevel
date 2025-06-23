@@ -1,0 +1,15 @@
+﻿2025-06-23T13:47:53.9389867Z ##[group]Run if [ -d "node_modules/@react-native/gradle-plugin" ]; then
+2025-06-23T13:47:53.9390370Z [36;1mif [ -d "node_modules/@react-native/gradle-plugin" ]; then[0m
+2025-06-23T13:47:53.9390738Z [36;1m  cd node_modules/@react-native/gradle-plugin[0m
+2025-06-23T13:47:53.9391155Z [36;1m  mkdir -p build/com/facebook/react/react-native-gradle-plugin/0.79.0[0m
+2025-06-23T13:47:53.9391529Z [36;1m  mkdir -p temp-jar/META-INF[0m
+2025-06-23T13:47:53.9391874Z [36;1m  echo "Manifest-Version: 1.0" > temp-jar/META-INF/MANIFEST.MF[0m
+2025-06-23T13:47:53.9392836Z [36;1m  cd temp-jar && jar cf ../build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.jar * && cd ..[0m
+2025-06-23T13:47:53.9394253Z [36;1m  echo '<?xml version="1.0" encoding="UTF-8"?><project><modelVersion>4.0.0</modelVersion><groupId>com.facebook.react</groupId><artifactId>react-native-gradle-plugin</artifactId><version>0.79.0</version></project>' > build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.pom[0m
+2025-06-23T13:47:53.9395386Z [36;1m  cd ../../..[0m
+2025-06-23T13:47:53.9395585Z [36;1mfi[0m
+2025-06-23T13:47:53.9450338Z shell: /usr/bin/bash -e {0}
+2025-06-23T13:47:53.9450578Z env:
+2025-06-23T13:47:53.9450876Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
+2025-06-23T13:47:53.9451349Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
+2025-06-23T13:47:53.9451694Z ##[endgroup]
