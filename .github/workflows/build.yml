@@ -129,15 +129,14 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Debug environment
-          env | grep -i gradle || true
-          env | grep -i classpath || true
+          # Remove system gradle from PATH to avoid conflicts
+          export PATH=$(echo $PATH | tr ':' '\n' | grep -v gradle | tr '\n' ':')
           # Clear ALL gradle-related env vars
           unset GRADLE_OPTS
           unset CLASSPATH
           unset GRADLE_HOME
           unset GRADLE_USER_HOME
-          # Run gradle
+          # Use only our gradle wrapper
           ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
