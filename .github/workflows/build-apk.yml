@@ -188,12 +188,30 @@ jobs:
             exit 1
           }
 
+      - name: Check build outputs
+        if: always()
+        run: |
+          echo "=== Searching for APK files ==="
+          find GreedGross -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+          echo ""
+          echo "=== Checking build directory ==="
+          ls -la GreedGross/app/build/outputs/ 2>/dev/null || echo "No outputs directory"
+          echo ""
+          echo "=== Checking for build errors in log ==="
+          if [ -f GreedGross/build.log ]; then
+            grep -i "failed\|error" GreedGross/build.log | tail -20 || true
+          fi
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: greed-gross-apk
-          path: GreedGross/app/build/outputs/apk/release/*Greed&Gross.apk
+          path: |
+            GreedGross/app/build/outputs/apk/release/*.apk
+            GreedGross/app/build/outputs/apk/debug/*.apk
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Create build summary
         run: |
