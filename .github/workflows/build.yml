@@ -128,15 +128,10 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Clear ALL potential problematic env vars
-          unset GRADLE_OPTS
-          unset CLASSPATH
-          unset GRADLE_HOME
-          unset GRADLE_USER_HOME
-          # First list available tasks to see what's happening
-          echo "=== Listing available tasks ==="
-          ./gradlew tasks --all
-          echo "=== Now trying to build ==="
+          # Debug what gradlew is doing
+          echo "=== Debug gradlew execution ==="
+          bash -x ./gradlew --version 2>&1 | head -50
+          echo "=== Now run normally ==="
           ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
