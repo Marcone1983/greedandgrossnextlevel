@@ -48,6 +48,12 @@ jobs:
             cd ../../..
           fi
           
+      - name: Fix reanimated C++ compatibility
+        run: |
+          # Force C++17 for reanimated to avoid C++20 errors
+          sed -i 's/std=c++20/std=c++17/g' node_modules/react-native-reanimated/android/CMakeLists.txt || true
+          sed -i 's/CMAKE_CXX_STANDARD 20/CMAKE_CXX_STANDARD 17/g' node_modules/react-native-reanimated/android/CMakeLists.txt || true
+          
       - name: Usa Build apk action
         uses: ./.github/actions/build-apk
         with:

@@ -74,7 +74,7 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground
-      source={require('@assets/images/lab-background.jpg')}
+      source={{ uri: 'https://i.imgur.com/XfGpCpR.png' }}
       style={styles.container}
       imageStyle={styles.backgroundImage}
     >
