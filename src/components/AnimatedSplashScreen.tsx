@@ -261,7 +261,7 @@ export default function AnimatedSplashScreen({ onFinish }: AnimatedSplashScreenP
             },
           ]}
         >
-          <Image source={require('../../assets/logoGG.png')} style={styles.logo} resizeMode="contain" />
+          <Image source={{ uri: 'https://i.imgur.com/XfGpCpR.png' }} style={styles.logo} resizeMode="contain" />
 
           {/* Glowing effect */}
           <View style={styles.glowEffect} />

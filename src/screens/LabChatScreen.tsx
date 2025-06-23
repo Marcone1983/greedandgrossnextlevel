@@ -38,7 +38,7 @@ import StrainSelector from '@/components/StrainSelector';
 import MemoryIndicator from '@/components/MemoryIndicator';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
 
-const AI_AVATAR = require('@assets/images/ai-scientist.png');
+const AI_AVATAR = { uri: 'https://i.imgur.com/XfGpCpR.png' };
 
 export default function LabChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);

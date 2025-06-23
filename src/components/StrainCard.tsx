@@ -48,7 +48,7 @@ export default function StrainCard({ strain, onPress, compact = false }: StrainC
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
       <View style={[styles.card, shadows.md]}>
         <ImageBackground
-          source={require('@assets/images/strain-pattern.png')}
+          source={{ uri: 'https://i.imgur.com/XfGpCpR.png' }}
           style={styles.cardBackground}
           imageStyle={styles.backgroundImage}
         >
