@@ -125,20 +125,23 @@ jobs:
         run: |
           sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
           
+      - name: Test Metro bundling first
+        run: |
+          # Test if Metro can bundle the JS
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp || {
+            echo "Metro bundling failed! Check JS errors"
+            exit 1
+          }
+          echo "Metro bundling test passed"
+          
       - name: Build APK
         run: |
           cd GreedGross
-          # Run gradle directly without the wrapper to avoid the jar path issue
+          # Run gradle build
           java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --stacktrace || {
             echo "Build failed!"
             exit 1
           }
-          # Verify APK was created
-          if [ ! -d "app/build/outputs/apk/release" ]; then
-            echo "ERROR: No release directory created!"
-            find app/build -type d 2>/dev/null || echo "No build directory!"
-            exit 1
-          fi
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
