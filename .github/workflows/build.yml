@@ -159,6 +159,8 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: app-release
-          path: GreedGross/app/build/outputs/apk/release/*.apk
+          name: greed-gross-apk
+          path: |
+            GreedGross/app/build/outputs/apk/**/*.apk
+            GreedGross/app/build/outputs/bundle/**/*.aab
           if-no-files-found: warn
