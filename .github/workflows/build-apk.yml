@@ -178,18 +178,15 @@ jobs:
           
           # Try to run assembleRelease directly without clean
           echo "=== Starting build ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace --info | tee build.log
-          
-          # Capture build status
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "::error::Build failed! Check logs for details"
-            echo "=== LAST 200 LINES OF BUILD LOG ==="
-            tail -200 build.log
+          ./gradlew assembleRelease --no-daemon --stacktrace --debug 2>&1 | tee build.log || {
+            echo "::error::Build failed with exit code $?"
+            echo "=== FULL BUILD LOG ==="
+            cat build.log
             echo ""
-            echo "=== Searching for Metro/JavaScript errors ==="
-            grep -A 20 -B 10 -i "metro\|bundle\|javascript\|js\|error" build.log || true
+            echo "=== Searching for errors ==="
+            grep -i "error\|failed\|exception\|could not" build.log | head -50 || true
             exit 1
-          fi
+          }
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
