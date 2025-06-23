@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 30  # Prevent hanging builds
     
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       # Android SDK is pre-installed on GitHub Actions runners
