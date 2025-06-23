@@ -132,12 +132,10 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          echo "=== Checking gradle wrapper ==="
-          ls -la gradle/wrapper/
-          echo "=== Checking gradlew ==="
-          ls -la gradlew
-          echo "=== Running gradle ==="
-          bash -x ./gradlew assembleRelease --no-daemon --stacktrace
+          # Fix the wrapper jar being interpreted as task
+          unset CLASSPATH
+          ./gradlew tasks --all || true
+          ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
