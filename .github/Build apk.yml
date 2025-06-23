@@ -22,8 +22,8 @@ runs:
         INPUT_FLAVOUR: ${{ inputs.flavour }}
       run: |
         cd GreedGross
-        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assemble"$INPUT_FLAVOUR" --no-daemon --stacktrace
-        APK_PATH="app/build/outputs/apk/$INPUT_FLAVOUR/app-$INPUT_FLAVOUR.apk"
-        APK_DIR="app/build/outputs/apk/$INPUT_FLAVOUR"
-        echo "apk-path=$(echo $APK_PATH)" >> $GITHUB_OUTPUT
-        echo "apk-directory=$(echo $APK_DIR)" >> $GITHUB_OUTPUT
+        ./gradlew assemble"$INPUT_FLAVOUR"
+        PATH="app/build/outputs/apk/$INPUT_FLAVOUR/app-$INPUT_FLAVOUR-unsigned.apk"
+        DIR="app/build/outputs/apk/$INPUT_FLAVOUR"
+        echo "apk-path=$(echo $PATH)" >> $GITHUB_OUTPUT
+        echo "apk-directory=$(echo $DIR)" >> $GITHUB_OUTPUT
