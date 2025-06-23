@@ -174,11 +174,11 @@ jobs:
           
           # First, let's see what tasks are available
           echo "=== Available Gradle tasks ==="
-          ./gradlew tasks --all --stacktrace || echo "Failed to list tasks"
+          ./gradlew -c settings.gradle tasks --all --stacktrace || echo "Failed to list tasks"
           
           # Try to run assembleRelease directly without clean
           echo "=== Starting build ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace --debug 2>&1 | tee build.log || {
+          ./gradlew -c settings.gradle assembleRelease --no-daemon --stacktrace --info 2>&1 | tee build.log || {
             echo "::error::Build failed with exit code $?"
             echo "=== FULL BUILD LOG ==="
             cat build.log
