@@ -130,16 +130,13 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Debug and fix environment
-          unset CLASSPATH
-          export GRADLE_OPTS=""
-          # Run gradle directly without wrapper issues
-          ./gradlew --version || true
-          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log || {
-            echo "Build failed, checking for specific errors..."
-            grep -i "gradle-wrapper.jar" build.log || true
-            exit 1
-          }
+          # Create a simple wrapper to avoid argument issues
+          cat > build-apk.sh << 'BUILDEOF'
+          #!/bin/bash
+          exec ./gradlew assembleRelease --no-daemon --stacktrace
+          BUILDEOF
+          chmod +x build-apk.sh
+          ./build-apk.sh
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
