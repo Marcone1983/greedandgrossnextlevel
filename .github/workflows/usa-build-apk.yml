@@ -48,25 +48,6 @@ jobs:
             cd ../../..
           fi
           
-      - name: Fix reanimated
-        run: |
-          sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
-          
-      - name: Create empty directories for NO-SOURCE fixes
-        run: |
-          # Create directories to avoid NO-SOURCE warnings
-          mkdir -p node_modules/react-native-localize/android/src/main/jniLibs
-          mkdir -p node_modules/@react-native-firebase/storage/android/src/main/res
-          
-      - name: Test Metro bundling first
-        run: |
-          # Test if Metro can bundle the JS
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp || {
-            echo "Metro bundling failed! Check JS errors above"
-            exit 1
-          }
-          echo "Metro bundling test passed"
-          
       - name: Usa Build apk action
         uses: ./.github/actions/build-apk
         with:
