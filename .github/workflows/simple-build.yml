@@ -1,9 +1,7 @@
-name: Run Build APK Action
+name: Simple Build
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
 
 jobs:
   build:
