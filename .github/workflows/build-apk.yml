@@ -158,9 +158,24 @@ jobs:
         run: |
           cd GreedGross
           
+          # Check current directory structure
+          echo "=== Current directory ==="
+          pwd
+          echo "=== Files in current directory ==="
+          ls -la
+          
+          # Check if settings.gradle exists
+          echo "=== Checking settings.gradle ==="
+          if [ -f "settings.gradle" ]; then
+            echo "settings.gradle exists:"
+            cat settings.gradle
+          else
+            echo "ERROR: settings.gradle NOT FOUND!"
+          fi
+          
           # First, let's see what tasks are available
           echo "=== Available Gradle tasks ==="
-          ./gradlew tasks --all || echo "Failed to list tasks"
+          ./gradlew tasks --all --stacktrace || echo "Failed to list tasks"
           
           # Try to run assembleRelease directly without clean
           echo "=== Starting build ==="
