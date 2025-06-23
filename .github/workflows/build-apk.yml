@@ -57,8 +57,7 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # DO NOT create lasspath - it confuses Gradle!
-          # Gradle thinks it's a settings file!
+          # Ensure lasspath doesn't exist - it was confusing Gradle!
           rm -rf lasspath 2>/dev/null || true
           
           # Create local.properties with SDK path
