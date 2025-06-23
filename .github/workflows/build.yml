@@ -129,8 +129,11 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Remove system gradle from PATH to avoid conflicts
-          export PATH=$(echo $PATH | tr ':' '\n' | grep -v gradle | tr '\n' ':')
+          # Debug Java version
+          echo "=== Java version ==="
+          java -version
+          echo "JAVA_HOME=$JAVA_HOME"
+          which java
           # Clear ALL gradle-related env vars
           unset GRADLE_OPTS
           unset CLASSPATH
