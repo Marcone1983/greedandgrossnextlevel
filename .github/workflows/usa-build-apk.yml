@@ -1,4 +1,4 @@
-name: Usa Build APK
+name: usa-build-apk
 
 on:
   workflow_dispatch:
@@ -67,7 +67,7 @@ jobs:
           }
           echo "Metro bundling test passed"
           
-      - name: Usa Build apk action
-        uses: ./.github/actions/build-apk
+      - name: usa-build-apk action
+        uses: ./.github/actions/usa-build-apk
         with:
           flavour: release
