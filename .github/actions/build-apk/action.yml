@@ -22,14 +22,19 @@ runs:
         INPUT_FLAVOUR: ${{ inputs.flavour }}
       run: |
         cd GreedGross
-        # Run with more verbose output to see JS errors
-        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assemble"$INPUT_FLAVOUR" --no-daemon -q || {
-          echo "Build failed! Checking for JS bundle errors..."
-          # Try to run the bundler manually to see the error
+        # Run build with minimal output
+        echo "Starting Android build..."
+        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon -q 2>&1 | \
+          grep -E "(FAILED|ERROR|error:|BUILD SUCCESSFUL)" | \
+          tail -100
+        
+        # Check build status
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          echo "Build failed! Running diagnostics..."
           cd ..
           npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp
           exit 1
-        }
+        fi
         PATH="app/build/outputs/apk/$INPUT_FLAVOUR/app-$INPUT_FLAVOUR-unsigned.apk"
         DIR="app/build/outputs/apk/$INPUT_FLAVOUR"
         echo "apk-path=$(echo $PATH)" >> $GITHUB_OUTPUT
