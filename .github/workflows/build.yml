@@ -109,10 +109,6 @@ jobs:
           GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
           GRADLEEOF
           
-      - uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: 8.10.2
-          
       - name: Setup RN gradle plugin
         run: |
           if [ -d "node_modules/@react-native/gradle-plugin" ]; then
@@ -132,9 +128,6 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Fix the wrapper jar being interpreted as task
-          unset CLASSPATH
-          ./gradlew tasks --all || true
           ./gradlew assembleRelease --no-daemon --stacktrace
           
       - name: Upload APK
