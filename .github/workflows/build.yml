@@ -48,10 +48,7 @@ jobs:
       - name: Setup Android
         run: |
           cd GreedGross
-          # Download a fresh gradlew to avoid the duplicate args issue
-          curl -s https://raw.githubusercontent.com/gradle/gradle/v8.10.2/gradlew > gradlew.new
-          chmod +x gradlew.new
-          mv gradlew.new gradlew
+          chmod +x gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
@@ -131,27 +128,15 @@ jobs:
       - name: Build APK
         run: |
           cd GreedGross
-          # Show what we're running
-          echo "=== Running gradlew assembleRelease ==="
-          ./gradlew assembleRelease --no-daemon --stacktrace 2>&1 | tee build.log
-          BUILD_RESULT=${PIPESTATUS[0]}
-          echo "=== Build exit code: $BUILD_RESULT ==="
-          
-          # Check if build actually succeeded
-          if [ $BUILD_RESULT -ne 0 ]; then
-            echo "ERROR: Build failed with exit code $BUILD_RESULT"
-            echo "=== Last 100 lines of build log ==="
-            tail -100 build.log
+          # Run with completely clean environment to avoid arg duplication
+          env -i PATH="$PATH" JAVA_HOME="$JAVA_HOME" ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" HOME="$HOME" USER="$USER" ./gradlew assembleRelease --no-daemon --stacktrace || {
+            echo "Build failed!"
             exit 1
-          fi
-          
-          # Check for APK
-          echo "=== Checking for APK files ==="
-          find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found!"
-          ls -la app/build/outputs/apk/release/ 2>/dev/null || echo "Release directory doesn't exist!"
-          
-          if [ ! -f "app/build/outputs/apk/release/app-release.apk" ] && [ ! -f "app/build/outputs/apk/release/app-release-unsigned.apk" ]; then
-            echo "ERROR: No APK was created!"
+          }
+          # Verify APK was created
+          if [ ! -d "app/build/outputs/apk/release" ]; then
+            echo "ERROR: No release directory created!"
+            find app/build -type d 2>/dev/null || echo "No build directory!"
             exit 1
           fi
           
