@@ -19,7 +19,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/constants/theme';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
-import * as Haptics from 'expo-haptics';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 interface MemoryIndicatorProps {
   size?: 'sm' | 'md' | 'lg';
@@ -101,13 +101,19 @@ export default function MemoryIndicator({
     } else {
       setIsModalOpen(true);
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
   };
 
   const handleToggleMemory = async () => {
     try {
       await updateMemorySettings({ enabled: !isEnabled });
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      ReactNativeHapticFeedback.trigger('impactMedium', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false
+      });
 
       toast.show({
         title: isEnabled ? 'Memory disabilitata' : 'Memory abilitata',
@@ -126,7 +132,10 @@ export default function MemoryIndicator({
     try {
       await clearAllMemory();
       setIsModalOpen(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      ReactNativeHapticFeedback.trigger('notificationSuccess', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false
+      });
 
       toast.show({
         title: 'Memory cancellata',

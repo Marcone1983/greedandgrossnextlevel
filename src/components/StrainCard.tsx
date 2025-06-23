@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 import { VStack, HStack, Text, Badge, Icon, Progress } from 'native-base';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import LinearGradient from 'react-native-linear-gradient';
 import { Strain } from '@/types';
 import { colors, gradients, shadows } from '@/constants/theme';
 import { getStrainTypeColor, formatTHCCBD } from '@/utils/helpers';

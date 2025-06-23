@@ -21,7 +21,7 @@ import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import * as Haptics from 'expo-haptics';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -200,7 +200,10 @@ export default function SettingsScreen() {
     }
 
     await saveNotificationSettings(newSettings);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
 
     logAnalytics('notification_setting_changed', {
       setting: key,
@@ -215,7 +218,10 @@ export default function SettingsScreen() {
 
   const handleThemeToggle = () => {
     toggleColorMode();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
     logAnalytics('theme_changed', { theme: isDarkMode ? 'light' : 'dark' });
   };
 
@@ -309,7 +315,10 @@ Thank you!
   const handleMemoryToggle = async () => {
     try {
       await updatePrivacySettings({ enableMemory: !memoryEnabled });
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
       logAnalytics('memory_setting_changed', { enabled: !memoryEnabled });
     } catch (error) {
       toast.show({
@@ -325,7 +334,10 @@ Thank you!
       await updatePrivacySettings({
         encryptSensitive: !memoryProfile?.privacySettings?.encryptSensitive,
       });
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
       logAnalytics('encryption_setting_changed', {
         enabled: !memoryProfile?.privacySettings?.encryptSensitive,
       });

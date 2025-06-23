@@ -24,7 +24,7 @@ import { useNavigation } from '@react-navigation/native';
 import { colors } from '@/constants/theme';
 import { useConversationMemory } from '@/hooks/useConversationMemory';
 import { ConversationEntry } from '@/services/memoryService';
-import * as Haptics from 'expo-haptics';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 interface ConversationItemProps {
   key?: string | number;
@@ -200,7 +200,10 @@ export default function ConversationHistoryScreen() {
   const handleConversationPress = (conversation: ConversationEntry) => {
     setSelectedConversation(conversation);
     setIsDetailModalOpen(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
   };
 
   const handleRefresh = async () => {

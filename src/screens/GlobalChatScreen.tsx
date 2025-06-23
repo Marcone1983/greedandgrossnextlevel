@@ -24,8 +24,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import LinearGradient from 'react-native-linear-gradient';
 import io from 'socket.io-client';
 
 import { RootState } from '@/store';
@@ -85,7 +85,10 @@ export default function GlobalChatScreen() {
 
       socketRef.current.on('message', (data: ChatMessage) => {
         dispatch(addMessage(data));
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        ReactNativeHapticFeedback.trigger('impactLight', {
+          enableVibrateFallback: true,
+          ignoreAndroidSystemSettings: false
+        });
       });
 
       socketRef.current.on('online_count', (count: number) => {
@@ -139,7 +142,10 @@ export default function GlobalChatScreen() {
     socketRef.current?.emit('message', newMessage);
     dispatch(incrementDailyUsage('messages'));
     setMessage('');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    ReactNativeHapticFeedback.trigger('impactMedium', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
   };
 
   const renderMessage = ({ item }: { item: ChatMessage }) => (

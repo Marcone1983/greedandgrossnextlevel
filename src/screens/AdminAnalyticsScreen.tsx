@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 import { colors } from '@/constants/theme';
 import { analyticsEngine, AnalyticsInsight, UserSegment } from '@/services/analyticsEngine';
 import { analyticsCollector } from '@/services/analyticsCollector';
-import * as Haptics from 'expo-haptics';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
@@ -88,7 +88,10 @@ export default function AdminAnalyticsScreen() {
     setIsRefreshing(true);
     await loadAnalytics();
     setIsRefreshing(false);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
   };
 
   const renderTimeRangeSelector = () => (

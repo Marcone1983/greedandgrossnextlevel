@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, HStack, VStack, Badge } from 'native-base';
-import { LinearGradient } from 'expo-linear-gradient';
+import LinearGradient from 'react-native-linear-gradient';
 import { ChatMessage, Strain } from '@/types';
 import { colors, gradients } from '@/constants/theme';
 import { formatDate } from '@/utils/helpers';

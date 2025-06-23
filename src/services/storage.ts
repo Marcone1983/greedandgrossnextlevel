@@ -1,6 +1,6 @@
 import { errorLogger } from './errorLogger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as SecureStore from 'expo-secure-store';
+import * as Keychain from 'react-native-keychain';
 import { User, Strain, CrossResult } from '@/types';
 
 const STORAGE_KEYS = {
@@ -125,7 +125,11 @@ export async function getPreferences(): Promise<any> {
 // Admin Secret (Secure Store)
 export async function saveAdminSecret(secret: string): Promise<void> {
   try {
-    await SecureStore.setItemAsync(STORAGE_KEYS.ADMIN_SECRET, secret);
+    await Keychain.setInternetCredentials(
+      'greedandgross.app',
+      STORAGE_KEYS.ADMIN_SECRET,
+      secret
+    );
   } catch (error) {
     // Error saving admin secret
   }
@@ -133,7 +137,10 @@ export async function saveAdminSecret(secret: string): Promise<void> {
 
 export async function getAdminSecret(): Promise<string | null> {
   try {
-    return await SecureStore.getItemAsync(STORAGE_KEYS.ADMIN_SECRET);
+    const credentials = await Keychain.getInternetCredentials('greedandgross.app');
+    return credentials && credentials.username === STORAGE_KEYS.ADMIN_SECRET
+      ? credentials.password
+      : null;
   } catch (error) {
     // Error getting admin secret
     return null;
@@ -149,7 +156,7 @@ export async function clearAllData(): Promise<void> {
       STORAGE_KEYS.CROSS_HISTORY,
       STORAGE_KEYS.PREFERENCES,
     ]);
-    await SecureStore.deleteItemAsync(STORAGE_KEYS.ADMIN_SECRET);
+    await Keychain.resetInternetCredentials('greedandgross.app');
   } catch (error) {
     // Error clearing all data
   }

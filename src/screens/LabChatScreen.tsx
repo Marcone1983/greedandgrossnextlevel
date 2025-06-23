@@ -23,8 +23,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import LinearGradient from 'react-native-linear-gradient';
 
 import { RootState } from '@/store';
 import { colors, gradients } from '@/constants/theme';
@@ -107,7 +107,10 @@ ${user?.tier === 'free' ? '🔬 Hai 1 incrocio gratuito disponibile oggi.' : '�
 
     setMessages(prev => [...prev, userMessage]);
     setInputText('');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
 
     dispatch(setCrossLoading(true));
     dispatch(incrementDailyUsage('crosses'));
@@ -218,7 +221,10 @@ ${result.cached ? '\n📌 Risultato dalla cache' : '\n✨ Nuovo incrocio calcola
 
   const handleSuggestedPromptPress = (prompt: string) => {
     setInputText(prompt);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
   };
 
   return (

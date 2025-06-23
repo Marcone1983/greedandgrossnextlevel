@@ -15,9 +15,9 @@ import {
 } from 'native-base';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import LinearGradient from 'react-native-linear-gradient';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
 
 import { colors, gradients, shadows } from '@/constants/theme';
 import { AdminStats } from '@/types';
@@ -62,7 +62,7 @@ export default function AdminPanel() {
           onPress: async () => {
             try {
               const blob = await downloadDatabase({ format }).unwrap();
-              const fileUri = `${FileSystem.documentDirectory}database.${format}`;
+              const fileUri = `${RNFS.DocumentDirectoryPath}/database.${format}`;
 
               // Convert blob to base64 and save
               const reader = new FileReader();
@@ -70,11 +70,9 @@ export default function AdminPanel() {
                 const base64data = reader.result as string;
                 const base64 = base64data.split(',')[1];
 
-                await FileSystem.writeAsStringAsync(fileUri, base64, {
-                  encoding: FileSystem.EncodingType.Base64,
-                });
+                await RNFS.writeFile(fileUri, base64, 'base64');
 
-                await Sharing.shareAsync(fileUri);
+                await Share.open({ url: `file://${fileUri}` });
               };
               reader.readAsDataURL(blob);
 

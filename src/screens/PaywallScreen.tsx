@@ -3,8 +3,8 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-nat
 import { VStack, HStack, Text, Icon, Badge, Button, Spinner, useToast } from 'native-base';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+import LinearGradient from 'react-native-linear-gradient';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { colors, gradients, shadows } from '@/constants/theme';
@@ -134,7 +134,10 @@ export default function PaywallScreen() {
     }
 
     setIsLoading(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    ReactNativeHapticFeedback.trigger('impactMedium', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
 
     try {
       const success = await purchaseSubscription(plans[selectedPlan].id);

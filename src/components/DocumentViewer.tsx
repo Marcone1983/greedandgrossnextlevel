@@ -16,7 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors } from '@/constants/theme';
 import { useDocumentCache } from '@/hooks/useDocumentCache';
-import * as Haptics from 'expo-haptics';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 interface DocumentViewerProps {
   documentType: 'privacy-policy' | 'terms-service' | 'disclaimer' | 'support-info';
@@ -56,7 +56,10 @@ export default function DocumentViewer({ documentType, language, onClose }: Docu
   const handleLoadError = () => {
     setIsLoading(false);
     setHasError(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    ReactNativeHapticFeedback.trigger('notificationError', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
   };
 
   const handleRetry = async () => {
@@ -66,7 +69,10 @@ export default function DocumentViewer({ documentType, language, onClose }: Docu
   };
 
   const handleGoBack = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger('impactLight', {
+      enableVibrateFallback: true,
+      ignoreAndroidSystemSettings: false
+    });
     onClose();
   };
 

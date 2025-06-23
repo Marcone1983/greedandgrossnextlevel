@@ -19,10 +19,10 @@ import {
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import * as Haptics from 'expo-haptics';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { LinearGradient } from 'expo-linear-gradient';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import RNFS from 'react-native-fs';
+import Share from 'react-native-share';
+import LinearGradient from 'react-native-linear-gradient';
 
 import { RootState } from '@/store';
 import { colors, gradients } from '@/constants/theme';
@@ -131,7 +131,10 @@ export default function StrainLibraryScreen() {
             setStrains(updatedStrains);
             saveStrains(updatedStrains);
             dispatch(removeStrain(strainId));
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            ReactNativeHapticFeedback.trigger('notificationSuccess', {
+              enableVibrateFallback: true,
+              ignoreAndroidSystemSettings: false
+            });
           },
         },
       ]
@@ -146,11 +149,11 @@ export default function StrainLibraryScreen() {
 
     try {
       const pdfContent = generatePDFContent(filteredStrains);
-      const fileUri = `${FileSystem.documentDirectory}strain_library.pdf`;
+      const fileUri = `${RNFS.DocumentDirectoryPath}/strain_library.pdf`;
 
       // In a real app, you'd use react-native-pdf or similar
-      await FileSystem.writeAsStringAsync(fileUri, pdfContent);
-      await Sharing.shareAsync(fileUri);
+      await RNFS.writeFile(fileUri, pdfContent, 'utf8');
+      await Share.open({ url: `file://${fileUri}` });
 
       toast.show({
         description: 'PDF esportato con successo',
