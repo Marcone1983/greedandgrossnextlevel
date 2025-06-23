@@ -10,8 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: action/checkout@v4
-      
+      - uses: actions/checkout@v4
+        
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -51,14 +51,8 @@ jobs:
       - name: Fix reanimated
         run: |
           sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
-          
-      - name: Create empty directories for NO-SOURCE fixes
-        run: |
-          # Create directories to avoid NO-SOURCE warnings
-          mkdir -p node_modules/react-native-localize/android/src/main/jniLibs
-          mkdir -p node_modules/@react-native-firebase/storage/android/src/main/res
       
       - name: usa-build-apk action
-        uses: ./github/actions/usa-build-apk
+        uses: ./.github/actions/usa-build-apk
         with:
           flavour: release
