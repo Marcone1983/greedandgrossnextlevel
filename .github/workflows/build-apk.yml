@@ -57,8 +57,8 @@ jobs:
           cd GreedGross
           chmod +x gradlew
           
-          # Ensure lasspath doesn't exist - it was confusing Gradle!
-          rm -rf lasspath 2>/dev/null || true
+          # Create lasspath as empty file - Gradle wants it!
+          touch lasspath
           
           # Create local.properties with SDK path
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
