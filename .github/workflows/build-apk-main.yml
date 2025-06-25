@@ -199,7 +199,7 @@ EOF
           
       - name: Build APK using composite action
         id: build-apk
-        uses: ./.github/actions/build-apk
+        uses: ./.github/actions/build-apk/
         with:
           flavour: release
           
