@@ -21,15 +21,11 @@ runs:
       env:
         INPUT_FLAVOUR: ${{ inputs.flavour }}
       run: |
-        # Build from GreedGross directory
+        # Build from android directory (renamed from GreedGross)
         echo "Starting Android build..."
         BUILD_STATUS=0
         
-        # First, ensure React Native can find the android directory
-        export REACT_NATIVE_PROJECT_ROOT=$(pwd)
-        export ANDROID_PROJECT_ROOT=$(pwd)/GreedGross
-        
-        cd GreedGross
+        cd android
         ./gradlew assembleRelease --no-daemon 2>&1 | \
           tee ../build.log | \
           grep -E "(FAILED|ERROR|BUILD|Task|success)" | \
@@ -46,8 +42,8 @@ runs:
         fi
         
         # Find the APK
-        PATH="GreedGross/app/build/outputs/apk/release/app-release-unsigned.apk"
-        DIR="GreedGross/app/build/outputs/apk/release"
+        PATH="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+        DIR="android/app/build/outputs/apk/release"
         echo "apk-path=$(echo $PATH)" >> $GITHUB_OUTPUT
         echo "apk-directory=$(echo $DIR)" >> $GITHUB_OUTPUT
         

@@ -26,7 +26,12 @@ jobs:
       
       - name: Setup Android
         run: |
-          cd GreedGross
+          # First rename GreedGross to android for React Native compatibility
+          if [ -d "GreedGross" ] && [ ! -d "android" ]; then
+            mv GreedGross android
+          fi
+          
+          cd android
           chmod +x gradlew
           echo -n > lasspath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
@@ -37,22 +42,17 @@ jobs:
           fi
           cd ..
           
-      - name: Generate autolinking and compile native modules
+      - name: Update React Native config
         run: |
-          # Ensure React Native autolinking works correctly
-          npx react-native config
-          
-          # Compile all native modules first
-          cd GreedGross
-          ./gradlew :react-native-reanimated:assembleRelease || true
-          ./gradlew :react-native-safe-area-context:assembleRelease || true
-          ./gradlew :react-native-screens:assembleRelease || true
-          ./gradlew :react-native-share:assembleRelease || true
-          ./gradlew :react-native-svg:assembleRelease || true
-          ./gradlew :react-native-fs:assembleRelease || true
-          ./gradlew :react-native-vector-icons:assembleRelease || true
-          ./gradlew :react-native-webview:assembleRelease || true
-          cd ..
+          # Update react-native.config.js to use standard structure
+          cat > react-native.config.js << 'EOF'
+module.exports = {
+  project: {
+    ios: {},
+    android: {},
+  },
+};
+EOF
           
       - name: Setup RN gradle plugin
         run: |
