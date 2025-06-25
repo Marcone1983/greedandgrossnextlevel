@@ -49,7 +49,7 @@ jobs:
         run: |
           cd GreedGross
           chmod +x gradlew
-          echo -n > lasspath
+          echo -n > classpath
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
       - name: Create google services
