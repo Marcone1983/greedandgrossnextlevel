@@ -30,9 +30,9 @@ runs:
         
         # Check build status
         if [ ${PIPESTATUS[0]} -ne 0 ]; then
-          echo "Build failed! Running diagnostics..."
+          echo "Build failed! Running Metro bundler test..."
           cd ..
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp 2>&1 | tail -100
           exit 1
         fi
         PATH="app/build/outputs/apk/$INPUT_FLAVOUR/app-$INPUT_FLAVOUR-unsigned.apk"
