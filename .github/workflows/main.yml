@@ -59,22 +59,22 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
         
-      - name: Fix settings file and build APK
+      - name: Create lasspath and build APK
         run: |
           cd "$GRADLEW_DIR"
           echo "🏗️ Building from directory: $(pwd)"
           
-          # Check for settings files
-          echo "🔍 Looking for settings files..."
-          ls -la | grep -E "(settings|lasspath)"
-          
-          # If lasspath exists but not settings.gradle, rename it
-          if [ -f "lasspath" ] && [ ! -f "settings.gradle" ]; then
-            echo "🔄 Renaming 'lasspath' to 'settings.gradle'"
-            mv lasspath settings.gradle
+          # Create empty lasspath if it doesn't exist
+          if [ ! -f "lasspath" ]; then
+            echo "📝 Creating empty lasspath file"
+            touch lasspath
           fi
           
-          # Build with explicit settings file
+          # List project files for debug
+          echo "📁 Project files:"
+          ls -la
+          
+          # Build the APK
           ./gradlew assembleDebug --stacktrace
         
       - name: Find and upload APK
