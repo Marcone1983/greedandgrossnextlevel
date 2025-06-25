@@ -37,10 +37,22 @@ jobs:
           fi
           cd ..
           
-      - name: Generate autolinking
+      - name: Generate autolinking and compile native modules
         run: |
           # Ensure React Native autolinking works correctly
           npx react-native config
+          
+          # Compile all native modules first
+          cd GreedGross
+          ./gradlew :react-native-reanimated:assembleRelease || true
+          ./gradlew :react-native-safe-area-context:assembleRelease || true
+          ./gradlew :react-native-screens:assembleRelease || true
+          ./gradlew :react-native-share:assembleRelease || true
+          ./gradlew :react-native-svg:assembleRelease || true
+          ./gradlew :react-native-fs:assembleRelease || true
+          ./gradlew :react-native-vector-icons:assembleRelease || true
+          ./gradlew :react-native-webview:assembleRelease || true
+          cd ..
           
       - name: Setup RN gradle plugin
         run: |
