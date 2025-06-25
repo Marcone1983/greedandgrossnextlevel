@@ -21,7 +21,7 @@ jobs:
           cache: npm
           
       - run: npm install --legacy-peer-deps
-          
+      
       - uses: ./.github/actions/build-apk
         with:
           flavour: release

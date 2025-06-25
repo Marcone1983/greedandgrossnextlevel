@@ -43,16 +43,16 @@ runs:
         fi
         
         # Find the APK
-        PATH="GreedGross/app/build/outputs/apk/release/app-release-unsigned.apk"
-        DIR="GreedGross/app/build/outputs/apk/release"
-        echo "apk-path=$(echo $PATH)" >> $GITHUB_OUTPUT
-        echo "apk-directory=$(echo $DIR)" >> $GITHUB_OUTPUT
+        APK_PATH="GreedGross/app/build/outputs/apk/release/app-release-unsigned.apk"
+        APK_DIR="GreedGross/app/build/outputs/apk/release"
+        echo "apk-path=$(echo $APK_PATH)" >> $GITHUB_OUTPUT
+        echo "apk-directory=$(echo $APK_DIR)" >> $GITHUB_OUTPUT
         
         # Check if APK was actually created
-        if [ -f "$PATH" ]; then
-          echo "✅ BUILD SUCCESS! APK created at: $PATH"
-          ls -lh "$PATH"
+        if [ -f "$APK_PATH" ]; then
+          echo "✅ BUILD SUCCESS! APK created at: $APK_PATH"
+          ls -lh "$APK_PATH"
         else
-          echo "❌ BUILD FAILED! APK not found at: $PATH"
+          echo "❌ BUILD FAILED! APK not found at: $APK_PATH"
           exit 1
         fi

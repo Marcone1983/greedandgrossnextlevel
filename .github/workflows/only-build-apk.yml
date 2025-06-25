@@ -10,6 +10,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          
+      - run: npm install --legacy-peer-deps
+      
+      - name: Setup Android
+        run: |
+          cd GreedGross
+          chmod +x gradlew
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          
+          # Fix gradle wrapper properties
+          if [ -f gradle/wrapper/gradle-wrapper.properties ]; then
+            sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.10.2-all.zip|' gradle/wrapper/gradle-wrapper.properties
+          fi
+          
+          # Download gradle wrapper jar if missing
+          if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
+            mkdir -p gradle/wrapper
+            curl -L https://github.com/gradle/gradle/raw/v8.10.2/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
+          fi
+      
       - uses: ./.github/actions/build-apk
         with:
           flavour: release
