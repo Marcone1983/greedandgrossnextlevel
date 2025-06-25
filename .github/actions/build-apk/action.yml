@@ -25,15 +25,12 @@ runs:
         echo "Starting Android build from project root..."
         BUILD_STATUS=0
         
-        # In RN 0.79, we need to use gradlew directly but from the android directory
-        # First, ensure all native dependencies are properly linked
-        echo "Building Android APK..."
-        cd GreedGross
-        ./gradlew assembleRelease --no-daemon 2>&1 | \
-          tee ../build.log | \
+        # Build from project root, pointing gradle to the GreedGross directory
+        echo "Building Android APK from project root..."
+        ./GreedGross/gradlew -p GreedGross assembleRelease --no-daemon 2>&1 | \
+          tee build.log | \
           grep -E "(FAILED|ERROR|BUILD|Task|success)" | \
           tail -200 || BUILD_STATUS=$?
-        cd ..
         
         # Check build status
         if [ $BUILD_STATUS -ne 0 ]; then
