@@ -21,30 +21,39 @@ runs:
       env:
         INPUT_FLAVOUR: ${{ inputs.flavour }}
       run: |
-        cd GreedGross
-        # Run build with minimal output
-        echo "Starting Android build..."
+        # Build from project root using React Native CLI
+        echo "Starting Android build from project root..."
         BUILD_STATUS=0
-        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon 2>&1 | \
+        
+        # Use React Native CLI to build Android APK
+        npx react-native build-android --mode=release 2>&1 | \
           tee build.log | \
-          grep -E "(FAILED|ERROR|BUILD|Task)" | \
-          tail -100 || BUILD_STATUS=$?
+          grep -E "(FAILED|ERROR|BUILD|Task|success)" | \
+          tail -200 || BUILD_STATUS=$?
+        
+        # If that fails, try gradle directly from android directory
+        if [ $BUILD_STATUS -ne 0 ]; then
+          echo "React Native CLI failed, trying gradle directly..."
+          cd GreedGross
+          ./gradlew assembleRelease --no-daemon 2>&1 | \
+            tee ../build-gradle.log | \
+            grep -E "(FAILED|ERROR|BUILD|Task)" | \
+            tail -100 || BUILD_STATUS=$?
+          cd ..
+        fi
         
         # Check build status
         if [ $BUILD_STATUS -ne 0 ]; then
           echo "=== Last 300 lines of build output ==="
-          tail -300 build.log
-        fi
-        
-        # Check build status again
-        if [ $BUILD_STATUS -ne 0 ]; then
+          tail -300 build.log 2>/dev/null || tail -300 build-gradle.log 2>/dev/null
           echo "Build failed! Running Metro bundler test..."
-          cd ..
           npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp 2>&1 | tail -100
           exit 1
         fi
-        PATH="app/build/outputs/apk/$INPUT_FLAVOUR/app-$INPUT_FLAVOUR-unsigned.apk"
-        DIR="app/build/outputs/apk/$INPUT_FLAVOUR"
+        
+        # Find the APK
+        PATH="GreedGross/app/build/outputs/apk/release/app-release-unsigned.apk"
+        DIR="GreedGross/app/build/outputs/apk/release"
         echo "apk-path=$(echo $PATH)" >> $GITHUB_OUTPUT
         echo "apk-directory=$(echo $DIR)" >> $GITHUB_OUTPUT
         
