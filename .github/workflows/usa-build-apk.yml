@@ -28,12 +28,8 @@ jobs:
       
       - name: Setup Android
         run: |
-          # First rename GreedGross to android for React Native compatibility
-          if [ -d "GreedGross" ] && [ ! -d "android" ]; then
-            mv GreedGross android
-          fi
-          
-          cd android
+          # Keep original GreedGross directory structure
+          cd GreedGross
           chmod +x gradlew
           
           # Fix gradle wrapper properties to ensure correct jar path
