@@ -26,7 +26,8 @@ runs:
         BUILD_STATUS=0
         
         cd android
-        ./gradlew assembleRelease --no-daemon 2>&1 | \
+        # Use bash to execute gradlew to avoid path issues
+        bash ./gradlew assembleRelease --no-daemon 2>&1 | \
           tee ../build.log | \
           grep -E "(FAILED|ERROR|BUILD|Task|success)" | \
           tail -200 || BUILD_STATUS=$?
