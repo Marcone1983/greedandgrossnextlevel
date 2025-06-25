@@ -35,6 +35,10 @@ jobs:
           rm -rf node_modules/detox
           npm uninstall detox --save-dev || true
           
+          # Let npm/yarn resolve compatible versions
+          echo "🔧 Resolving compatible React Native dependencies..."
+          npm install --legacy-peer-deps || npm install
+          
       - name: Install React Native CLI
         run: npm install -g @react-native-community/cli
         
@@ -99,6 +103,14 @@ jobs:
             touch lasspath
           fi
           
+          # Let Gradle refresh dependencies and resolve versions
+          echo "🔄 Refreshing Gradle dependencies..."
+          ./gradlew --refresh-dependencies || true
+          
+          # Clean previous builds
+          echo "🧹 Cleaning previous builds..."
+          ./gradlew clean || true
+          
           # Remove Detox interference if exists
           if [ -f "settings.gradle" ]; then
             echo "🔧 Backing up and fixing settings.gradle..."
@@ -111,7 +123,7 @@ jobs:
           echo "📁 Android project files:"
           ls -la
           
-          # Build APK (skip tests to avoid Detox issues)
+          # Build APK (let Gradle resolve dependencies automatically)
           ./gradlew assembleDebug -x test -x lint --stacktrace
           
       - name: Find and upload APK
