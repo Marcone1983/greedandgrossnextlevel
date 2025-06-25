@@ -48,17 +48,17 @@ jobs:
         run: |
           # Update react-native.config.js to point to renamed android directory
           cat > react-native.config.js << 'EOF'
-module.exports = {
-  project: {
-    ios: {},
-    android: {
-      sourceDir: './android',
-      manifestPath: 'app/src/main/AndroidManifest.xml',
-      packageName: 'com.greedandgross.cannabisbreeding',
-    },
-  },
-};
-EOF
+          module.exports = {
+            project: {
+              ios: {},
+              android: {
+                sourceDir: './android',
+                manifestPath: 'app/src/main/AndroidManifest.xml',
+                packageName: 'com.greedandgross.cannabisbreeding',
+              },
+            },
+          };
+          EOF
           
       - name: Setup RN gradle plugin
         run: |
