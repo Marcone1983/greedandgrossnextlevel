@@ -1,4 +1,4 @@
-name: Usa build pk
+name: Usa Build APK
 
 on:
   workflow_dispatch:
@@ -26,7 +26,6 @@ jobs:
       
       - name: Setup Android
         run: |
-          
           cd GreedGross
           chmod +x gradlew
           
@@ -44,7 +43,6 @@ jobs:
           
       - name: Update React Native config for renamed android directory
         run: |
-          
           cat > react-native.config.js << 'EOF'
           module.exports = {
             project: {
@@ -60,7 +58,6 @@ jobs:
           
       - name: Setup RN gradle plugin
         run: |
-        
           if [ -d "node_modules/@react-native/gradle-plugin" ]; then
             cd node_modules/@react-native/gradle-plugin
             mkdir -p build/com/facebook/react/react-native-gradle-plugin/0.79.0
@@ -73,7 +70,6 @@ jobs:
           
       - name: Fix reanimated C++ compatibility
         run: |
-        
           # Fix Hermes detection
           sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
           
@@ -87,7 +83,6 @@ jobs:
           
       - name: Verify native modules
         run: |
-        
           echo "Checking if all native modules are installed..."
           for module in react-native-reanimated react-native-safe-area-context react-native-screens react-native-share react-native-svg react-native-fs react-native-vector-icons react-native-webview; do
             if [ ! -d "node_modules/$module/android" ]; then
@@ -100,7 +95,6 @@ jobs:
           
       - name: Fix autolinking manually
         run: |
-        
           # Create the autolinking directory
           mkdir -p GreedGross/app/build/generated/autolinking/src/main/java/com/facebook/react
           
@@ -203,7 +197,8 @@ public class PackageList {
 }
 EOF
           
-      - name: Usa Build apk action
+      - name: Usa build apk action
         uses: ./.github/actions/build-apk
         with:
           flavour: release
+
