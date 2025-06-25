@@ -54,7 +54,7 @@ jobs:
             project: {
               ios: {},
               android: {
-                sourceDir: './android',
+                sourceDir: './GreedGross',
                 manifestPath: 'app/src/main/AndroidManifest.xml',
                 packageName: 'com.greedandgross.cannabisbreeding',
               },
