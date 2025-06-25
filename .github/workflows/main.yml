@@ -35,14 +35,34 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
             
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      - name: Check for gradlew
+        run: |
+          if [ -f "gradlew" ]; then
+            echo "✅ gradlew found"
+            chmod +x gradlew
+          else
+            echo "❌ gradlew not found. Checking project structure..."
+            find . -name "gradlew" -type f
+            ls -la
+          fi
         
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
+        if: hashFiles('gradlew') != ''
         
       - name: Build APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          if [ -f "gradlew" ]; then
+            ./gradlew assembleDebug --stacktrace
+          else
+            echo "❌ Cannot build: gradlew not found!"
+            echo "💡 Make sure your Android project has gradle wrapper files:"
+            echo "   - gradlew (Linux/Mac)"
+            echo "   - gradlew.bat (Windows)" 
+            echo "   - gradle/wrapper/gradle-wrapper.jar"
+            echo "   - gradle/wrapper/gradle-wrapper.properties"
+            exit 1
+          fi
         
       - name: List APK files (debug)
         run: find . -name "*.apk" -type f
