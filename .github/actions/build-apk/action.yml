@@ -21,16 +21,22 @@ runs:
       env:
         INPUT_FLAVOUR: ${{ inputs.flavour }}
       run: |
-        # Build from project root using React Native CLI
-        echo "Starting Android build from project root..."
+        # Build must be done from project root for autolinking to work
+        echo "Starting Android build..."
         BUILD_STATUS=0
         
-        # Build from project root, pointing gradle to the GreedGross directory
-        echo "Building Android APK from project root..."
-        ./GreedGross/gradlew -p GreedGross assembleRelease --no-daemon 2>&1 | \
-          tee build.log | \
+        # Create symlink for android directory if not exists
+        if [ ! -L "android" ]; then
+          ln -s GreedGross android
+        fi
+        
+        # Build using the symlinked android directory
+        echo "Building Android APK via symlink..."
+        cd android && ./gradlew assembleRelease --no-daemon 2>&1 | \
+          tee ../build.log | \
           grep -E "(FAILED|ERROR|BUILD|Task|success)" | \
           tail -200 || BUILD_STATUS=$?
+        cd ..
         
         # Check build status
         if [ $BUILD_STATUS -ne 0 ]; then
