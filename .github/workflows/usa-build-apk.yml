@@ -4,9 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths-ignore:
-      - '**.md'
-
+    
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,18 +26,16 @@ jobs:
       
       - name: Setup Android
         run: |
-          # Keep original GreedGross directory structure
+          
           cd GreedGross
           chmod +x gradlew
           
-          # Fix gradle wrapper properties to ensure correct jar path
           if [ -f gradle/wrapper/gradle-wrapper.properties ]; then
             sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.10.2-all.zip|' gradle/wrapper/gradle-wrapper.properties
           fi
           
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
-          # Download gradle wrapper jar if missing
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
             mkdir -p gradle/wrapper
             curl -L https://github.com/gradle/gradle/raw/v8.10.2/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
@@ -48,7 +44,7 @@ jobs:
           
       - name: Update React Native config for renamed android directory
         run: |
-          # Update react-native.config.js to point to renamed android directory
+          
           cat > react-native.config.js << 'EOF'
           module.exports = {
             project: {
@@ -64,6 +60,7 @@ jobs:
           
       - name: Setup RN gradle plugin
         run: |
+        
           if [ -d "node_modules/@react-native/gradle-plugin" ]; then
             cd node_modules/@react-native/gradle-plugin
             mkdir -p build/com/facebook/react/react-native-gradle-plugin/0.79.0
@@ -76,6 +73,7 @@ jobs:
           
       - name: Fix reanimated C++ compatibility
         run: |
+        
           # Fix Hermes detection
           sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
           
@@ -89,6 +87,7 @@ jobs:
           
       - name: Verify native modules
         run: |
+        
           echo "Checking if all native modules are installed..."
           for module in react-native-reanimated react-native-safe-area-context react-native-screens react-native-share react-native-svg react-native-fs react-native-vector-icons react-native-webview; do
             if [ ! -d "node_modules/$module/android" ]; then
@@ -101,6 +100,7 @@ jobs:
           
       - name: Fix autolinking manually
         run: |
+        
           # Create the autolinking directory
           mkdir -p GreedGross/app/build/generated/autolinking/src/main/java/com/facebook/react
           
