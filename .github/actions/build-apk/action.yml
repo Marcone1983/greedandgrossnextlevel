@@ -24,19 +24,20 @@ runs:
         cd GreedGross
         # Run build with minimal output
         echo "Starting Android build..."
+        BUILD_STATUS=0
         java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon 2>&1 | \
           tee build.log | \
-          grep -E "(FAILED|ERROR|BUILD)" | \
-          tail -100
-        
-        # Show the end of the log if build fails
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
-          echo "=== Last 200 lines of build output ==="
-          tail -200 build.log
-        fi
+          grep -E "(FAILED|ERROR|BUILD|Task)" | \
+          tail -100 || BUILD_STATUS=$?
         
         # Check build status
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+        if [ $BUILD_STATUS -ne 0 ]; then
+          echo "=== Last 300 lines of build output ==="
+          tail -300 build.log
+        fi
+        
+        # Check build status again
+        if [ $BUILD_STATUS -ne 0 ]; then
           echo "Build failed! Running Metro bundler test..."
           cd ..
           npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp 2>&1 | tail -100
