@@ -25,19 +25,31 @@ jobs:
           node-version: '22'
           cache: 'npm'
           
-      - name: Install React Native dependencies
+      - name: Install React Native dependencies with auto-resolution
         run: |
-          echo "📦 Installing JavaScript dependencies..."
-          npm install
+          echo "📦 Installing JavaScript dependencies with smart resolution..."
           
-          # Remove problematic Detox
-          echo "🗑️ Removing Detox to prevent build conflicts..."
-          rm -rf node_modules/detox
-          npm uninstall detox --save-dev || true
+          # Create .npmrc for better dependency resolution
+          echo "legacy-peer-deps=true" > .npmrc
+          echo "auto-install-peers=true" >> .npmrc
           
-          # Let npm/yarn resolve compatible versions
-          echo "🔧 Resolving compatible React Native dependencies..."
-          npm install --legacy-peer-deps || npm install
+          # Remove problematic packages
+          echo "🗑️ Removing problematic packages..."
+          npm uninstall detox expo expo-modules-core --save-dev --legacy-peer-deps || true
+          
+          # Clean cache
+          npm cache clean --force
+          
+          # Install with automatic resolution
+          echo "🔧 Installing with automatic version resolution..."
+          npm install --legacy-peer-deps || {
+            echo "⚠️ First install failed, trying with force..."
+            npm install --force
+          }
+          
+          # Let React Native resolve its own dependencies
+          echo "🔄 Ensuring React Native compatibility..."
+          npx react-native-clean-project-auto -y || true
           
       - name: Install React Native CLI
         run: npm install -g @react-native-community/cli
@@ -103,16 +115,32 @@ jobs:
             touch lasspath
           fi
           
-          # Find and replace 0.79.0 EVERYWHERE
-          echo "🔧 Aggressively fixing React Native versions..."
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -l "0\.79\.0" {} \;
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
-          find . -name "*.properties" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
+          # Smart version detection and fixing
+          echo "🔧 Smart React Native version resolution..."
           
-          # Also try different version formats
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/79\.0/73.4/g' {} \;
+          # Detect current React Native version from package.json
+          RN_VERSION=$(node -p "require('../package.json').dependencies['react-native']" 2>/dev/null || echo "0.79.0")
+          echo "📌 Detected React Native version: $RN_VERSION"
           
-          echo "✅ Replaced all 0.79.0 references with working version"
+          # Extract major.minor version
+          RN_MAJOR_MINOR=$(echo $RN_VERSION | grep -oE '[0-9]+\.[0-9]+' | head -1)
+          
+          # Create gradle.properties with version overrides
+          echo "🔧 Creating Gradle properties for auto-resolution..."
+          cat >> gradle.properties << EOF
+
+# Auto-resolved versions
+REACT_NATIVE_VERSION=$RN_MAJOR_MINOR.0
+android.useAndroidX=true
+android.enableJetifier=true
+kotlin.suppressDeprecationWarnings=true
+EOF
+          
+          # Fix gradle plugin references dynamically
+          echo "🔄 Updating gradle files to use detected version..."
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i "s/com.facebook.react:react-native-gradle-plugin:[0-9.]\+/com.facebook.react:react-native-gradle-plugin:$RN_MAJOR_MINOR.0/g" {} \;
+          
+          echo "✅ React Native version auto-resolved to: $RN_MAJOR_MINOR.0"
           
           # Show what we changed
           echo "🔍 Checking gradle files after fix:"
@@ -138,8 +166,44 @@ jobs:
           echo "📁 Android project files:"
           ls -la
           
-          # Build APK (let Gradle resolve dependencies automatically)
-          ./gradlew assembleDebug -x test -x lint --stacktrace
+          # Fix autolinking for custom directory structure
+          echo "🔗 Fixing React Native autolinking..."
+          if [ -f "../react-native.config.js" ]; then
+            echo "✅ Found react-native.config.js"
+          else
+            echo "📝 Creating react-native.config.js for custom android directory..."
+            cat > ../react-native.config.js << RNCONFIG
+module.exports = {
+  project: {
+    ios: {},
+    android: {
+      sourceDir: './${ANDROID_DIR}',
+      manifestPath: 'app/src/main/AndroidManifest.xml',
+    },
+  },
+  dependencies: {
+    // Auto-exclude problematic dependencies
+    'detox': {
+      platforms: {
+        android: null,
+      },
+    },
+  },
+};
+RNCONFIG
+          fi
+          
+          # Build APK with auto-resolution enabled
+          echo "🏗️ Building APK with automatic dependency resolution..."
+          ./gradlew assembleDebug \
+            -x test \
+            -x lint \
+            --refresh-dependencies \
+            --continue \
+            --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" \
+            -Pandroid.enableJetifier=true \
+            -Pandroid.useAndroidX=true
           
       - name: Find and upload APK
         run: |
