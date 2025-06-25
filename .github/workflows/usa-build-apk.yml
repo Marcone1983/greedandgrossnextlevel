@@ -197,7 +197,7 @@ public class PackageList {
 }
 EOF
           
-      - name: Usa build apk action
+      - name: usa build apk
         uses: ./.github/actions/build-apk
         with:
           flavour: release
