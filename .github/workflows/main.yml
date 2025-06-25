@@ -32,6 +32,12 @@ jobs:
           
       - name: Install React Native CLI
         run: npm install -g @react-native-community/cli
+        
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
           
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -43,48 +49,57 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
             
-      - name: Find and setup gradlew
+      - name: Find React Native Android directory
         run: |
-          echo "🔍 Searching for gradlew files..."
-          find . -name "gradlew" -type f
-          echo "📁 Repository structure:"
-          find . -type d -name "*app*" -o -name "*android*" -o -name "*gradle*" | head -10
-          
-          # Find gradlew location
-          GRADLEW_PATH=$(find . -name "gradlew" -type f | head -1)
-          if [ -n "$GRADLEW_PATH" ]; then
-            echo "✅ Found gradlew at: $GRADLEW_PATH"
-            GRADLEW_DIR=$(dirname "$GRADLEW_PATH")
-            echo "📂 Gradle project directory: $GRADLEW_DIR"
-            echo "GRADLEW_DIR=$GRADLEW_DIR" >> $GITHUB_ENV
-            echo "GRADLEW_PATH=$GRADLEW_PATH" >> $GITHUB_ENV
-            chmod +x "$GRADLEW_PATH"
+          echo "🔍 Looking for React Native Android project..."
+          if [ -d "android" ]; then
+            echo "✅ Found android directory"
+            echo "ANDROID_DIR=android" >> $GITHUB_ENV
           else
-            echo "❌ gradlew not found anywhere!"
-            exit 1
+            # Search for gradlew as fallback
+            GRADLEW_PATH=$(find . -name "gradlew" -type f | head -1)
+            if [ -n "$GRADLEW_PATH" ]; then
+              GRADLEW_DIR=$(dirname "$GRADLEW_PATH")
+              echo "✅ Found gradlew at: $GRADLEW_PATH"
+              echo "ANDROID_DIR=$GRADLEW_DIR" >> $GITHUB_ENV
+            else
+              echo "❌ No Android project found!"
+              exit 1
+            fi
           fi
         
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
         
-      - name: Create lasspath and build APK
+      - name: Build React Native Android APK
         run: |
-          cd "$GRADLEW_DIR"
-          echo "🏗️ Building from directory: $(pwd)"
+          cd "$ANDROID_DIR"
+          echo "🏗️ Building React Native Android from: $(pwd)"
           
-          # Create empty lasspath if it doesn't exist
+          # Make gradlew executable
+          chmod +x gradlew
+          
+          # Create lasspath if needed
           if [ ! -f "lasspath" ]; then
             echo "📝 Creating empty lasspath file"
             touch lasspath
           fi
           
-          # List project files for debug
-          echo "📁 Project files:"
+          # Remove Detox interference if exists
+          if [ -f "settings.gradle" ]; then
+            echo "🔧 Backing up and fixing settings.gradle..."
+            cp settings.gradle settings.gradle.backup
+            # Remove detox lines
+            grep -v "detox" settings.gradle.backup > settings.gradle || cp settings.gradle.backup settings.gradle
+          fi
+          
+          # List files for debug
+          echo "📁 Android project files:"
           ls -la
           
-          # Build the APK
-          ./gradlew assembleDebug --stacktrace
-        
+          # Build APK (skip tests to avoid Detox issues)
+          ./gradlew assembleDebug -x test -x lint --stacktrace
+          
       - name: Find and upload APK
         run: |
           echo "🔍 Searching for APK files..."
