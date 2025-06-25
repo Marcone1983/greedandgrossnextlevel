@@ -1,4 +1,4 @@
-name: 'Build apk'
+name: 'build apk'
 description: 'Builds apk and returns path as output'
 inputs:
   flavour: # id of input

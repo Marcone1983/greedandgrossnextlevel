@@ -1,4 +1,4 @@
-name: Usa Build APK
+name: usa build apk
 
 on:
   workflow_dispatch:
