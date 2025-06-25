@@ -21,11 +21,11 @@ runs:
       env:
         INPUT_FLAVOUR: ${{ inputs.flavour }}
       run: |
-        # Build from android directory (renamed from GreedGross)
+        # Build from GreedGross directory
         echo "Starting Android build..."
         BUILD_STATUS=0
         
-        cd android
+        cd GreedGross
         # Use Java directly to run gradle wrapper to avoid path issues
         java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon 2>&1 | \
           tee ../build.log | \
@@ -43,8 +43,8 @@ runs:
         fi
         
         # Find the APK
-        PATH="android/app/build/outputs/apk/release/app-release-unsigned.apk"
-        DIR="android/app/build/outputs/apk/release"
+        PATH="GreedGross/app/build/outputs/apk/release/app-release-unsigned.apk"
+        DIR="GreedGross/app/build/outputs/apk/release"
         echo "apk-path=$(echo $PATH)" >> $GITHUB_OUTPUT
         echo "apk-directory=$(echo $DIR)" >> $GITHUB_OUTPUT
         
