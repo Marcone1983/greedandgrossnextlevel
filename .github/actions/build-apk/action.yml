@@ -24,9 +24,16 @@ runs:
         cd GreedGross
         # Run build with minimal output
         echo "Starting Android build..."
-        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --info 2>&1 | \
-          grep -E "(createBundleReleaseJsAndAssets|Metro|error|ERROR|FAILED)" | \
-          tail -1000
+        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon 2>&1 | \
+          tee build.log | \
+          grep -E "(FAILED|ERROR|BUILD)" | \
+          tail -100
+        
+        # Show the end of the log if build fails
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          echo "=== Last 200 lines of build output ==="
+          tail -200 build.log
+        fi
         
         # Check build status
         if [ ${PIPESTATUS[0]} -ne 0 ]; then
