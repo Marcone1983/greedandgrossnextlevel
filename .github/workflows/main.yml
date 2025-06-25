@@ -103,15 +103,20 @@ jobs:
             touch lasspath
           fi
           
-          # Auto-fix incompatible versions in build.gradle
-          if [ -f "build.gradle" ]; then
-            echo "🔧 Auto-fixing React Native plugin versions..."
-            # Replace any 0.79.x with latest stable
-            sed -i 's/com\.facebook\.react:react-native-gradle-plugin:0\.79\.[0-9]*/com.facebook.react:react-native-gradle-plugin:+/g' build.gradle
-            # Replace exact 0.79.0 with auto-resolve
-            sed -i 's/0\.79\.0/+/g' build.gradle
-            echo "✅ Updated build.gradle to use compatible versions"
-          fi
+          # Find and replace 0.79.0 EVERYWHERE
+          echo "🔧 Aggressively fixing React Native versions..."
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -l "0\.79\.0" {} \;
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
+          find . -name "*.properties" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
+          
+          # Also try different version formats
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/79\.0/73.4/g' {} \;
+          
+          echo "✅ Replaced all 0.79.0 references with working version"
+          
+          # Show what we changed
+          echo "🔍 Checking gradle files after fix:"
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -H "react-native-gradle-plugin" {} \; || true
           
           # Let Gradle refresh dependencies and resolve versions
           echo "🔄 Refreshing Gradle dependencies..."
