@@ -35,6 +35,12 @@ jobs:
             mkdir -p gradle/wrapper
             curl -L https://github.com/gradle/gradle/raw/v8.10.2/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
           fi
+          cd ..
+          
+      - name: Generate autolinking
+        run: |
+          # Ensure React Native autolinking works correctly
+          npx react-native config
           
       - name: Setup RN gradle plugin
         run: |
