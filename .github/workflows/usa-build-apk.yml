@@ -42,14 +42,18 @@ jobs:
           fi
           cd ..
           
-      - name: Update React Native config
+      - name: Update React Native config for renamed android directory
         run: |
-          # Update react-native.config.js to use standard structure
+          # Update react-native.config.js to point to renamed android directory
           cat > react-native.config.js << 'EOF'
 module.exports = {
   project: {
     ios: {},
-    android: {},
+    android: {
+      sourceDir: './android',
+      manifestPath: 'app/src/main/AndroidManifest.xml',
+      packageName: 'com.greedandgross.cannabisbreeding',
+    },
   },
 };
 EOF
