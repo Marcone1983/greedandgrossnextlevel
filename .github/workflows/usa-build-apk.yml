@@ -35,8 +35,14 @@ jobs:
           
           cd android
           chmod +x gradlew
-          echo -n > lasspath
+          
+          # Fix gradle wrapper properties to ensure correct jar path
+          if [ -f gradle/wrapper/gradle-wrapper.properties ]; then
+            sed -i 's|distributionUrl=.*|distributionUrl=https\\://services.gradle.org/distributions/gradle-8.10.2-all.zip|' gradle/wrapper/gradle-wrapper.properties
+          fi
+          
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+          
           # Download gradle wrapper jar if missing
           if [ ! -f gradle/wrapper/gradle-wrapper.jar ]; then
             mkdir -p gradle/wrapper

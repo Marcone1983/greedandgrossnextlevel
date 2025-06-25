@@ -26,8 +26,8 @@ runs:
         BUILD_STATUS=0
         
         cd android
-        # Use bash to execute gradlew to avoid path issues
-        bash ./gradlew assembleRelease --no-daemon 2>&1 | \
+        # Use Java directly to run gradle wrapper to avoid path issues
+        java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon 2>&1 | \
           tee ../build.log | \
           grep -E "(FAILED|ERROR|BUILD|Task|success)" | \
           tail -200 || BUILD_STATUS=$?
