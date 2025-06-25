@@ -103,6 +103,16 @@ jobs:
             touch lasspath
           fi
           
+          # Auto-fix incompatible versions in build.gradle
+          if [ -f "build.gradle" ]; then
+            echo "🔧 Auto-fixing React Native plugin versions..."
+            # Replace any 0.79.x with latest stable
+            sed -i 's/com\.facebook\.react:react-native-gradle-plugin:0\.79\.[0-9]*/com.facebook.react:react-native-gradle-plugin:+/g' build.gradle
+            # Replace exact 0.79.0 with auto-resolve
+            sed -i 's/0\.79\.0/+/g' build.gradle
+            echo "✅ Updated build.gradle to use compatible versions"
+          fi
+          
           # Let Gradle refresh dependencies and resolve versions
           echo "🔄 Refreshing Gradle dependencies..."
           ./gradlew --refresh-dependencies || true
