@@ -76,9 +76,16 @@ jobs:
           
       - name: Fix reanimated C++ compatibility
         run: |
-          # Force C++17 for reanimated to avoid C++20 errors
-          sed -i 's/std=c++20/std=c++17/g' node_modules/react-native-reanimated/android/CMakeLists.txt || true
-          sed -i 's/CMAKE_CXX_STANDARD 20/CMAKE_CXX_STANDARD 17/g' node_modules/react-native-reanimated/android/CMakeLists.txt || true
+          # Fix Hermes detection
+          sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
+          
+          # Force C++17 instead of C++20 to fix std::regular error
+          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/CMAKE_CXX_STANDARD 20/CMAKE_CXX_STANDARD 17/g' {} \;
+          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/cxx_std_20/cxx_std_17/g' {} \;
+          
+          # Also fix in build.gradle files
+          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/-std=c++20/-std=c++17/g' {} \;
+          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/cppFlags.add("-std=c++20")/cppFlags.add("-std=c++17")/g' {} \;
           
       - name: Usa Build apk action
         uses: ./.github/actions/build-apk
