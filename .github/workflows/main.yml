@@ -30,6 +30,11 @@ jobs:
           echo "📦 Installing JavaScript dependencies..."
           npm install
           
+          # Remove problematic Detox
+          echo "🗑️ Removing Detox to prevent build conflicts..."
+          rm -rf node_modules/detox
+          npm uninstall detox --save-dev || true
+          
       - name: Install React Native CLI
         run: npm install -g @react-native-community/cli
         
