@@ -57,12 +57,21 @@ jobs:
       - name: Find React Native Android directory
         run: |
           echo "🔍 Looking for React Native Android project..."
+          
+          # First check for standard React Native android directory
           if [ -d "android" ]; then
-            echo "✅ Found android directory"
+            echo "✅ Found standard React Native android directory"
             echo "ANDROID_DIR=android" >> $GITHUB_ENV
+          elif [ -d "GreedGross" ]; then
+            echo "✅ Found GreedGross directory"
+            echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
           else
-            # Search for gradlew as fallback
-            GRADLEW_PATH=$(find . -name "gradlew" -type f | head -1)
+            echo "🔍 Searching for Android project directories..."
+            find . -name "build.gradle" -path "*/android/*" | head -5
+            find . -name "gradlew" -not -path "*/node_modules/*" | head -5
+            
+            # Find gradlew NOT in node_modules
+            GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
             if [ -n "$GRADLEW_PATH" ]; then
               GRADLEW_DIR=$(dirname "$GRADLEW_PATH")
               echo "✅ Found gradlew at: $GRADLEW_PATH"
