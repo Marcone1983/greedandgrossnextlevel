@@ -32,6 +32,8 @@ jobs:
       run: |
         # Use React Native 0.79.0 (latest stable)
         npm install
+        # Create Maven artifacts that lottie-react-native expects
+        ./scripts/create-maven-repo.sh
         
     - name: Find Android directory
       run: |
