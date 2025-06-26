@@ -10,7 +10,8 @@
     "test:e2e": "detox test",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "postinstall": "node scripts/fix-react-native-0.80.0.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",
