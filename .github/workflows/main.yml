@@ -38,6 +38,8 @@ jobs:
         ./scripts/force-repositories.sh
         # Apply ultimate fix
         ./scripts/ultimate-fix.sh
+        # Fix Java version compatibility
+        ./scripts/fix-java-version.sh
         
     - name: Find Android directory
       run: |
@@ -84,6 +86,16 @@ jobs:
           echo "                // Fix namespace for React Native modules" >> build.gradle
           echo "                if (!project.android.hasProperty('namespace') || project.android.namespace == null) {" >> build.gradle
           echo "                    namespace project.group ?: 'com.reactnative.' + project.name.replace('-', '')" >> build.gradle
+          echo "                }" >> build.gradle
+          echo "                // Fix Java version compatibility" >> build.gradle
+          echo "                compileOptions {" >> build.gradle
+          echo "                    sourceCompatibility JavaVersion.VERSION_17" >> build.gradle
+          echo "                    targetCompatibility JavaVersion.VERSION_17" >> build.gradle
+          echo "                }" >> build.gradle
+          echo "                if (project.hasProperty('kotlin')) {" >> build.gradle
+          echo "                    kotlinOptions {" >> build.gradle
+          echo "                        jvmTarget = '17'" >> build.gradle
+          echo "                    }" >> build.gradle
           echo "                }" >> build.gradle
           echo "            }" >> build.gradle
           echo "        }" >> build.gradle
