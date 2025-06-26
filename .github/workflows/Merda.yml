@@ -1,4 +1,4 @@
-name: Build APK - RN 0.79 CORRETTO
+name: Build APK
 
 on:
   workflow_dispatch:
