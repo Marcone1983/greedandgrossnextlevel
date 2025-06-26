@@ -19,15 +19,19 @@ allprojects {
     }
 }
 
-// Add local Maven repository
+// Add local Maven repository  
 allprojects {
     repositories {
         // Local maven repository with our stub artifacts
         maven {
-            url "$rootDir/../scripts"
+            url file("$rootDir/../scripts")
             content {
                 includeGroup "com.facebook.react"
             }
+        }
+        // Also add the node_modules React Native location
+        maven {
+            url file("$rootDir/../node_modules/react-native/android")
         }
     }
 }
