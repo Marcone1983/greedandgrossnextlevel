@@ -56,10 +56,6 @@ jobs:
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
         
-        if [ -f "settings.gradle" ]; then
-          echo "includeBuild('../node_modules/@react-native/gradle-plugin')" >> settings.gradle
-        fi
-        
         if [ ! -d "app" ]; then
           echo "Creating app module structure..."
           mkdir -p app/src/main/java
