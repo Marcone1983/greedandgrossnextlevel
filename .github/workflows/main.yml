@@ -19,6 +19,7 @@ jobs:
         
     - name: Install dependencies
       run: |
+        npm install
         rm -rf node_modules/detox || true
         npm uninstall detox --save-dev || true
         
@@ -52,6 +53,15 @@ jobs:
         chmod +x gradlew
         
         touch lasspath
+        
+        # Add React Native repositories before removing plugin
+        sed -i '/repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }\
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }' build.gradle
+        
+        # Fix in allprojects too
+        sed -i '/allprojects {/,/}/ { /repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }\
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }
+        }' build.gradle
         
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
