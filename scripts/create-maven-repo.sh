@@ -1,26 +1,28 @@
 #!/bin/bash
 set -e
 
+# Start in scripts directory
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPTS_DIR"
+
+# Clean up any existing artifacts
+rm -rf com
+
 # Create proper Maven structure for React Native 0.79.0
 mkdir -p com/facebook/react/react-native/0.79.0
 mkdir -p com/facebook/react/react-android/0.79.0
 mkdir -p com/facebook/react/hermes-android/0.79.0
 
-# Create a minimal but valid AAR file (it's a ZIP with required structure)
+# Create react-native AAR
 cd com/facebook/react/react-native/0.79.0
-
-# Create a valid AAR structure
 mkdir -p temp/META-INF
 echo "Manifest-Version: 1.0" > temp/META-INF/MANIFEST.MF
 mkdir -p temp/classes
 touch temp/classes/.keep
 echo "<manifest package='com.facebook.react' />" > temp/AndroidManifest.xml
-
-# Create the AAR
 (cd temp && zip -r ../react-native-0.79.0.aar .)
 rm -rf temp
 
-# Create POM file that redirects to the actual React Native location
 cat > react-native-0.79.0.pom << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
@@ -32,10 +34,8 @@ cat > react-native-0.79.0.pom << 'EOF'
 </project>
 EOF
 
-cd ../../../..
-
-# Do the same for react-android
-mkdir -p com/facebook/react/react-android/0.79.0
+# Create react-android AAR
+cd "$SCRIPTS_DIR"
 cd com/facebook/react/react-android/0.79.0
 mkdir -p temp/META-INF
 echo "Manifest-Version: 1.0" > temp/META-INF/MANIFEST.MF
@@ -56,10 +56,8 @@ cat > react-android-0.79.0.pom << 'EOF'
 </project>
 EOF
 
-cd ../../../..
-
-# Do the same for hermes-android
-mkdir -p com/facebook/react/hermes-android/0.79.0
+# Create hermes-android AAR
+cd "$SCRIPTS_DIR"
 cd com/facebook/react/hermes-android/0.79.0
 mkdir -p temp/META-INF
 echo "Manifest-Version: 1.0" > temp/META-INF/MANIFEST.MF
@@ -80,4 +78,4 @@ cat > hermes-android-0.79.0.pom << 'EOF'
 </project>
 EOF
 
-cd ../../../..
+echo "Maven artifacts created successfully in $SCRIPTS_DIR"
