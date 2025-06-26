@@ -1,24 +1,24 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
+// apply plugin: "com.facebook.react" // Removed to avoid gradle plugin issues
 
 import com.android.build.OutputFile
 
-react {
-    // The root of your project, i.e. where "package.json" lives. Default is '../..'
-    root = file("../../")
-    // The folder where the react-native Codegen will use to output the generated source code. Default is 'build/generated/codegen'
-    codegenDir = file("$buildDir/generated/codegen")
-    // The cli.js file which used to run the bundler command. Default is ../node_modules/react-native/cli.js
-    cliFile = file("../../node_modules/react-native/cli.js")
-    // The path to the JS bundle file to be used for Release builds. Default is 'index.android.bundle'
-    bundleAssetName = "index.android.bundle"
-    // The entry file for bundle generation. Default is 'index.js'
-    entryFile = file("../../index.js")
-    // Bundle command and packager args
-    bundleCommand = "bundle"
-    extraPackagerArgs = []
-}
+// react {
+//     // The root of your project, i.e. where "package.json" lives. Default is '../..'
+//     root = file("../../")
+//     // The folder where the react-native Codegen will use to output the generated source code. Default is 'build/generated/codegen'
+//     codegenDir = file("$buildDir/generated/codegen")
+//     // The cli.js file which used to run the bundler command. Default is ../node_modules/react-native/cli.js
+//     cliFile = file("../../node_modules/react-native/cli.js")
+//     // The path to the JS bundle file to be used for Release builds. Default is 'index.android.bundle'
+//     bundleAssetName = "index.android.bundle"
+//     // The entry file for bundle generation. Default is 'index.js'
+//     entryFile = file("../../index.js")
+//     // Bundle command and packager args
+//     bundleCommand = "bundle"
+//     extraPackagerArgs = []
+// }
 
 // React Native 0.79.0 uses the gradle plugin to handle native modules automatically
 
@@ -181,6 +181,25 @@ dependencies {
     }
 
     // Hermes is now handled automatically by React Native 0.79.0
+    
+    // Native module dependencies (manual since we removed the gradle plugin)
+    implementation project(':react-native-async-storage_async-storage')
+    implementation project(':react-native-device-info')
+    implementation project(':react-native-firebase_app')
+    implementation project(':react-native-firebase_auth')
+    implementation project(':react-native-firebase_firestore')
+    implementation project(':react-native-firebase_storage')
+    implementation project(':react-native-gesture-handler')
+    implementation project(':react-native-linear-gradient')
+    implementation project(':react-native-haptic-feedback')
+    implementation project(':react-native-reanimated')
+    implementation project(':react-native-safe-area-context')
+    implementation project(':react-native-screens')
+    implementation project(':react-native-share')
+    implementation project(':react-native-svg')
+    implementation project(':react-native-fs')
+    implementation project(':react-native-vector-icons')
+    implementation project(':react-native-webview')
 }
 
 if (isNewArchitectureEnabled()) {
