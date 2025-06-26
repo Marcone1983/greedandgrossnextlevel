@@ -12,7 +12,12 @@ ln -s node_modules/react-native/android local-maven
 echo "Symlink created!"
 
 # Also create a maven-metadata-local.xml for each artifact to help with version resolution
-cd node_modules/react-native/android/com/facebook/react
+if [ -d "node_modules/react-native/android/com/facebook/react" ]; then
+  cd node_modules/react-native/android/com/facebook/react
+else
+  echo "React Native Maven directory not found, skipping metadata creation"
+  exit 0
+fi
 
 for module in react-native react-android hermes-android; do
   if [ -d "$module/0.79.0" ]; then
