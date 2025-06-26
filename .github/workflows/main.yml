@@ -44,6 +44,9 @@ jobs:
         # Fix all gradle issues
         ./fix-gradle-issues.sh
         
+        # Fix specific bcprov jar issue
+        ./fix-bcprov-issue.sh
+        
         # Emergency C++ fix
         find node_modules -name "CMakeLists.txt" -type f -exec sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' {} \;
         
