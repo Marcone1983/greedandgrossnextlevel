@@ -60,25 +60,9 @@ jobs:
           echo "includeBuild('../node_modules/@react-native/gradle-plugin')" >> settings.gradle
         fi
         
-        # Check what modules exist and build the right one
-        echo "Available modules:"
-        ls -la | grep "^d"
-        
-        echo "Available tasks:"
-        ./gradlew tasks | grep -i assemble
-        
-        # Build using the correct module
-        if [ -d "app" ]; then
-          ./gradlew :app:assembleDebug --stacktrace
-        else
-          # Find any module with assembleDebug
-          MODULE=$(./gradlew tasks | grep "assembleDebug" | head -1 | cut -d: -f1)
-          if [ -n "$MODULE" ]; then
-            ./gradlew :$MODULE:assembleDebug --stacktrace
-          else
-            ./gradlew build --stacktrace
-          fi
-        fi
+        # Build the APK in the correct module
+        echo "Building APK..."
+        ./gradlew :app:assembleDebug --stacktrace
         
     - uses: actions/upload-artifact@v4
       with:
