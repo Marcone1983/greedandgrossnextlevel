@@ -66,6 +66,10 @@ jobs:
           echo "                buildFeatures {" >> build.gradle
           echo "                    buildConfig true" >> build.gradle
           echo "                }" >> build.gradle
+          echo "                // Fix namespace for React Native modules" >> build.gradle
+          echo "                if (!project.android.hasProperty('namespace') || project.android.namespace == null) {" >> build.gradle
+          echo "                    namespace project.group ?: 'com.reactnative.' + project.name.replace('-', '')" >> build.gradle
+          echo "                }" >> build.gradle
           echo "            }" >> build.gradle
           echo "        }" >> build.gradle
           echo "    }" >> build.gradle
