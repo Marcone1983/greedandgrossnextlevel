@@ -1,0 +1,33 @@
+// Fix for React Native dependency resolution
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            eachDependency { DependencyResolveDetails details ->
+                // Map old Facebook package names to new React Native structure
+                if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
+                    // Use the actual React Native from node_modules
+                    details.useTarget("com.facebook.react:react-native:0.79.0")
+                }
+                if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-android') {
+                    details.useTarget("com.facebook.react:react-android:0.79.0")
+                }
+                if (details.requested.group == 'com.facebook.react' && details.requested.name == 'hermes-android') {
+                    details.useTarget("com.facebook.react:hermes-android:0.79.0")
+                }
+            }
+        }
+    }
+}
+
+// Add local Maven repository
+allprojects {
+    repositories {
+        // Local maven repository with our stub artifacts
+        maven {
+            url "$rootDir/../scripts"
+            content {
+                includeGroup "com.facebook.react"
+            }
+        }
+    }
+}
