@@ -1,5 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+
 // Hermes compatibility for older React Native modules
 allprojects {
     ext {
@@ -52,23 +53,3 @@ task bundleRelease {
     dependsOn ':app:bundleRelease'
 }
 
-// Force React Native version resolution
-allprojects {
-    configurations.all {
-        resolutionStrategy {
-            force 'com.facebook.react:react-native:0.79.0'
-            force 'com.facebook.react:react-native-gradle-plugin:0.79.0'
-            force 'com.facebook.react:hermes-android:0.79.0'
-            force 'com.facebook.react:react-android:0.79.0'
-            
-            // Force all React Native modules to use 0.79.0
-            eachDependency { details ->
-                if (details.requested.group == 'com.facebook.react') {
-                    if (details.requested.version == '0.80.0' || details.requested.version == '+') {
-                        details.useVersion '0.79.0'
-                    }
-                }
-            }
-        }
-    }
-}

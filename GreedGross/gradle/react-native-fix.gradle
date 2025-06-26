@@ -1,0 +1,43 @@
+// Fix for React Native version issues
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            // Replace any React Native request with implementation from node_modules
+            dependencySubstitution {
+                // React Native core
+                substitute module('com.facebook.react:react-native:0.79.0') using module('com.facebook.react:react-native:+')
+                substitute module('com.facebook.react:react-native:0.80.0') using module('com.facebook.react:react-native:+')
+                
+                // React Android
+                substitute module('com.facebook.react:react-android:0.79.0') using module('com.facebook.react:react-android:+')
+                substitute module('com.facebook.react:react-android:0.80.0') using module('com.facebook.react:react-android:+')
+                
+                // Hermes
+                substitute module('com.facebook.react:hermes-android:0.79.0') using module('com.facebook.react:hermes-android:+')
+                substitute module('com.facebook.react:hermes-android:0.80.0') using module('com.facebook.react:hermes-android:+')
+                
+                // Hermes Engine
+                substitute module('com.facebook.react:hermes-engine:0.79.0') using module('com.facebook.react:hermes-engine:+')
+                substitute module('com.facebook.react:hermes-engine:0.80.0') using module('com.facebook.react:hermes-engine:+')
+            }
+        }
+    }
+    
+    afterEvaluate {
+        if (project.hasProperty('android')) {
+            android {
+                // Fix namespace issues
+                if (!project.android.hasProperty('namespace') || project.android.namespace == null) {
+                    namespace = project.group ?: 'com.reactnative.' + project.name.replace('-', '')
+                }
+                
+                // Ensure buildConfig is enabled
+                if (project.android.hasProperty('buildFeatures')) {
+                    buildFeatures {
+                        buildConfig = true
+                    }
+                }
+            }
+        }
+    }
+}
