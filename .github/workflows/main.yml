@@ -60,11 +60,71 @@ jobs:
           echo "includeBuild('../node_modules/@react-native/gradle-plugin')" >> settings.gradle
         fi
         
-        # Build the APK in the correct module
-        echo "Building APK..."
-        ./gradlew :app:assembleDebug --stacktrace
+        # Check if we have app module - if not, create it
+        if [ ! -d "app" ]; then
+          echo "Creating app module structure..."
+          mkdir -p app/src/main/java
+          mkdir -p app/src/main/res
+          
+          # Create app/build.gradle
+          cat > app/build.gradle << 'EOF'
+apply plugin: "com.android.application"
+
+android {
+    compileSdkVersion 35
+    buildToolsVersion "35.0.0"
+    
+    defaultConfig {
+        applicationId "com.greedgross"
+        minSdkVersion 24
+        targetSdkVersion 35
+        versionCode 1
+        versionName "1.0"
+    }
+    
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation project(':react-native')
+}
+EOF
+          
+          # Update settings.gradle to include app
+          echo "include ':app'" >> settings.gradle
+        fi
+        
+        # Find what build tasks actually exist
+        echo "Checking available build tasks..."
+        ./gradlew tasks | grep -i assemble
+        
+        # Build all variants: Debug APK, Release APK, and AAB
+        echo "Building all APK and AAB variants..."
+        
+        echo "Building Debug APK..."
+        ./gradlew assembleDebug --stacktrace
+        
+        echo "Building Release APK..."  
+        ./gradlew assembleRelease --stacktrace
+        
+        echo "Building Debug AAB..."
+        ./gradlew bundleDebug --stacktrace
+        
+        echo "Building Release AAB..."
+        ./gradlew bundleRelease --stacktrace
         
     - uses: actions/upload-artifact@v4
       with:
-        name: app-debug-apk
-        path: "**/build/outputs/apk/debug/*.apk"
+        name: android-builds
+        path: |
+          "**/build/outputs/apk/debug/*.apk"
+          "**/build/outputs/apk/release/*.apk"
+          "**/build/outputs/bundle/debug/*.aab"
+          "**/build/outputs/bundle/release/*.aab"
