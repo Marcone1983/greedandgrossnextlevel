@@ -109,31 +109,26 @@ jobs:
             grep "react-native" ../package.json || true
           fi
           
-          # Check what's in node_modules
-          echo "🔍 Checking available React Native gradle plugin..."
-          find ../node_modules -name "*gradle-plugin*" -type d | head -5 || true
-          ls -la ../node_modules/@react-native/ 2>/dev/null || true
-          ls -la ../node_modules/react-native/android/ 2>/dev/null || true
+          # Show original build.gradle
+          echo "🔍 Original build.gradle:"
+          cat build.gradle
           
-          # Remove version requirements - let it use whatever is available
-          echo "🔧 Removing specific version requirements..."
-          if [ -f "build.gradle" ]; then
-            # Replace specific versions with classpath from node_modules
-            sed -i 's/com\.facebook\.react:react-native-gradle-plugin:[0-9\.]*//g' build.gradle
-            # Use the plugin from node_modules path
-            echo "" >> build.gradle
-            echo "// Auto-added: Use React Native plugin from node_modules" >> build.gradle
-            echo "apply from: file(\"../node_modules/@react-native/gradle-plugin/react.gradle\")" >> build.gradle
-          fi
+          # Fix build.gradle properly - comment out problematic lines instead of breaking them
+          echo "🔧 Fixing build.gradle properly..."
+          cp build.gradle build.gradle.backup
           
-          # Check for gradle.properties and add Maven repos
-          if [ -f "gradle.properties" ]; then
-            echo "🔧 Adding Maven repositories..."
-            echo "" >> gradle.properties
-            echo "# Auto-added: Maven repositories" >> gradle.properties
-            echo "android.useAndroidX=true" >> gradle.properties
-            echo "android.enableJetifier=true" >> gradle.properties
-          fi
+          # Remove/comment problematic react-native plugin lines
+          sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
+          sed -i '/react-native-gradle-plugin/d' build.gradle
+          
+          # Remove empty classpath lines
+          sed -i '/classpath[[:space:]]*$/d' build.gradle
+          sed -i '/classpath[[:space:]]*"[[:space:]]*"[[:space:]]*$/d' build.gradle
+          sed -i '/classpath[[:space:]]*""[[:space:]]*$/d' build.gradle
+          
+          # Show fixed build.gradle
+          echo "🔍 Fixed build.gradle:"
+          cat build.gradle
           
           # Remove Detox interference if exists
           if [ -f "settings.gradle" ]; then
@@ -142,10 +137,6 @@ jobs:
             # Remove detox lines
             grep -v "detox" settings.gradle.backup > settings.gradle || cp settings.gradle.backup settings.gradle
           fi
-          
-          # Show final build.gradle
-          echo "🔍 Final build.gradle:"
-          cat build.gradle | tail -10
           
           # List files for debug
           echo "📁 Android project files:"
@@ -159,10 +150,12 @@ jobs:
             echo "✅ build succeeded"
           elif ./gradlew assemble -x test -x lint --stacktrace; then
             echo "✅ assemble succeeded"
+          elif ./gradlew tasks; then
+            echo "📋 At least gradle works, here are available tasks:"
+            ./gradlew tasks | grep -E "(assemble|build)" || true
+            exit 1
           else
-            echo "❌ All build attempts failed"
-            echo "📋 Available tasks:"
-            ./gradlew tasks | grep -i assemble || true
+            echo "❌ Gradle completely broken"
             exit 1
           fi
           
