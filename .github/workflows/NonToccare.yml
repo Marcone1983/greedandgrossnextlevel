@@ -126,16 +126,20 @@ jobs:
           echo "🔍 Original build.gradle:"
           cat build.gradle
           
-          # Fix build.gradle with correct version
-          echo "🔧 Fixing build.gradle with real React Native version..."
+          # Fix build.gradle with new @react-native scoped packages
+          echo "🔧 Updating build.gradle to use new @react-native scoped packages..."
           cp build.gradle build.gradle.backup
           
-          # Replace impossible 0.79.0 with working 0.80.0
+          # Replace old Facebook naming with new @react-native scoped packages
+          sed -i 's/com\.facebook\.react:react-native-gradle-plugin:[0-9\.]*/@react-native\/gradle-plugin/g' build.gradle
+          sed -i 's/com\.facebook\.react:react-native-gradle-plugin/@react-native\/gradle-plugin/g' build.gradle
+          
+          # Also fix any remaining version references
           sed -i 's/0\.79\.0/0.80.0/g' build.gradle
           
           # Show fixed build.gradle
-          echo "🔍 Fixed build.gradle (should now use 0.80.0):"
-          grep "react-native-gradle-plugin" build.gradle || true
+          echo "🔍 Fixed build.gradle (should now use @react-native scoped packages):"
+          grep -E "(react-native|@react-native)" build.gradle || true
           
           # Remove Detox interference if exists
           if [ -f "settings.gradle" ]; then
