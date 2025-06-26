@@ -505,6 +505,30 @@
         }
       }
     },
+    "react-native-fs": {
+      "root": "/data/data/com.termux/files/home/greedandgrossnextlevel.app/greed-and-gross/node_modules/react-native-fs",
+      "name": "react-native-fs",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/data/data/com.termux/files/home/greedandgrossnextlevel.app/greed-and-gross/node_modules/react-native-fs/RNFS.podspec",
+          "version": "2.20.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/data/data/com.termux/files/home/greedandgrossnextlevel.app/greed-and-gross/node_modules/react-native-fs/android",
+          "packageImportPath": "import com.rnfs.RNFSPackage;",
+          "packageInstance": "new RNFSPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/data/data/com.termux/files/home/greedandgrossnextlevel.app/greed-and-gross/node_modules/react-native-fs/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-vector-icons": {
       "root": "/data/data/com.termux/files/home/greedandgrossnextlevel.app/greed-and-gross/node_modules/react-native-vector-icons",
       "name": "react-native-vector-icons",
