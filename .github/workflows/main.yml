@@ -67,6 +67,10 @@ jobs:
           echo '    compileSdkVersion 34' >> app/build.gradle
           echo '    buildToolsVersion "34.0.0"' >> app/build.gradle
           echo '    ' >> app/build.gradle
+          echo '    buildFeatures {' >> app/build.gradle
+          echo '        buildConfig true' >> app/build.gradle
+          echo '    }' >> app/build.gradle
+          echo '    ' >> app/build.gradle
           echo '    defaultConfig {' >> app/build.gradle
           echo '        applicationId "com.greedgross"' >> app/build.gradle
           echo '        minSdkVersion 24' >> app/build.gradle
@@ -90,6 +94,9 @@ jobs:
           sed -i '/apply plugin: "com.facebook.react"/d' app/build.gradle
           if ! grep -q "compileSdkVersion" app/build.gradle; then
             sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
+          fi
+          if ! grep -q "buildConfig true" app/build.gradle; then
+            sed -i '/android {/a\    buildFeatures {\n        buildConfig true\n    }' app/build.gradle
           fi
         fi
         
