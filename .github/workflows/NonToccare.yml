@@ -103,24 +103,37 @@ jobs:
             touch lasspath
           fi
           
-          # Find and replace 0.79.0 EVERYWHERE
-          echo "🔧 Aggressively fixing React Native versions..."
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -l "0\.79\.0" {} \;
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
-          find . -name "*.properties" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
+          # Check what React Native version is actually installed
+          echo "🔍 Checking installed React Native version..."
+          if [ -f "../package.json" ]; then
+            grep "react-native" ../package.json || true
+          fi
           
-          # Also try different version formats
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/79\.0/73.4/g' {} \;
+          # Check what's in node_modules
+          echo "🔍 Checking available React Native gradle plugin..."
+          find ../node_modules -name "*gradle-plugin*" -type d | head -5 || true
+          ls -la ../node_modules/@react-native/ 2>/dev/null || true
+          ls -la ../node_modules/react-native/android/ 2>/dev/null || true
           
-          echo "✅ Replaced all 0.79.0 references with working version"
+          # Remove version requirements - let it use whatever is available
+          echo "🔧 Removing specific version requirements..."
+          if [ -f "build.gradle" ]; then
+            # Replace specific versions with classpath from node_modules
+            sed -i 's/com\.facebook\.react:react-native-gradle-plugin:[0-9\.]*//g' build.gradle
+            # Use the plugin from node_modules path
+            echo "" >> build.gradle
+            echo "// Auto-added: Use React Native plugin from node_modules" >> build.gradle
+            echo "apply from: file(\"../node_modules/@react-native/gradle-plugin/react.gradle\")" >> build.gradle
+          fi
           
-          # Show what we changed
-          echo "🔍 Checking gradle files after fix:"
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -H "react-native-gradle-plugin" {} \; || true
-          
-          # Check what tasks are available
-          echo "🔍 Checking available Gradle tasks..."
-          ./gradlew tasks --all | head -20 || true
+          # Check for gradle.properties and add Maven repos
+          if [ -f "gradle.properties" ]; then
+            echo "🔧 Adding Maven repositories..."
+            echo "" >> gradle.properties
+            echo "# Auto-added: Maven repositories" >> gradle.properties
+            echo "android.useAndroidX=true" >> gradle.properties
+            echo "android.enableJetifier=true" >> gradle.properties
+          fi
           
           # Remove Detox interference if exists
           if [ -f "settings.gradle" ]; then
@@ -129,6 +142,10 @@ jobs:
             # Remove detox lines
             grep -v "detox" settings.gradle.backup > settings.gradle || cp settings.gradle.backup settings.gradle
           fi
+          
+          # Show final build.gradle
+          echo "🔍 Final build.gradle:"
+          cat build.gradle | tail -10
           
           # List files for debug
           echo "📁 Android project files:"
