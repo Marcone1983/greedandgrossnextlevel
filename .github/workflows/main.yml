@@ -55,12 +55,23 @@ jobs:
         
         # Add React Native repositories before removing plugin
         sed -i '/repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }\
-        maven { url("$rootDir/../node_modules/jsc-android/dist") }' build.gradle
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }\
+        maven { url file("$rootDir/../scripts") }' build.gradle
         
         # Fix in allprojects too
         sed -i '/allprojects {/,/}/ { /repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }\
-        maven { url("$rootDir/../node_modules/jsc-android/dist") }
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }\
+        maven { url file("$rootDir/../scripts") }
         }' build.gradle
+        
+        # Force all React Native modules to use our repositories
+        for module in ../node_modules/@react-native-firebase/* ../node_modules/lottie-react-native ../node_modules/react-native-*; do
+          if [ -d "$module" ] && [ -f "$module/android/build.gradle" ]; then
+            echo "Fixing repositories for $(basename $module)"
+            sed -i '/repositories {/a\        maven { url file("$rootDir/../../scripts") }\
+        maven { url("$rootDir/../../node_modules/react-native/android") }' "$module/android/build.gradle"
+          fi
+        done
         
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
