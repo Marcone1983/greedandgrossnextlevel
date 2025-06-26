@@ -13,13 +13,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       
-    - name: Setup Node 18 (OBBLIGATORIO per RN 0.79)
+    - name: Setup Node 18
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
         
-    - name: Setup JDK 17 (OBBLIGATORIO per AGP 8.5)
+    - name: Setup JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
@@ -32,7 +32,7 @@ jobs:
         npm uninstall detox --save-dev || true
         npm install
         
-    - name: Setup Android (RN 0.79 REQUIREMENTS)
+    - name: Setup Android
       run: |
         # Find android directory
         if [ -d "android" ]; then
@@ -46,7 +46,7 @@ jobs:
         
         chmod +x gradlew
         
-        # TUE FIX DI 5 GIORNI (conservate)
+        # TUE FIX DI 5 GIORNI
         touch lasspath
         
         # Repository Maven fix
