@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "type-check": "tsc --noEmit",
-    "postinstall": "node scripts/force-react-native-0.79.0.js"
+    "postinstall": "echo 'postinstall completed'"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.21.0",
