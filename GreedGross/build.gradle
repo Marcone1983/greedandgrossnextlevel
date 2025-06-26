@@ -42,6 +42,15 @@ allprojects {
         maven { url "https://www.jitpack.io" }
         maven { url("$rootDir/../node_modules/react-native/android") }
     }
+    
+    // Forza l'uso di 0.79.0
+    configurations.all {
+        resolutionStrategy {
+            force 'com.facebook.react:react-native:0.79.0'
+            force 'com.facebook.react:react-android:0.79.0'
+            force 'com.facebook.react:hermes-android:0.79.0'
+        }
+    }
 }
 
 // Root tasks that delegate to app module
