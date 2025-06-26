@@ -132,11 +132,16 @@ android {
     }
 }
 
+// React Native configuration
+repositories {
+    maven { url "$rootDir/../node_modules/react-native/android" }
+}
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
-    
-    // The Application project(':app') includes the React Native dependency automatically via the plugin
-    
+    //noinspection GradleDynamicVersion
+    // React Native is included automatically by the com.facebook.react plugin
+
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     
     // Firebase
