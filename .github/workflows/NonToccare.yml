@@ -4,127 +4,54 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
         
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          
-      - run: |
-          npm install
-          rm -rf node_modules/detox
-          npm uninstall detox --save-dev || true
-          npm install --legacy-peer-deps || npm install
-          
-      - run: npm install -g @react-native-community/cli
+    - name: Install dependencies
+      run: |
+        npm install
+        rm -rf node_modules/detox || true
+        npm uninstall detox --save-dev || true
         
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: ${{ runner.os }}-gradle-
-            
-      - run: |
-          sed -i 's/"react-native": "0\.79\.0"/"react-native": "0.80.0"/g' package.json
-          sed -i 's/"@react-native\/babel-preset": "^0\.79\.0"/"@react-native\/babel-preset": "^0.80.0"/g' package.json
-          sed -i 's/"@react-native\/gradle-plugin": "^0\.79\.0"/"@react-native\/gradle-plugin": "^0.80.0"/g' package.json
-          sed -i 's/"@react-native\/metro-config": "^0\.79\.0"/"@react-native\/metro-config": "^0.80.0"/g' package.json
-          npm install
-            
-      - run: |
-          if [ -d "android" ]; then
-            echo "ANDROID_DIR=android" >> $GITHUB_ENV
-          elif [ -d "GreedGross" ]; then
-            echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
-          else
-            GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
-            echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
-          fi
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
         
-      - uses: gradle/wrapper-validation-action@v1
+    - name: Fix React Native version
+      run: |
+        sed -i 's/0\.79\.0/0.80.0/g' package.json
+        npm install
         
-      - run: |
-          cd "$ANDROID_DIR"
-          chmod +x gradlew
-          [ ! -f "lasspath" ] && touch lasspath
-          
-          cat > build.gradle << 'EOF'
-allprojects {
-    ext {
-        hermesEnabled = true
-    }
-}
-buildscript {
-    ext {
-        buildToolsVersion = "35.0.0"
-        minSdkVersion = 24
-        compileSdkVersion = 35
-        targetSdkVersion = 35
-        ndkVersion = "25.1.8937393"
-        kotlinVersion = "1.8.10"
-        FLIPPER_VERSION = "0.182.0"
-    }
-    repositories {
-        google()
-        mavenCentral()
-        maven { url("$rootDir/../node_modules/react-native/android") }
-        maven { url("$rootDir/../node_modules/@react-native/gradle-plugin/build") }
-    }
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.7.0")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("com.google.gms:google-services:4.4.0")
-        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.9")
-        classpath("com.google.firebase:perf-plugin:1.4.2")
-        classpath(files("$rootDir/../node_modules/@react-native/gradle-plugin/build/libs/gradle-plugin.jar"))
-    }
-}
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url("$rootDir/../node_modules/react-native/android") }
-        maven { url("$rootDir/../node_modules/@react-native/gradle-plugin/build") }
-        maven { url("$rootDir/../node_modules/jsc-android/dist") }
-    }
-}
-EOF
-          
-          if [ -f "settings.gradle" ]; then
-            grep -v "detox" settings.gradle > settings.gradle.tmp && mv settings.gradle.tmp settings.gradle
-          fi
-          
-          if ./gradlew assembleDebug -x test -x lint --stacktrace; then
-            echo "Build successful"
-          elif ./gradlew build -x test -x lint --stacktrace; then
-            echo "Build successful"
-          elif ./gradlew assemble -x test -x lint --stacktrace; then
-            echo "Build successful"
-          else
-            echo "All builds failed"
-            exit 1
-          fi
-          
-      - uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: |
-            ./**/build/outputs/apk/debug/*.apk
-            ./**/build/outputs/apk/**/*.apk
-          retention-days: 30
+    - name: Find Android directory
+      run: |
+        if [ -d "android" ]; then
+          echo "ANDROID_DIR=android" >> $GITHUB_ENV
+        elif [ -d "GreedGross" ]; then
+          echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
+        else
+          GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
+          echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
+        fi
+        
+    - name: Build APK
+      run: |
+        cd "$ANDROID_DIR"
+        chmod +x gradlew
+        touch lasspath
+        ./gradlew assembleDebug --stacktrace
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: "**/build/outputs/apk/debug/*.apk"
