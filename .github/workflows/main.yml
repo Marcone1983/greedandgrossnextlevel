@@ -32,6 +32,8 @@ jobs:
       run: |
         # Use React Native 0.79.0 (latest stable)
         npm install
+        # Fix version mismatch
+        ./scripts/fix-version-mismatch.sh
         # Publish React Native to local repository
         ./scripts/publish-react-native.sh
         
