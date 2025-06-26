@@ -1,69 +1,100 @@
 name: Build APK
 
 on:
+
   workflow_dispatch:
+  
   push:
+  
     branches: [main]
 
 jobs:
+
   build:
+  
     runs-on: ubuntu-latest
     
     steps:
+    
     - uses: actions/checkout@v4
       
     - uses: actions/setup-node@v4
+     
       with:
+      
         node-version: '22'
+        
         cache: 'npm'
         
     - name: Install dependencies
+      
       run: npm install
         
     - uses: actions/setup-java@v4
+      
       with:
+      
         distribution: 'temurin'
+        
         java-version: '17'
         
     - name: Run build fixes
+      
       run: |
-        chmod +x fix-build-issues.sh
-        ./fix-build-issues.sh
         
     - name: Find Android directory
+      
       run: |
+       
         if [ -d "android" ]; then
+          
           echo "ANDROID_DIR=android" >> $GITHUB_ENV
+        
         elif [ -d "GreedGross" ]; then
+          
           echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
+       
         else
+          
           GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
+          
           echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
+        
         fi
         
-    - name: Build all Android variants
+    - name: Build all
+      
       run: |
+      
         cd "$ANDROID_DIR"
         
         echo "Available build tasks:"
+        
         ./gradlew tasks | grep -i assemble || true
         
         echo "Building Debug APK..."
+       
         ./gradlew assembleDebug --stacktrace
         
         echo "Building Release APK..."  
+       
         ./gradlew assembleRelease --stacktrace
         
         echo "Building Debug AAB..."
+      
         ./gradlew bundleDebug --stacktrace || true
         
         echo "Building Release AAB..."
+       
         ./gradlew bundleRelease --stacktrace || true
         
     - uses: actions/upload-artifact@v4
+      
       with:
+      
         name: android-builds-complete
         path: |
+        
           **/build/outputs/apk/debug/*.apk
           **/build/outputs/apk/release/*.apk
           **/build/outputs/bundle/debug/*.aab
