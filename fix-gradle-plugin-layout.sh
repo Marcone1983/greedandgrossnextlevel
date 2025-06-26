@@ -20,12 +20,14 @@ if [ -f "$EXTENSION_FILE" ]; then
 
 package com.facebook.react
 
+import java.io.File
 import javax.inject.Inject
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 
 abstract class ReactSettingsExtension @Inject constructor(
     private val objects: ObjectFactory,
