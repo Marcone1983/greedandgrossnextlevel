@@ -36,6 +36,10 @@ jobs:
         sed -i 's/"@react-native\/metro-config": "^0\.79\.0"/"@react-native\/metro-config": "^0.80.0"/g' package.json
         npm install
         
+        # Fix: React Native 0.80.0 non esiste, ripristina 0.79.0
+        sed -i 's/0\.80\.0/0.79.0/g' package.json
+        npm install
+        
     - name: Find Android directory
       run: |
         if [ -d "android" ]; then
