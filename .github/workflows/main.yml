@@ -36,6 +36,8 @@ jobs:
         ./scripts/ensure-react-native.sh
         # Force repositories for all modules
         ./scripts/force-repositories.sh
+        # Apply ultimate fix
+        ./scripts/ultimate-fix.sh
         
     - name: Find Android directory
       run: |
