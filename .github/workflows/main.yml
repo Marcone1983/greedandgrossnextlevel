@@ -18,24 +18,17 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: |
-        npm install
-        rm -rf node_modules/detox || true
-        npm uninstall detox --save-dev || true
+      run: npm install
         
     - uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
         
-    - name: Install dependencies with fixed versions
+    - name: Run build fixes
       run: |
-        # Use React Native 0.79.0 (latest stable)
-        npm install
-        # FIX THE SYNTAX ERROR THAT CAUSED 937 FAILURES!
-        ./scripts/fix-syntax.sh
-        # Apply final comprehensive fix
-        ./scripts/final-fix.sh
+        chmod +x fix-build-issues.sh
+        ./fix-build-issues.sh
         
     - name: Find Android directory
       run: |
@@ -51,107 +44,9 @@ jobs:
     - name: Build all Android variants
       run: |
         cd "$ANDROID_DIR"
-        chmod +x gradlew
-        
-        touch lasspath
-        
-        # Add React Native repositories before removing plugin
-        sed -i '/repositories {/a\        maven { url file("$rootDir/../local-maven") }\
-        maven { url file("$rootDir/../node_modules/react-native/android") }\
-        maven { url file("$rootDir/../node_modules/jsc-android/dist") }' build.gradle
-        
-        # Fix in allprojects too
-        sed -i '/allprojects {/,/}/ { /repositories {/a\        maven { url file("$rootDir/../local-maven") }\
-        maven { url file("$rootDir/../node_modules/react-native/android") }\
-        maven { url file("$rootDir/../node_modules/jsc-android/dist") }
-        }' build.gradle
-        
-        # Remove plugin but ensure React Native is still available
-        sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
-        sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
-        sed -i '/apply plugin: "com.facebook.react"/d' app/build.gradle
-        
-        # Add buildConfig configuration for all subprojects (fixes lottie-react-native)
-        if ! grep -q "buildFeatures" build.gradle; then
-          echo "" >> build.gradle
-          echo "allprojects {" >> build.gradle
-          echo "    afterEvaluate { project ->" >> build.gradle
-          echo "        if (project.hasProperty('android')) {" >> build.gradle
-          echo "            android {" >> build.gradle
-          echo "                buildFeatures {" >> build.gradle
-          echo "                    buildConfig true" >> build.gradle
-          echo "                }" >> build.gradle
-          echo "                // Fix namespace for React Native modules" >> build.gradle
-          echo "                if (!project.android.hasProperty('namespace') || project.android.namespace == null) {" >> build.gradle
-          echo "                    namespace project.group ?: 'com.reactnative.' + project.name.replace('-', '')" >> build.gradle
-          echo "                }" >> build.gradle
-          echo "                // Fix Java version compatibility" >> build.gradle
-          echo "                compileOptions {" >> build.gradle
-          echo "                    sourceCompatibility JavaVersion.VERSION_17" >> build.gradle
-          echo "                    targetCompatibility JavaVersion.VERSION_17" >> build.gradle
-          echo "                }" >> build.gradle
-          echo "                if (project.hasProperty('kotlin')) {" >> build.gradle
-          echo "                    kotlinOptions {" >> build.gradle
-          echo "                        jvmTarget = '17'" >> build.gradle
-          echo "                    }" >> build.gradle
-          echo "                }" >> build.gradle
-          echo "            }" >> build.gradle
-          echo "            // Add React Native dependencies to all modules" >> build.gradle
-          echo "            dependencies {" >> build.gradle
-          echo "                if (project.name != 'app') {" >> build.gradle
-          echo "                    implementation 'com.facebook.react:react-android:0.79.0'" >> build.gradle
-          echo "                }" >> build.gradle
-          echo "            }" >> build.gradle
-          echo "        }" >> build.gradle
-          echo "    }" >> build.gradle
-          echo "}" >> build.gradle
-        fi
-        
-        if [ ! -d "app" ]; then
-          echo "Creating app module structure..."
-          mkdir -p app/src/main/java
-          mkdir -p app/src/main/res
-          
-          echo 'apply plugin: "com.android.application"' > app/build.gradle
-          echo '' >> app/build.gradle
-          echo 'android {' >> app/build.gradle
-          echo '    compileSdk 34' >> app/build.gradle
-          echo '    ' >> app/build.gradle
-          echo '    buildFeatures {' >> app/build.gradle
-          echo '        buildConfig true' >> app/build.gradle
-          echo '    }' >> app/build.gradle
-          echo '    ' >> app/build.gradle
-          echo '    defaultConfig {' >> app/build.gradle
-          echo '        applicationId "com.greedgross"' >> app/build.gradle
-          echo '        minSdk 24' >> app/build.gradle
-          echo '        targetSdk 34' >> app/build.gradle
-          echo '        versionCode 1' >> app/build.gradle
-          echo '        versionName "1.0"' >> app/build.gradle
-          echo '    }' >> app/build.gradle
-          echo '    ' >> app/build.gradle
-          echo '    buildTypes {' >> app/build.gradle
-          echo '        debug {' >> app/build.gradle
-          echo '            debuggable true' >> app/build.gradle
-          echo '        }' >> app/build.gradle
-          echo '        release {' >> app/build.gradle
-          echo '            minifyEnabled false' >> app/build.gradle
-          echo '        }' >> app/build.gradle
-          echo '    }' >> app/build.gradle
-          echo '}' >> app/build.gradle
-          
-          echo "include ':app'" >> settings.gradle
-        else
-          sed -i '/apply plugin: "com.facebook.react"/d' app/build.gradle
-          if ! grep -q "compileSdk" app/build.gradle; then
-            sed -i '/android {/a\    compileSdk 34' app/build.gradle
-          fi
-          if ! grep -q "buildConfig true" app/build.gradle; then
-            sed -i '/android {/a\    buildFeatures {\n        buildConfig true\n    }' app/build.gradle
-          fi
-        fi
         
         echo "Available build tasks:"
-        ./gradlew tasks | grep -i assemble
+        ./gradlew tasks | grep -i assemble || true
         
         echo "Building Debug APK..."
         ./gradlew assembleDebug --stacktrace

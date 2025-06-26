@@ -1,16 +1,24 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
 
 import com.android.build.OutputFile
 
-project.ext.react = [
-    entryFile: "index.js",
-    bundleAssetName: "index.android.bundle",
-    root: "../../",
-    cliPath: "../node_modules/react-native/cli.js",
-    bundleCommand: "bundle",
-    extraPackagerArgs: ["--verbose=false", "--silent"]
-]
+react {
+    // The root of your project, i.e. where "package.json" lives. Default is '../..'
+    root = file("../../")
+    // The folder where the react-native Codegen will use to output the generated source code. Default is 'build/generated/codegen'
+    codegenDir = file("$buildDir/generated/codegen")
+    // The cli.js file which used to run the bundler command. Default is ../node_modules/react-native/cli.js
+    cliFile = file("../../node_modules/react-native/cli.js")
+    // The path to the JS bundle file to be used for Release builds. Default is 'index.android.bundle'
+    bundleAssetName = "index.android.bundle"
+    // The entry file for bundle generation. Default is 'index.js'
+    entryFile = file("../../index.js")
+    // Bundle command and packager args
+    bundleCommand = "bundle"
+    extraPackagerArgs = []
+}
 
 // React Native 0.79.0 uses the gradle plugin to handle native modules automatically
 

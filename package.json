@@ -42,7 +42,7 @@
     "react-native-modal": "^13.0.1",
     "react-native-pdf": "^6.7.1",
     "react-native-purchases": "^8.11.5",
-    "react-native-reanimated": "^3.16.7",
+    "react-native-reanimated": "3.6.2",
     "react-native-safe-area-context": "^5.4.1",
     "react-native-screens": "^3.34.0",
     "react-native-share": "^10.0.2",
