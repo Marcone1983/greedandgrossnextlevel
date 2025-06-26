@@ -110,9 +110,16 @@ EOF
             grep -v "detox" settings.gradle > settings.gradle.tmp && mv settings.gradle.tmp settings.gradle
           fi
           
-          ./gradlew assembleDebug -x test -x lint --stacktrace || \
-          ./gradlew build -x test -x lint --stacktrace || \
-          ./gradlew assemble -x test -x lint --stacktrace
+          if ./gradlew assembleDebug -x test -x lint --stacktrace; then
+            echo "Build successful"
+          elif ./gradlew build -x test -x lint --stacktrace; then
+            echo "Build successful"
+          elif ./gradlew assemble -x test -x lint --stacktrace; then
+            echo "Build successful"
+          else
+            echo "All builds failed"
+            exit 1
+          fi
           
       - uses: actions/upload-artifact@v4
         with:
