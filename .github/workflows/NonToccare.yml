@@ -1,0 +1,174 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          
+      - name: Install React Native dependencies
+        run: |
+          echo "📦 Installing JavaScript dependencies..."
+          npm install
+          
+          # Remove problematic Detox
+          echo "🗑️ Removing Detox to prevent build conflicts..."
+          rm -rf node_modules/detox
+          npm uninstall detox --save-dev || true
+          
+          # Let npm/yarn resolve compatible versions
+          echo "🔧 Resolving compatible React Native dependencies..."
+          npm install --legacy-peer-deps || npm install
+          
+      - name: Install React Native CLI
+        run: npm install -g @react-native-community/cli
+        
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+            
+      - name: Find React Native Android directory
+        run: |
+          echo "🔍 Looking for React Native Android project..."
+          
+          # First check for standard React Native android directory
+          if [ -d "android" ]; then
+            echo "✅ Found standard React Native android directory"
+            echo "ANDROID_DIR=android" >> $GITHUB_ENV
+          elif [ -d "GreedGross" ]; then
+            echo "✅ Found GreedGross directory"
+            echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
+          else
+            echo "🔍 Searching for Android project directories..."
+            find . -name "build.gradle" -path "*/android/*" | head -5
+            find . -name "gradlew" -not -path "*/node_modules/*" | head -5
+            
+            # Find gradlew NOT in node_modules
+            GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
+            if [ -n "$GRADLEW_PATH" ]; then
+              GRADLEW_DIR=$(dirname "$GRADLEW_PATH")
+              echo "✅ Found gradlew at: $GRADLEW_PATH"
+              echo "ANDROID_DIR=$GRADLEW_DIR" >> $GITHUB_ENV
+            else
+              echo "❌ No Android project found!"
+              exit 1
+            fi
+          fi
+        
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+        
+      - name: Build React Native Android APK
+        run: |
+          cd "$ANDROID_DIR"
+          echo "🏗️ Building React Native Android from: $(pwd)"
+          
+          # Make gradlew executable
+          chmod +x gradlew
+          
+          # Create lasspath if needed
+          if [ ! -f "lasspath" ]; then
+            echo "📝 Creating empty lasspath file"
+            touch lasspath
+          fi
+          
+          # Find and replace 0.79.0 EVERYWHERE
+          echo "🔧 Aggressively fixing React Native versions..."
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -l "0\.79\.0" {} \;
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
+          find . -name "*.properties" -not -path "*/node_modules/*" -exec sed -i 's/0\.79\.0/0.73.4/g' {} \;
+          
+          # Also try different version formats
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec sed -i 's/79\.0/73.4/g' {} \;
+          
+          echo "✅ Replaced all 0.79.0 references with working version"
+          
+          # Show what we changed
+          echo "🔍 Checking gradle files after fix:"
+          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -H "react-native-gradle-plugin" {} \; || true
+          
+          # Check what tasks are available
+          echo "🔍 Checking available Gradle tasks..."
+          ./gradlew tasks --all | head -20 || true
+          
+          # Remove Detox interference if exists
+          if [ -f "settings.gradle" ]; then
+            echo "🔧 Backing up and fixing settings.gradle..."
+            cp settings.gradle settings.gradle.backup
+            # Remove detox lines
+            grep -v "detox" settings.gradle.backup > settings.gradle || cp settings.gradle.backup settings.gradle
+          fi
+          
+          # List files for debug
+          echo "📁 Android project files:"
+          ls -la
+          
+          # Try different build commands in order of preference
+          echo "🏗️ Trying to build APK..."
+          if ./gradlew assembleDebug -x test -x lint --stacktrace; then
+            echo "✅ assembleDebug succeeded"
+          elif ./gradlew build -x test -x lint --stacktrace; then
+            echo "✅ build succeeded"
+          elif ./gradlew assemble -x test -x lint --stacktrace; then
+            echo "✅ assemble succeeded"
+          else
+            echo "❌ All build attempts failed"
+            echo "📋 Available tasks:"
+            ./gradlew tasks | grep -i assemble || true
+            exit 1
+          fi
+          
+      - name: Find and upload APK
+        run: |
+          echo "🔍 Searching for APK files..."
+          find . -name "*.apk" -type f
+          
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: |
+            ./**/build/outputs/apk/debug/*.apk
+            ./**/build/outputs/apk/**/*.apk
+          retention-days: 30
+          
+      - name: Upload mapping files (if exists)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mapping-files
+          path: |
+            ./**/build/outputs/mapping/debug/
+            ./**/build/outputs/mapping/**/*.txt
+          retention-days: 30
