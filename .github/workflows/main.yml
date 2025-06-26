@@ -41,8 +41,8 @@ jobs:
         
     - name: Run build fixes
       run: |
-        # Clear corrupted gradle cache
-        rm -rf ~/.gradle/caches/jars-9/
+        # Fix all gradle issues
+        ./fix-gradle-issues.sh
         
         # Emergency C++ fix
         find node_modules -name "CMakeLists.txt" -type f -exec sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' {} \;
