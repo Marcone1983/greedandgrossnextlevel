@@ -49,6 +49,11 @@ allprojects {
         resolutionStrategy {
             force "com.facebook.react:react-android:0.79.0"
             force "com.facebook.react:hermes-android:0.79.0"
+            
+            // Force specific bouncycastle version to avoid jar corruption
+            force 'org.bouncycastle:bcprov-jdk18on:1.77'
+            force 'org.bouncycastle:bcpkix-jdk18on:1.77'
+            force 'org.bouncycastle:bcutil-jdk18on:1.77'
         }
     }
 }
