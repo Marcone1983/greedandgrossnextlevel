@@ -27,8 +27,9 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      
-      run: npm install
+      run: |
+        npm install --legacy-peer-deps
+        npm ls || true
         
     - uses: actions/setup-java@v4
       
@@ -39,8 +40,16 @@ jobs:
         java-version: '17'
         
     - name: Run build fixes
-      
       run: |
+        # Emergency C++ fix
+        find node_modules -name "CMakeLists.txt" -type f -exec sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' {} \;
+        
+        # Create local.properties
+        echo "sdk.dir=$ANDROID_SDK_ROOT" > GreedGross/local.properties
+        echo "ndk.dir=$ANDROID_NDK_ROOT" >> GreedGross/local.properties
+        
+        # Fix permissions
+        chmod +x GreedGross/gradlew
         
     - name: Find Android directory
       
@@ -72,9 +81,12 @@ jobs:
         
         ./gradlew tasks | grep -i assemble || true
         
-        echo "Building Debug APK..."
-       
-        ./gradlew assembleDebug --stacktrace
+        echo "Building Debug APK with verbose logging..."
+        ./gradlew assembleDebug --stacktrace --info 2>&1 | tee build.log || {
+          echo "❌ BUILD FAILED! Last 200 lines of error:"
+          tail -200 build.log
+          exit 1
+        }
         
         echo "Building Release APK..."  
        
@@ -99,3 +111,10 @@ jobs:
           **/build/outputs/apk/release/*.apk
           **/build/outputs/bundle/debug/*.aab
           **/build/outputs/bundle/release/*.aab
+          
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: build-logs
+        path: |
+          **/build.log
