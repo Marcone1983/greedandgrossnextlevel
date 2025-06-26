@@ -16,7 +16,7 @@ jobs:
     - name: Setup Node 18
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '22'
         cache: 'npm'
         
     - name: Setup JDK 17
@@ -34,29 +34,29 @@ jobs:
         
     - name: Setup Android
       run: |
-        # Find android directory
+        
         if [ -d "android" ]; then
           cd android
         elif [ -d "GreedGross" ]; then
-          cd GreedGross
+        cd GreedGross
         else
-          echo "❌ NO ANDROID DIRECTORY!"
           exit 1
         fi
-        
+      
         chmod +x gradlew
-        
-        # TUE FIX DI 5 GIORNI
+     
         touch lasspath
-        
-        # Repository Maven fix
+   
         sed -i '/repositories {/a\        maven { url file("$rootDir/../node_modules/react-native/android") }\
         maven { url file("$rootDir/../node_modules/jsc-android/dist") }' build.gradle
         
-        # GRADLE.PROPERTIES CORRETTO PER RN 0.79
         cat > gradle.properties << 'EOF'
 
 org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError 
+} 
+} 
+
+
 org.gradle.workers.max=2
 org.gradle.configureondemand=true
 android.useAndroidX=true
@@ -65,7 +65,7 @@ newArchEnabled=false
 hermesEnabled=true
 EOF
 } 
-        # BUILD.GRADLE ROOT CORRETTO PER RN 0.79
+        
         cat > build.gradle << 'EOF'
 buildscript {
     ext {
@@ -90,7 +90,6 @@ allprojects {
         maven { url file("../node_modules/jsc-android/dist") }
     }
     
-    // FIX NAMESPACE per AGP 8.5
     afterEvaluate { project ->
         if (project.hasProperty("android")) {
             android {
@@ -119,40 +118,45 @@ task clean(type: Delete) {
 }
 EOF
 
-        # GRADLE WRAPPER CORRETTO
         echo "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.14-all.zip" > gradle/wrapper/gradle-wrapper.properties
         
-        # FIX APP/BUILD.GRADLE
         if [ -d "app" ]; then
-          # Fix sintassi moderna
-          sed -i 's/compileSdkVersion/compileSdk/g' app/build.gradle
-          sed -i 's/minSdkVersion/minSdk/g' app/build.gradle
-          sed -i 's/targetSdkVersion/targetSdk/g' app/build.gradle
           
-          # Aggiungi namespace se manca
+          sed -i 's/compileSdkVersion/compileSdk/' app/build.gradle
+          sed -i 's/minSdkVersion/minSdk/' app/build.gradle
+          sed -i 's/targetSdkVersion/targetSdk/' app/build.gradle
+          
           if ! grep -q "namespace" app/build.gradle; then
             sed -i '/android {/a\    namespace "com.greedgross"' app/build.gradle
           fi
           
-          # Fix compileSdk 35
           sed -i 's/compileSdk [0-9]*/compileSdk 35' app/build.gradle
         fi
         
     - name: Build Debug APK
       run: |
+        
         if [ -d "android" ]; then
+         
           cd android
+          
         elif [ -d "GreedGross" ]; then
+          
           cd GreedGross
+          
         fi
         
         ./gradlew assembleDebug --no-daemon --stacktrace
         
     - name: Build Release APK
       run: |
+      
         if [ -d "android" ]; then
-          cd android
+         
+          cd Android  
+
         elif [ -d "GreedGross" ]; then
+          
           cd GreedGross
         fi
         
@@ -163,5 +167,7 @@ EOF
       with:
         name: android-builds-rn079
         path: |
+          
           **/build/outputs/apk/**/*.apk
+          
           **/build/outputs/bundle/**/*.aab
