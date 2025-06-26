@@ -40,6 +40,8 @@ jobs:
         ./scripts/ultimate-fix.sh
         # Fix Java version compatibility
         ./scripts/fix-java-version.sh
+        # Fix SDK versions
+        ./scripts/fix-sdk-version.sh
         
     - name: Find Android directory
       run: |

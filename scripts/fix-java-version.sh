@@ -12,13 +12,18 @@ find node_modules -name "build.gradle" | while read gradle_file; do
     
     # Add Java compatibility settings after android block
     if ! grep -q "sourceCompatibility" "$gradle_file"; then
+      # First add compileOptions
       sed -i '/android {/a\    compileOptions {\
         sourceCompatibility JavaVersion.VERSION_17\
         targetCompatibility JavaVersion.VERSION_17\
-    }\
-    kotlinOptions {\
+    }' "$gradle_file"
+      
+      # Only add kotlinOptions if kotlin plugin is applied
+      if grep -q "kotlin-android" "$gradle_file"; then
+        sed -i '/compileOptions {/,/}/a\    kotlinOptions {\
         jvmTarget = "17"\
     }' "$gradle_file"
+      fi
     fi
   fi
 done
