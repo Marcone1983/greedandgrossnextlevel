@@ -56,6 +56,22 @@ jobs:
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
         
+        # Add buildConfig configuration for all subprojects (fixes lottie-react-native)
+        if ! grep -q "buildFeatures" build.gradle; then
+          echo "" >> build.gradle
+          echo "allprojects {" >> build.gradle
+          echo "    afterEvaluate { project ->" >> build.gradle
+          echo "        if (project.hasProperty('android')) {" >> build.gradle
+          echo "            android {" >> build.gradle
+          echo "                buildFeatures {" >> build.gradle
+          echo "                    buildConfig true" >> build.gradle
+          echo "                }" >> build.gradle
+          echo "            }" >> build.gradle
+          echo "        }" >> build.gradle
+          echo "    }" >> build.gradle
+          echo "}" >> build.gradle
+        fi
+        
         if [ ! -d "app" ]; then
           echo "Creating app module structure..."
           mkdir -p app/src/main/java
