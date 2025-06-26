@@ -34,6 +34,8 @@ jobs:
         npm install
         # Ensure React Native dependencies
         ./scripts/ensure-react-native.sh
+        # Force repositories for all modules
+        ./scripts/force-repositories.sh
         
     - name: Find Android directory
       run: |
