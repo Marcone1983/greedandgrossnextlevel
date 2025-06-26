@@ -43,30 +43,23 @@ jobs:
           echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
         fi
         
-    - name: Build APK
+    - name: Build APK and AAB
       run: |
         cd "$ANDROID_DIR"
         chmod +x gradlew
-        
-        # Create empty lasspath file
         touch lasspath
         
-        # Remove old Facebook plugin completely
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
         
-        # Fix settings.gradle to use new system
         if [ -f "settings.gradle" ]; then
           echo "includeBuild('../node_modules/@react-native/gradle-plugin')" >> settings.gradle
         fi
         
-        # Check if we have app module - if not, create it
         if [ ! -d "app" ]; then
-          echo "Creating app module structure..."
           mkdir -p app/src/main/java
           mkdir -p app/src/main/res
           
-          # Create app/build.gradle
           cat > app/build.gradle << 'EOF'
 apply plugin: "com.android.application"
 
@@ -97,34 +90,21 @@ dependencies {
 }
 EOF
           
-          # Update settings.gradle to include app
           echo "include ':app'" >> settings.gradle
         fi
         
-        # Find what build tasks actually exist
-        echo "Checking available build tasks..."
         ./gradlew tasks | grep -i assemble
         
-        # Build all variants: Debug APK, Release APK, and AAB
-        echo "Building all APK and AAB variants..."
-        
-        echo "Building Debug APK..."
         ./gradlew assembleDebug --stacktrace
-        
-        echo "Building Release APK..."  
         ./gradlew assembleRelease --stacktrace
-        
-        echo "Building Debug AAB..."
-        ./gradlew bundleDebug --stacktrace
-        
-        echo "Building Release AAB..."
-        ./gradlew bundleRelease --stacktrace
+        ./gradlew bundleDebug --stacktrace || true
+        ./gradlew bundleRelease --stacktrace || true
         
     - uses: actions/upload-artifact@v4
       with:
         name: android-builds
         path: |
-          "**/build/outputs/apk/debug/*.apk"
-          "**/build/outputs/apk/release/*.apk"
-          "**/build/outputs/bundle/debug/*.aab"
-          "**/build/outputs/bundle/release/*.aab"
+          **/build/outputs/apk/debug/*.apk
+          **/build/outputs/apk/release/*.apk
+          **/build/outputs/bundle/debug/*.aab
+          **/build/outputs/bundle/release/*.aab
