@@ -51,6 +51,22 @@ jobs:
         # Fix permissions
         chmod +x GreedGross/gradlew
         
+        # Fix namespace issue for react-native-fs
+        if [ -f "node_modules/react-native-fs/android/build.gradle" ]; then
+          echo "Fixing react-native-fs namespace..."
+          sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle
+        fi
+        
+        # Fix namespace for other modules that might have issues
+        for module in react-native-device-info react-native-share react-native-vector-icons react-native-webview react-native-linear-gradient react-native-haptic-feedback; do
+          BUILD_FILE="node_modules/$module/android/build.gradle"
+          if [ -f "$BUILD_FILE" ] && ! grep -q "namespace" "$BUILD_FILE"; then
+            echo "Adding namespace to $module..."
+            PACKAGE_NAME=$(grep -oP '(?<=package\s")[^"]+' node_modules/$module/android/src/main/AndroidManifest.xml 2>/dev/null || echo "com.$module" | sed 's/-/./g')
+            sed -i "/android {/a\\    namespace \"$PACKAGE_NAME\"" "$BUILD_FILE"
+          fi
+        done
+        
     - name: Find Android directory
       
       run: |
