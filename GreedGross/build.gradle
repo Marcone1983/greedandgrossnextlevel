@@ -55,6 +55,3 @@ task bundleRelease {
     dependsOn ':app:bundleRelease'
 }
 
-// Apply dependency resolution fix
-apply from: file("gradle-fix.gradle")
-
