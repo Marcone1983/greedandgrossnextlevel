@@ -32,12 +32,8 @@ jobs:
       run: |
         # Use React Native 0.79.0 (latest stable)
         npm install
-        # Apply simple fix
-        ./scripts/simple-fix.sh
-        # Create symlink
-        ./scripts/symlink-fix.sh
-        # Force repositories in modules
-        ./scripts/force-module-repos.sh
+        # Apply final comprehensive fix
+        ./scripts/final-fix.sh
         
     - name: Find Android directory
       run: |
