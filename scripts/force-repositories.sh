@@ -18,13 +18,13 @@ find node_modules -name "build.gradle" | while read gradle_file; do
     # Force add our repository at the beginning of repositories block
     # First, for regular repositories blocks
     sed -i '/repositories {/{
-      a\        maven { url("$rootDir/../local-maven") }
+      a\        maven { url file("$rootDir/../local-maven") }
     }' "$gradle_file"
     
     # Also handle buildscript repositories
     sed -i '/buildscript {/,/}/ {
       /repositories {/{
-        a\        maven { url("$rootDir/../local-maven") }
+        a\        maven { url file("$rootDir/../local-maven") }
       }
     }' "$gradle_file"
   fi
