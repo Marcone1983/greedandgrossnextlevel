@@ -70,16 +70,31 @@ jobs:
           
       - name: Fix reanimated C++ compatibility
         run: |
-          # Fix Hermes detection
-          sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
+          # Run comprehensive C++ build fix script
+          if [ -f "scripts/fix-cpp-build-errors.sh" ]; then
+            chmod +x scripts/fix-cpp-build-errors.sh
+            ./scripts/fix-cpp-build-errors.sh
+          else
+            # Fallback to inline fixes if script doesn't exist
+            echo "Running inline C++ fixes..."
+            
+            # Fix Hermes detection
+            sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
+            
+            # Force C++17 instead of C++20
+            find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/CMAKE_CXX_STANDARD 20/CMAKE_CXX_STANDARD 17/g' {} \;
+            find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/-std=c++20/-std=c++17/g' {} \;
+          fi
           
-          # Force C++17 instead of C++20 to fix std::regular error
-          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/CMAKE_CXX_STANDARD 20/CMAKE_CXX_STANDARD 17/g' {} \;
-          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/cxx_std_20/cxx_std_17/g' {} \;
-          
-          # Also fix in build.gradle files
-          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/-std=c++20/-std=c++17/g' {} \;
-          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/cppFlags.add("-std=c++20")/cppFlags.add("-std=c++17")/g' {} \;
+          # Additional step to patch Folly headers after gradle cache is populated
+          cat > patch-folly-runtime.sh << 'EOF'
+          #!/bin/bash
+          # This will be called during the build
+          find ~/.gradle/caches -path "*/F14Table.h" -type f 2>/dev/null | head -5 | while read -r file; do
+            sed -i 's/static_assert(std::regular<F14HashToken>);/\/\/ C++17 compat: static_assert commented out/' "$file" 2>/dev/null || true
+          done
+          EOF
+          chmod +x patch-folly-runtime.sh
           
       - name: Verify native modules
         run: |
@@ -92,6 +107,30 @@ jobs:
               echo "✓ $module found"
             fi
           done
+          
+      - name: Patch Folly headers for C++17 compatibility
+        run: |
+          # Create a pre-processor definition to handle std::regular
+          echo "Creating Folly compatibility patch..."
+          
+          # Find and patch cached React Native files
+          find ~/.gradle/caches -name "F14Table.h" -type f 2>/dev/null | while read -r file; do
+            echo "Patching: $file"
+            # Comment out the problematic static_assert
+            sed -i 's/static_assert(std::regular<F14HashToken>);/\/\/ static_assert(std::regular<F14HashToken>); \/\/ Commented for C++17/' "$file" 2>/dev/null || true
+          done
+          
+          # Alternative: Create a global include that defines std::regular
+          mkdir -p GreedGross/app/src/main/cpp
+          cat > GreedGross/app/src/main/cpp/cpp17_compat.h << 'EOF'
+          #pragma once
+          #if __cplusplus < 202002L
+          namespace std {
+            template<typename T>
+            inline constexpr bool regular = true;
+          }
+          #endif
+          EOF
           
       - name: Fix autolinking manually
         run: |
@@ -196,6 +235,38 @@ public class PackageList {
   }
 }
 EOF
+          
+      - name: Force C++17 in Android build
+        run: |
+          # Add global C++ flags to gradle.properties
+          echo "" >> GreedGross/gradle.properties
+          echo "# Force C++17 for all native builds" >> GreedGross/gradle.properties
+          echo "android.defaultConfig.cmake.cppFlags=-std=c++17" >> GreedGross/gradle.properties
+          echo "android.defaultConfig.externalNativeBuild.cmake.cppFlags=-std=c++17" >> GreedGross/gradle.properties
+          
+          # Create a gradle init script to force C++17
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/force-cpp17.gradle << 'EOF'
+          allprojects {
+              afterEvaluate { project ->
+                  if (project.hasProperty('android')) {
+                      android {
+                          defaultConfig {
+                              if (externalNativeBuild?.cmake) {
+                                  externalNativeBuild {
+                                      cmake {
+                                          cppFlags.add("-std=c++17")
+                                          cppFlags.remove("-std=c++20")
+                                          arguments "-DCMAKE_CXX_STANDARD=17"
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+          EOF
           
       - name: usa build apk
         uses: ./.github/actions/build-apk

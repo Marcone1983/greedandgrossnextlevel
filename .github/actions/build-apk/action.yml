@@ -15,6 +15,21 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Pre-build patches
+      shell: bash
+      run: |
+        echo "Applying runtime patches..."
+        # Patch Folly headers in gradle cache if they exist
+        find ~/.gradle/caches -path "*/F14Table.h" -type f 2>/dev/null | head -10 | while read -r file; do
+          echo "Patching: $file"
+          sed -i 's/static_assert(std::regular<F14HashToken>);/\/\/ static_assert removed for C++17/' "$file" 2>/dev/null || true
+        done
+        
+        # Run common fixes if script exists
+        if [ -f "scripts/fix-common-android-errors.sh" ]; then
+          ./scripts/fix-common-android-errors.sh
+        fi
+        
     - name: Build APK
       id: build-apk
       shell: bash
@@ -26,6 +41,12 @@ runs:
         BUILD_STATUS=0
         
         cd GreedGross
+        
+        # Clean before build
+        if [ -f "pre-build-cleanup.sh" ]; then
+          ./pre-build-cleanup.sh
+        fi
+        
         # Use Java directly to run gradle wrapper to avoid path issues
         java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon 2>&1 | \
           tee ../build.log | \

@@ -1,0 +1,51 @@
+diff --git a/node_modules/react-native-reanimated/android/CMakeLists.txt b/node_modules/react-native-reanimated/android/CMakeLists.txt
+index 1234567..abcdefg 100644
+--- a/node_modules/react-native-reanimated/android/CMakeLists.txt
++++ b/node_modules/react-native-reanimated/android/CMakeLists.txt
+@@ -13,7 +13,7 @@ endif()
+ 
+ set(CMAKE_VERBOSE_MAKEFILE ON)
+ set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Wall -Werror")
++set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Werror")
+ 
+ # Add preprocessor flag to disable std::regular check
+ add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
+@@ -200,6 +200,11 @@ target_compile_options(
+         -Wall
+         -Werror
+         -DNDEBUG
++        -D__cpp_concepts=201907L
++)
++
++# Add compatibility header
++target_compile_definitions(worklets PRIVATE 
+         -DJS_RUNTIME_HERMES=${JS_RUNTIME_HERMES}
+ )
+ 
+diff --git a/node_modules/react-native-reanimated/android/build.gradle b/node_modules/react-native-reanimated/android/build.gradle
+index 2345678..bcdefgh 100644
+--- a/node_modules/react-native-reanimated/android/build.gradle
++++ b/node_modules/react-native-reanimated/android/build.gradle
+@@ -550,7 +550,7 @@ android {
+     externalNativeBuild {
+       cmake {
+         path "CMakeLists.txt"
+-        version "3.22.1"
++        version "3.18.1"
+       }
+     }
+   }
+@@ -570,6 +570,12 @@ android {
+         externalNativeBuild {
+           cmake {
+             arguments "-DANDROID_STL=c++_shared"
++            cppFlags "-std=c++17"
++            // Remove any C++20 flags
++            cppFlags.removeAll { it.contains("c++20") }
++            // Force C++17 standard
++            arguments "-DCMAKE_CXX_STANDARD=17"
++            arguments "-DCMAKE_CXX_STANDARD_REQUIRED=ON"
+           }
+         }
+         buildConfigField("boolean", "IS_NEW_ARCHITECTURE_ENABLED", "false")
