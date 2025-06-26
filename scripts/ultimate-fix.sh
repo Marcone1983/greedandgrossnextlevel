@@ -39,6 +39,24 @@ allprojects {
         }
     }
 }
+
+// Fix SDK and Java versions
+allprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                if (!hasProperty('compileSdkVersion') || compileSdkVersion == null) {
+                    compileSdkVersion 34
+                }
+                
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
+}
 EOF
 
 # Also create metadata files
