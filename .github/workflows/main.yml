@@ -32,10 +32,8 @@ jobs:
       run: |
         # Use React Native 0.79.0 (latest stable)
         npm install
-        # Fix version mismatch
-        ./scripts/fix-version-mismatch.sh
-        # Publish React Native to local repository
-        ./scripts/publish-react-native.sh
+        # Ensure React Native dependencies
+        ./scripts/ensure-react-native.sh
         
     - name: Find Android directory
       run: |
@@ -56,14 +54,14 @@ jobs:
         touch lasspath
         
         # Add React Native repositories before removing plugin
-        sed -i '/repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }\
-        maven { url("$rootDir/../node_modules/jsc-android/dist") }\
-        maven { url("$rootDir/../local-maven-repo") }' build.gradle
+        sed -i '/repositories {/a\        maven { url("$rootDir/../local-maven") }\
+        maven { url("$rootDir/../node_modules/react-native/android") }\
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }' build.gradle
         
         # Fix in allprojects too
-        sed -i '/allprojects {/,/}/ { /repositories {/a\        maven { url("$rootDir/../node_modules/react-native/android") }\
-        maven { url("$rootDir/../node_modules/jsc-android/dist") }\
-        maven { url("$rootDir/../local-maven-repo") }
+        sed -i '/allprojects {/,/}/ { /repositories {/a\        maven { url("$rootDir/../local-maven") }\
+        maven { url("$rootDir/../node_modules/react-native/android") }\
+        maven { url("$rootDir/../node_modules/jsc-android/dist") }
         }' build.gradle
         
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
