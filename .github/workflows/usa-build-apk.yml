@@ -27,7 +27,7 @@ jobs:
       
       - name: Setup Android
         run: |
-          cd GreedGross
+          cd android
           chmod +x gradlew
           
           if [ -f gradle/wrapper/gradle-wrapper.properties ]; then
@@ -49,7 +49,7 @@ jobs:
             project: {
               ios: {},
               android: {
-                sourceDir: './GreedGross',
+                sourceDir: './android',
                 manifestPath: 'app/src/main/AndroidManifest.xml',
                 packageName: 'com.greedandgross.cannabisbreeding',
               },
@@ -122,8 +122,8 @@ jobs:
           done
           
           # Alternative: Create a global include that defines std::regular
-          mkdir -p GreedGross/app/src/main/cpp
-          cat > GreedGross/app/src/main/cpp/cpp17_compat.h << 'EOF'
+          mkdir -p android/app/src/main/cpp
+          cat > android/app/src/main/cpp/cpp17_compat.h << 'EOF'
           #pragma once
           #if __cplusplus < 202002L
           namespace std {
@@ -136,10 +136,10 @@ jobs:
       - name: Fix autolinking manually
         run: |
           # Create the autolinking directory
-          mkdir -p GreedGross/app/build/generated/autolinking/src/main/java/com/facebook/react
+          mkdir -p android/app/build/generated/autolinking/src/main/java/com/facebook/react
           
           # Create PackageList.java manually with correct imports
-          cat > GreedGross/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java << 'EOF'
+          cat > android/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java << 'EOF'
 package com.facebook.react;
 
 import android.app.Application;
@@ -240,10 +240,10 @@ EOF
       - name: Force C++17 in Android build
         run: |
           # Add global C++ flags to gradle.properties
-          echo "" >> GreedGross/gradle.properties
-          echo "# Force C++17 for all native builds" >> GreedGross/gradle.properties
-          echo "android.defaultConfig.cmake.cppFlags=-std=c++17" >> GreedGross/gradle.properties
-          echo "android.defaultConfig.externalNativeBuild.cmake.cppFlags=-std=c++17" >> GreedGross/gradle.properties
+          echo "" >> android/gradle.properties
+          echo "# Force C++17 for all native builds" >> android/gradle.properties
+          echo "android.defaultConfig.cmake.cppFlags=-std=c++17" >> android/gradle.properties
+          echo "android.defaultConfig.externalNativeBuild.cmake.cppFlags=-std=c++17" >> android/gradle.properties
           
           # Create a gradle init script to force C++17
           mkdir -p ~/.gradle/init.d

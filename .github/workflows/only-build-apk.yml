@@ -26,7 +26,7 @@ jobs:
       
       - name: Setup Android
         run: |
-          cd GreedGross
+          cd android
           chmod +x gradlew
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           

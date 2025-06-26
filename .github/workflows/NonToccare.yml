@@ -39,8 +39,8 @@ jobs:
       run: |
         if [ -d "android" ]; then
           echo "ANDROID_DIR=android" >> $GITHUB_ENV
-        elif [ -d "GreedGross" ]; then
-          echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
+        elif [ -d "android" ]; then
+          echo "ANDROID_DIR=android" >> $GITHUB_ENV
         else
           GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
           echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV

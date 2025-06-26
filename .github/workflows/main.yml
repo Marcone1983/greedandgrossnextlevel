@@ -51,11 +51,11 @@ jobs:
         find node_modules -name "CMakeLists.txt" -type f -exec sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' {} \;
         
         # Create local.properties
-        echo "sdk.dir=$ANDROID_SDK_ROOT" > GreedGross/local.properties
-        echo "ndk.dir=$ANDROID_NDK_ROOT" >> GreedGross/local.properties
+        echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+        echo "ndk.dir=$ANDROID_NDK_ROOT" >> android/local.properties
         
         # Fix permissions
-        chmod +x GreedGross/gradlew
+        chmod +x android/gradlew
         
         # Fix namespace issue for react-native-fs
         if [ -f "node_modules/react-native-fs/android/build.gradle" ]; then
@@ -73,25 +73,9 @@ jobs:
           fi
         done
         
-    - name: Find Android directory
-      
+    - name: Set Android directory
       run: |
-       
-        if [ -d "android" ]; then
-          
-          echo "ANDROID_DIR=android" >> $GITHUB_ENV
-        
-        elif [ -d "GreedGross" ]; then
-          
-          echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
-       
-        else
-          
-          GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
-          
-          echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
-        
-        fi
+        echo "ANDROID_DIR=android" >> $GITHUB_ENV
         
     - name: Build all
       

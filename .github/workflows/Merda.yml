@@ -38,8 +38,8 @@ jobs:
         
         if [ -d "android" ]; then
           cd android
-        elif [ -d "GreedGross" ]; then
-        cd GreedGross
+        elif [ -d "android" ]; then
+        cd android
         else
           exit 1
         fi
@@ -141,9 +141,9 @@ EOF
          
           cd android
           
-        elif [ -d "GreedGross" ]; then
+        elif [ -d "android" ]; then
           
-          cd GreedGross
+          cd android
           
         fi
         
@@ -156,9 +156,9 @@ EOF
          
           cd Android  
 
-        elif [ -d "GreedGross" ]; then
+        elif [ -d "android" ]; then
           
-          cd GreedGross
+          cd android
         fi
         
         ./gradlew assembleRelease --no-daemon --stacktrace

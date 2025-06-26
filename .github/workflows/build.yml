@@ -47,13 +47,13 @@ jobs:
           
       - name: Setup Android
         run: |
-          cd GreedGross
+          cd android
           chmod +x gradlew
           echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
           
       - name: Create google services
         run: |
-          cd GreedGross
+          cd android
           cat > app/google-services.json << 'GOOGLEEOF'
           {
             "project_info": {
@@ -98,7 +98,7 @@ jobs:
           
       - name: Setup keystore
         run: |
-          cd GreedGross
+          cd android
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/greed-gross-release-key.keystore
           cat >> gradle.properties << 'GRADLEEOF'
           
@@ -148,10 +148,10 @@ jobs:
       - name: Fix autolinking manually
         run: |
           # Create the autolinking directory
-          mkdir -p GreedGross/app/build/generated/autolinking/src/main/java/com/facebook/react
+          mkdir -p android/app/build/generated/autolinking/src/main/java/com/facebook/react
           
           # Create PackageList.java manually with correct imports
-          cat > GreedGross/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java << 'EOF'
+          cat > android/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java << 'EOF'
 package com.facebook.react;
 
 import android.app.Application;
@@ -260,7 +260,7 @@ EOF
           
       - name: Build APK
         run: |
-          cd GreedGross
+          cd android
           # Run gradle build
           java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --stacktrace || {
             echo "Build failed!"
@@ -273,6 +273,6 @@ EOF
         with:
           name: greed-gross-apk
           path: |
-            GreedGross/app/build/outputs/apk/**/*.apk
-            GreedGross/app/build/outputs/bundle/**/*.aab
+            android/app/build/outputs/apk/**/*.apk
+            android/app/build/outputs/bundle/**/*.aab
           if-no-files-found: warn

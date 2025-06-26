@@ -36,11 +36,11 @@ runs:
       env:
         INPUT_FLAVOUR: ${{ inputs.flavour }}
       run: |
-        # Build from GreedGross directory
+        # Build from android directory
         echo "Starting Android build..."
         BUILD_STATUS=0
         
-        cd GreedGross
+        cd android
         
         # Clean before build
         if [ -f "pre-build-cleanup.sh" ]; then
@@ -64,8 +64,8 @@ runs:
         fi
         
         # Find the APK
-        APK_PATH="GreedGross/app/build/outputs/apk/release/app-release-unsigned.apk"
-        APK_DIR="GreedGross/app/build/outputs/apk/release"
+        APK_PATH="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+        APK_DIR="android/app/build/outputs/apk/release"
         echo "apk-path=$(echo $APK_PATH)" >> $GITHUB_OUTPUT
         echo "apk-directory=$(echo $APK_DIR)" >> $GITHUB_OUTPUT
         

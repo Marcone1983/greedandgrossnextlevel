@@ -1,4 +1,4 @@
-rootProject.name = 'GreedGross'
+rootProject.name = 'GreedAndGross'
 include ':app'
 
 // Manual native module inclusion
