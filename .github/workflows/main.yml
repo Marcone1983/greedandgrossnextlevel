@@ -127,14 +127,14 @@ jobs:
           
           # Create gradle.properties with version overrides
           echo "🔧 Creating Gradle properties for auto-resolution..."
-          cat >> gradle.properties << EOF
-
-# Auto-resolved versions
-REACT_NATIVE_VERSION=$RN_MAJOR_MINOR.0
-android.useAndroidX=true
-android.enableJetifier=true
-kotlin.suppressDeprecationWarnings=true
-EOF
+          {
+            echo ""
+            echo "# Auto-resolved versions"
+            echo "REACT_NATIVE_VERSION=$RN_MAJOR_MINOR.0"
+            echo "android.useAndroidX=true"
+            echo "android.enableJetifier=true"
+            echo "kotlin.suppressDeprecationWarnings=true"
+          } >> gradle.properties
           
           # Fix gradle plugin references dynamically
           echo "🔄 Updating gradle files to use detected version..."
@@ -172,25 +172,24 @@ EOF
             echo "✅ Found react-native.config.js"
           else
             echo "📝 Creating react-native.config.js for custom android directory..."
-            cat > ../react-native.config.js << RNCONFIG
-module.exports = {
-  project: {
-    ios: {},
-    android: {
-      sourceDir: './${ANDROID_DIR}',
-      manifestPath: 'app/src/main/AndroidManifest.xml',
-    },
-  },
-  dependencies: {
-    // Auto-exclude problematic dependencies
-    'detox': {
-      platforms: {
-        android: null,
-      },
-    },
-  },
-};
-RNCONFIG
+            printf '%s\n' \
+              "module.exports = {" \
+              "  project: {" \
+              "    ios: {}," \
+              "    android: {" \
+              "      sourceDir: './${ANDROID_DIR}'," \
+              "      manifestPath: 'app/src/main/AndroidManifest.xml'," \
+              "    }," \
+              "  }," \
+              "  dependencies: {" \
+              "    // Auto-exclude problematic dependencies" \
+              "    'detox': {" \
+              "      platforms: {" \
+              "        android: null," \
+              "      }," \
+              "    }," \
+              "  }," \
+              "};" > ../react-native.config.js
           fi
           
           # Build APK with auto-resolution enabled
