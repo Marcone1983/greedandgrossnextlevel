@@ -3,394 +3,52 @@ name: Build APK
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
-      - master
-  pull_request:
-    branches:
-      - main
-      - master
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
         
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          
-      - name: Install React Native dependencies with auto-resolution
-        run: |
-          echo "📦 Installing JavaScript dependencies with smart resolution..."
-          
-          # Create .npmrc for better dependency resolution
-          echo "legacy-peer-deps=true" > .npmrc
-          echo "auto-install-peers=true" >> .npmrc
-          
-          # Remove problematic packages
-          echo "🗑️ Removing problematic packages..."
-          npm uninstall detox expo expo-modules-core --save-dev --legacy-peer-deps || true
-          
-          # Clean cache
-          npm cache clean --force
-          
-          # Install with automatic resolution
-          echo "🔧 Installing with automatic version resolution..."
-          npm install --legacy-peer-deps || {
-            echo "⚠️ First install failed, trying with force..."
-            npm install --force
-          }
-          
-          # Let React Native resolve its own dependencies
-          echo "🔄 Ensuring React Native compatibility..."
-          npx react-native-clean-project-auto -y || true
-          
-          # Fix reanimated C++ compatibility
-          echo "🔧 Fixing react-native-reanimated C++ compatibility..."
-          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/CMAKE_CXX_STANDARD 20/CMAKE_CXX_STANDARD 17/g' {} \;
-          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/cxx_std_20/cxx_std_17/g' {} \;
-          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/-std=c++20/-std=c++17/g' {} \;
-          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/cppFlags.add("-std=c++20")/cppFlags.add("-std=c++17")/g' {} \;
-          
-      - name: Install React Native CLI
-        run: npm install -g @react-native-community/cli
+    - run: npm install
         
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-            
-      - name: Find React Native Android directory
-        run: |
-          echo "🔍 Looking for React Native Android project..."
-          
-          # First check for standard React Native android directory
-          if [ -d "android" ]; then
-            echo "✅ Found standard React Native android directory"
-            echo "ANDROID_DIR=android" >> $GITHUB_ENV
-          elif [ -d "GreedGross" ]; then
-            echo "✅ Found GreedGross directory"
-            echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
-          else
-            echo "🔍 Searching for Android project directories..."
-            find . -name "build.gradle" -path "*/android/*" | head -5
-            find . -name "gradlew" -not -path "*/node_modules/*" | head -5
-            
-            # Find gradlew NOT in node_modules
-            GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
-            if [ -n "$GRADLEW_PATH" ]; then
-              GRADLEW_DIR=$(dirname "$GRADLEW_PATH")
-              echo "✅ Found gradlew at: $GRADLEW_PATH"
-              echo "ANDROID_DIR=$GRADLEW_DIR" >> $GITHUB_ENV
-            else
-              echo "❌ No Android project found!"
-              exit 1
-            fi
-          fi
+    - uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
         
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+    - run: sed -i 's/0\.79\.0/0.80.0/g' package.json
         
-      - name: Build React Native Android APK
-        run: |
-          cd "$ANDROID_DIR"
-          echo "🏗️ Building React Native Android from: $(pwd)"
-          
-          # Make gradlew executable
-          chmod +x gradlew
-          
-          # Create lasspath if needed
-          if [ ! -f "lasspath" ]; then
-            echo "📝 Creating empty lasspath file"
-            touch lasspath
-          fi
-          
-          # Smart version detection and fixing
-          echo "🔧 Smart React Native version resolution..."
-          
-          # Detect current React Native version from package.json
-          RN_VERSION=$(node -p "require('../package.json').dependencies['react-native']" 2>/dev/null || echo "0.79.0")
-          echo "📌 Detected React Native version: $RN_VERSION"
-          
-          # Extract major.minor version
-          RN_MAJOR_MINOR=$(echo $RN_VERSION | grep -oE '[0-9]+\.[0-9]+' | head -1)
-          
-          # Create gradle.properties with version overrides
-          echo "🔧 Creating Gradle properties for auto-resolution..."
-          {
-            echo ""
-            echo "# Auto-resolved versions"
-            echo "REACT_NATIVE_VERSION=$RN_MAJOR_MINOR.0"
-            echo "android.useAndroidX=true"
-            echo "android.enableJetifier=true"
-            echo "kotlin.suppressDeprecationWarnings=true"
-          } >> gradle.properties
-          
-          # Fix React Native gradle plugin path  
-          echo "🔄 Setting up React Native gradle plugin..."
-          cd ..
-          
-          # Ensure we have the correct version
-          ACTUAL_RN_VERSION=$RN_MAJOR_MINOR.0
-          
-          if [ -d "node_modules/@react-native/gradle-plugin" ]; then
-            echo "📦 Building React Native gradle plugin locally for version $ACTUAL_RN_VERSION..."
-            cd node_modules/@react-native/gradle-plugin
-            
-            # Build the plugin using its own gradle if available
-            if [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
-              echo "🔨 Found gradle build file, building plugin..."
-              ./gradlew build publishToMavenLocal || true
-            else
-              echo "📦 Creating plugin JAR manually..."
-              # Create directory structure
-              mkdir -p build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION
-              
-              # Create a minimal but valid JAR
-              mkdir -p temp-jar/META-INF
-              mkdir -p temp-jar/com/facebook/react
-              
-              # Create manifest
-              cat > temp-jar/META-INF/MANIFEST.MF << MANIFEST
-Manifest-Version: 1.0
-Implementation-Title: react-native-gradle-plugin
-Implementation-Version: $ACTUAL_RN_VERSION
-Built-By: React Native
-MANIFEST
-              
-              # Create marker class
-              echo "package com.facebook.react; public class GradlePlugin {}" > temp-jar/com/facebook/react/GradlePlugin.java
-              
-              # Create JAR
-              cd temp-jar
-              jar cf ../build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION/react-native-gradle-plugin-$ACTUAL_RN_VERSION.jar .
-              cd ..
-              
-              # Create POM
-              cat > build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION/react-native-gradle-plugin-$ACTUAL_RN_VERSION.pom << POM
-<?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.facebook.react</groupId>
-  <artifactId>react-native-gradle-plugin</artifactId>
-  <version>$ACTUAL_RN_VERSION</version>
-</project>
-POM
-              
-              # Clean up
-              rm -rf temp-jar
-            fi
-            
-            echo "✅ Plugin files created:"
-            ls -la build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION/
-            
-            cd ../../..
-          else
-            echo "⚠️ @react-native/gradle-plugin not found!"
-          fi
-          
-          cd "$ANDROID_DIR"
-          
-          echo "✅ React Native version auto-resolved to: $RN_MAJOR_MINOR.0"
-          
-          # Show what we changed
-          echo "🔍 Checking gradle files after fix:"
-          find . -name "*.gradle" -not -path "*/node_modules/*" -exec grep -H "react-native-gradle-plugin" {} \; || true
-          
-          # Let Gradle refresh dependencies and resolve versions
-          echo "🔄 Refreshing Gradle dependencies..."
-          ./gradlew --refresh-dependencies || true
-          
-          # Clean previous builds
-          echo "🧹 Cleaning previous builds..."
-          ./gradlew clean || true
-          
-          # Remove Detox interference if exists
-          if [ -f "settings.gradle" ]; then
-            echo "🔧 Backing up and fixing settings.gradle..."
-            cp settings.gradle settings.gradle.backup
-            # Remove detox lines
-            grep -v "detox" settings.gradle.backup > settings.gradle || cp settings.gradle.backup settings.gradle
-          fi
-          
-          # List files for debug
-          echo "📁 Android project files:"
-          ls -la
-          
-          # Fix autolinking manually
-          echo "🔗 Creating PackageList.java for autolinking..."
-          mkdir -p app/build/generated/autolinking/src/main/java/com/facebook/react
-          
-          # Create PackageList.java file
-          echo 'package com.facebook.react;' > app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import android.app.Application;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import android.content.Context;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import android.content.res.Resources;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.facebook.react.ReactPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.facebook.react.shell.MainPackageConfig;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.facebook.react.shell.MainReactPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import java.util.Arrays;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import java.util.ArrayList;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '// Import native modules' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.th3rdwave.safeareacontext.SafeAreaContextPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.swmansion.gesturehandler.RNGestureHandlerPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.swmansion.rnscreens.RNScreensPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.swmansion.reanimated.ReanimatedPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import cl.json.RNSharePackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.horcrux.svg.SvgPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.oblador.vectoricons.VectorIconsPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.reactnativecommunity.webview.RNCWebViewPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.rnfs.RNFSPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.mkuczera.RNReactNativeHapticFeedbackPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.learnium.RNDeviceInfo.RNDeviceInfoPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.BV.LinearGradient.LinearGradientPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import io.invertase.firebase.app.ReactNativeFirebaseAppPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import io.invertase.firebase.auth.ReactNativeFirebaseAuthPackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import io.invertase.firebase.firestore.ReactNativeFirebaseFirestorePackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'import io.invertase.firebase.storage.ReactNativeFirebaseStoragePackage;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo 'public class PackageList {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  private Application application;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  private ReactNativeHost reactNativeHost;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  private MainPackageConfig mConfig;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  public PackageList(ReactNativeHost reactNativeHost) {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    this(reactNativeHost, null);' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  public PackageList(Application application) {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    this(application, null);' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  public PackageList(ReactNativeHost reactNativeHost, MainPackageConfig config) {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    this.reactNativeHost = reactNativeHost;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    mConfig = config;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  public PackageList(Application application, MainPackageConfig config) {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    this.reactNativeHost = null;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    this.application = application;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    mConfig = config;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  private ReactNativeHost getReactNativeHost() {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    return this.reactNativeHost;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  private Resources getResources() {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    return this.getApplication().getResources();' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  private Application getApplication() {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    if (this.reactNativeHost == null) return this.application;' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    return this.reactNativeHost.getApplication();' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  private Context getApplicationContext() {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    return this.getApplication().getApplicationContext();' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  public ArrayList<ReactPackage> getPackages() {' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    return new ArrayList<>(Arrays.<ReactPackage>asList(' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new MainReactPackage(mConfig),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new AsyncStoragePackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new RNDeviceInfoPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new ReactNativeFirebaseAppPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new ReactNativeFirebaseAuthPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new ReactNativeFirebaseFirestorePackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new ReactNativeFirebaseStoragePackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new RNGestureHandlerPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new LinearGradientPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new RNReactNativeHapticFeedbackPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new ReanimatedPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new SafeAreaContextPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new RNScreensPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new RNSharePackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new SvgPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new RNFSPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new VectorIconsPackage(),' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '      new RNCWebViewPackage()' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '    ));' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '  }' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          echo '}' >> app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java
-          
-          # Build APK with auto-resolution enabled
-          echo "🏗️ Building APK with automatic dependency resolution..."
-          
-          # Add local maven repository for React Native gradle plugin
-          echo "📦 Adding local Maven repository to settings.gradle..."
-          if [ -f "settings.gradle" ]; then
-            # Backup original
-            cp settings.gradle settings.gradle.backup
-            
-            # Add local maven repo at the beginning
-            {
-              echo "pluginManagement {"
-              echo "    repositories {"
-              echo "        mavenLocal()"
-              echo "        maven { url '../node_modules/@react-native/gradle-plugin/build' }"
-              echo "        gradlePluginPortal()"
-              echo "        google()"
-              echo "        mavenCentral()"
-              echo "    }"
-              echo "}"
-              echo ""
-              cat settings.gradle.backup
-            } > settings.gradle
-          fi
-          
-          ./gradlew assembleDebug \
-            -x test \
-            -x lint \
-            --refresh-dependencies \
-            --continue \
-            --stacktrace \
-            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m" \
-            -Pandroid.enableJetifier=true \
-            -Pandroid.useAndroidX=true
-          
-      - name: Find and upload APK
-        run: |
-          echo "🔍 Searching for APK files..."
-          find . -name "*.apk" -type f
-          
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-apk
-          path: |
-            ./**/build/outputs/apk/debug/*.apk
-            ./**/build/outputs/apk/**/*.apk
-          retention-days: 30
-          
-      - name: Upload mapping files (if exists)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: mapping-files
-          path: |
-            ./**/build/outputs/mapping/debug/
-            ./**/build/outputs/mapping/**/*.txt
-          retention-days: 30
+    - run: npm install
+        
+    - name: Build
+      run: |
+        if [ -d "android" ]; then
+          cd android
+        elif [ -d "GreedGross" ]; then
+          cd GreedGross
+        fi
+        chmod +x gradlew
+        
+        # Remove old Facebook plugin completely
+        sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
+        sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
+        
+        # Fix settings.gradle to use new system
+        if [ -f "settings.gradle" ]; then
+          echo "includeBuild('../node_modules/@react-native/gradle-plugin')" >> settings.gradle
+        fi
+        
+        ./gradlew assembleDebug --stacktrace
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: "**/build/outputs/apk/debug/*.apk"
