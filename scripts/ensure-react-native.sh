@@ -16,7 +16,9 @@ for module in react-native react-android hermes-android; do
   # Create a minimal AAR (ZIP file with required structure)
   mkdir -p temp/META-INF
   echo "Manifest-Version: 1.0" > temp/META-INF/MANIFEST.MF
-  echo "<manifest xmlns:android='http://schemas.android.com/apk/res/android' package='com.facebook.react.$module' />" > temp/AndroidManifest.xml
+  # Use a valid Java package name (replace hyphens with underscores)
+  package_name="com.facebook.react.${module//-/_}"
+  echo "<manifest xmlns:android='http://schemas.android.com/apk/res/android' package='$package_name' />" > temp/AndroidManifest.xml
   mkdir -p temp/classes
   mkdir -p temp/res
   touch temp/classes/.keep
