@@ -17,24 +17,35 @@ jobs:
         node-version: '22'
         cache: 'npm'
         
-    - run: npm install
+    - name: Install dependencies
+      run: |
+        rm -rf node_modules/detox || true
+        npm uninstall detox --save-dev || true
         
     - uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
         
-    - run: sed -i 's/0\.79\.0/0.80.0/g' package.json
+    - name: Fix React Native version
+      run: |
+        sed -i 's/0\.79\.0/0.80.0/g' package.json
+        npm install
         
-    - run: npm install
-        
-    - name: Build
+    - name: Find Android directory
       run: |
         if [ -d "android" ]; then
-          cd android
+          echo "ANDROID_DIR=android" >> $GITHUB_ENV
         elif [ -d "GreedGross" ]; then
-          cd GreedGross
+          echo "ANDROID_DIR=GreedGross" >> $GITHUB_ENV
+        else
+          GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
+          echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
         fi
+        
+    - name: Build APK
+      run: |
+        cd "$ANDROID_DIR"
         chmod +x gradlew
         
         # Create empty lasspath file
@@ -49,7 +60,21 @@ jobs:
           echo "includeBuild('../node_modules/@react-native/gradle-plugin')" >> settings.gradle
         fi
         
-        ./gradlew assembleDebug --stacktrace
+        # Check available tasks first
+        echo "Available tasks:"
+        ./gradlew tasks --all | grep -i assemble || true
+        
+        # Try different build commands
+        if ./gradlew :app:assembleDebug --stacktrace; then
+          echo "app:assembleDebug succeeded"
+        elif ./gradlew assembleDebug --stacktrace; then
+          echo "assembleDebug succeeded"  
+        elif ./gradlew build --stacktrace; then
+          echo "build succeeded"
+        else
+          echo "All builds failed"
+          exit 1
+        fi
         
     - uses: actions/upload-artifact@v4
       with:
