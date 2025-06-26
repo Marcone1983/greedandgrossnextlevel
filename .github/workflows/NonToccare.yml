@@ -49,6 +49,47 @@ jobs:
         cd "$ANDROID_DIR"
         chmod +x gradlew
         touch lasspath
+        
+        # Fix build.gradle - remove old Facebook plugin
+        cp build.gradle build.gradle.backup
+        cat > build.gradle << 'EOF'
+allprojects {
+    ext {
+        hermesEnabled = true
+    }
+}
+buildscript {
+    ext {
+        buildToolsVersion = "35.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 35
+        targetSdkVersion = 35
+        ndkVersion = "25.1.8937393"
+        kotlinVersion = "1.8.10"
+        FLIPPER_VERSION = "0.182.0"
+    }
+    repositories {
+        google()
+        mavenCentral()
+        maven { url("$rootDir/../node_modules/react-native/android") }
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.7.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("com.google.gms:google-services:4.4.0")
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.9.9")
+        classpath("com.google.firebase:perf-plugin:1.4.2")
+    }
+}
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url("$rootDir/../node_modules/react-native/android") }
+    }
+}
+EOF
+        
         ./gradlew assembleDebug --stacktrace
         
     - uses: actions/upload-artifact@v4
