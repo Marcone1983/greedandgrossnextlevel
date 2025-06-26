@@ -53,8 +53,7 @@ allprojects {
     }
 }
 
-// Apply React Native fixes to all modules
-apply from: "react-native-fix.gradle"
+// React Native fixes are handled inline above
 
 // Root tasks that delegate to app module
 task assembleRelease {
