@@ -32,10 +32,8 @@ jobs:
       run: |
         # Use React Native 0.79.0 (latest stable)
         npm install
-        # Ensure React Native dependencies
-        ./scripts/ensure-react-native.sh
-        # Apply ultimate fix (includes all fixes)
-        ./scripts/ultimate-fix.sh
+        # Apply simple fix
+        ./scripts/simple-fix.sh
         
     - name: Find Android directory
       run: |
@@ -56,13 +54,11 @@ jobs:
         touch lasspath
         
         # Add React Native repositories before removing plugin
-        sed -i '/repositories {/a\        maven { url file("$rootDir/../local-maven") }\
-        maven { url file("$rootDir/../node_modules/react-native/android") }\
+        sed -i '/repositories {/a\        maven { url file("$rootDir/../node_modules/react-native/android") }\
         maven { url file("$rootDir/../node_modules/jsc-android/dist") }' build.gradle
         
         # Fix in allprojects too
-        sed -i '/allprojects {/,/}/ { /repositories {/a\        maven { url file("$rootDir/../local-maven") }\
-        maven { url file("$rootDir/../node_modules/react-native/android") }\
+        sed -i '/allprojects {/,/}/ { /repositories {/a\        maven { url file("$rootDir/../node_modules/react-native/android") }\
         maven { url file("$rootDir/../node_modules/jsc-android/dist") }
         }' build.gradle
         
