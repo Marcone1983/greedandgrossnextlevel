@@ -3,6 +3,12 @@ set -e
 
 echo "Fixing React Native version mismatch..."
 
+# Check if the android directory exists
+if [ ! -d "node_modules/react-native/android/com/facebook/react" ]; then
+  echo "React Native android directory not found, skipping version fix"
+  exit 0
+fi
+
 cd node_modules/react-native/android/com/facebook/react
 
 # Create 0.79.0 directories and link to 0.80.0 files
