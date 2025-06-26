@@ -66,6 +66,7 @@ jobs:
           echo 'android {' >> app/build.gradle
           echo '    compileSdkVersion 34' >> app/build.gradle
           echo '    buildToolsVersion "34.0.0"' >> app/build.gradle
+          echo '    ' >> app/build.gradle
           echo '    defaultConfig {' >> app/build.gradle
           echo '        applicationId "com.greedgross"' >> app/build.gradle
           echo '        minSdkVersion 24' >> app/build.gradle
@@ -73,13 +74,23 @@ jobs:
           echo '        versionCode 1' >> app/build.gradle
           echo '        versionName "1.0"' >> app/build.gradle
           echo '    }' >> app/build.gradle
+          echo '    ' >> app/build.gradle
           echo '    buildTypes {' >> app/build.gradle
-          echo '        debug { debuggable true }' >> app/build.gradle
-          echo '        release { minifyEnabled false }' >> app/build.gradle
+          echo '        debug {' >> app/build.gradle
+          echo '            debuggable true' >> app/build.gradle
+          echo '        }' >> app/build.gradle
+          echo '        release {' >> app/build.gradle
+          echo '            minifyEnabled false' >> app/build.gradle
+          echo '        }' >> app/build.gradle
           echo '    }' >> app/build.gradle
           echo '}' >> app/build.gradle
           
           echo "include ':app'" >> settings.gradle
+        else
+          sed -i '/apply plugin: "com.facebook.react"/d' app/build.gradle
+          if ! grep -q "compileSdkVersion" app/build.gradle; then
+            sed -i '/android {/a\    compileSdkVersion 34' app/build.gradle
+          fi
         fi
         
         echo "Available build tasks:"
