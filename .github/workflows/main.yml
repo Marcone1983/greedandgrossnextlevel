@@ -37,6 +37,9 @@ jobs:
         fi
         chmod +x gradlew
         
+        # Create empty lasspath file
+        touch lasspath
+        
         # Remove old Facebook plugin completely
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
