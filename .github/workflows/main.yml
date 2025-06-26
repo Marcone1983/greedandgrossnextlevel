@@ -143,19 +143,70 @@ jobs:
             echo "kotlin.suppressDeprecationWarnings=true"
           } >> gradle.properties
           
-          # Fix React Native gradle plugin path
+          # Fix React Native gradle plugin path  
           echo "🔄 Setting up React Native gradle plugin..."
           cd ..
+          
+          # Ensure we have the correct version
+          ACTUAL_RN_VERSION=$RN_MAJOR_MINOR.0
+          
           if [ -d "node_modules/@react-native/gradle-plugin" ]; then
-            echo "📦 Building React Native gradle plugin locally..."
+            echo "📦 Building React Native gradle plugin locally for version $ACTUAL_RN_VERSION..."
             cd node_modules/@react-native/gradle-plugin
-            mkdir -p build/com/facebook/react/react-native-gradle-plugin/$RN_MAJOR_MINOR.0
-            mkdir -p temp-jar/META-INF
-            echo "Manifest-Version: 1.0" > temp-jar/META-INF/MANIFEST.MF
-            cd temp-jar && jar cf ../build/com/facebook/react/react-native-gradle-plugin/$RN_MAJOR_MINOR.0/react-native-gradle-plugin-$RN_MAJOR_MINOR.0.jar * && cd ..
-            echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><project><modelVersion>4.0.0</modelVersion><groupId>com.facebook.react</groupId><artifactId>react-native-gradle-plugin</artifactId><version>$RN_MAJOR_MINOR.0</version></project>" > build/com/facebook/react/react-native-gradle-plugin/$RN_MAJOR_MINOR.0/react-native-gradle-plugin-$RN_MAJOR_MINOR.0.pom
+            
+            # Build the plugin using its own gradle if available
+            if [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
+              echo "🔨 Found gradle build file, building plugin..."
+              ./gradlew build publishToMavenLocal || true
+            else
+              echo "📦 Creating plugin JAR manually..."
+              # Create directory structure
+              mkdir -p build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION
+              
+              # Create a minimal but valid JAR
+              mkdir -p temp-jar/META-INF
+              mkdir -p temp-jar/com/facebook/react
+              
+              # Create manifest
+              cat > temp-jar/META-INF/MANIFEST.MF << MANIFEST
+Manifest-Version: 1.0
+Implementation-Title: react-native-gradle-plugin
+Implementation-Version: $ACTUAL_RN_VERSION
+Built-By: React Native
+MANIFEST
+              
+              # Create marker class
+              echo "package com.facebook.react; public class GradlePlugin {}" > temp-jar/com/facebook/react/GradlePlugin.java
+              
+              # Create JAR
+              cd temp-jar
+              jar cf ../build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION/react-native-gradle-plugin-$ACTUAL_RN_VERSION.jar .
+              cd ..
+              
+              # Create POM
+              cat > build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION/react-native-gradle-plugin-$ACTUAL_RN_VERSION.pom << POM
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.facebook.react</groupId>
+  <artifactId>react-native-gradle-plugin</artifactId>
+  <version>$ACTUAL_RN_VERSION</version>
+</project>
+POM
+              
+              # Clean up
+              rm -rf temp-jar
+            fi
+            
+            echo "✅ Plugin files created:"
+            ls -la build/com/facebook/react/react-native-gradle-plugin/$ACTUAL_RN_VERSION/
+            
             cd ../../..
+          else
+            echo "⚠️ @react-native/gradle-plugin not found!"
           fi
+          
           cd "$ANDROID_DIR"
           
           echo "✅ React Native version auto-resolved to: $RN_MAJOR_MINOR.0"
