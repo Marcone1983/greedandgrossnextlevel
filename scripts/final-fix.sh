@@ -45,11 +45,11 @@ allprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             android {
-                compileSdkVersion 34
+                compileSdk 34
                 
                 defaultConfig {
-                    if (!hasProperty('minSdkVersion') || minSdkVersion < 24) {
-                        minSdkVersion 24
+                    if (!hasProperty('minSdk') || minSdk < 24) {
+                        minSdk 24
                     }
                 }
                 

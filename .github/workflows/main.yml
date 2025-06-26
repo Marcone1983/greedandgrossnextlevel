@@ -32,6 +32,8 @@ jobs:
       run: |
         # Use React Native 0.79.0 (latest stable)
         npm install
+        # FIX THE SYNTAX ERROR THAT CAUSED 937 FAILURES!
+        ./scripts/fix-syntax.sh
         # Apply final comprehensive fix
         ./scripts/final-fix.sh
         
@@ -106,14 +108,15 @@ jobs:
           echo '' >> app/build.gradle
           echo 'android {' >> app/build.gradle
           echo '    compileSdk 34' >> app/build.gradle
+          echo '    ' >> app/build.gradle
           echo '    buildFeatures {' >> app/build.gradle
           echo '        buildConfig true' >> app/build.gradle
           echo '    }' >> app/build.gradle
           echo '    ' >> app/build.gradle
           echo '    defaultConfig {' >> app/build.gradle
           echo '        applicationId "com.greedgross"' >> app/build.gradle
-          echo '        minSdkVersion 24' >> app/build.gradle
-          echo '        targetSdkVersion 34' >> app/build.gradle
+          echo '        minSdk 24' >> app/build.gradle
+          echo '        targetSdk 34' >> app/build.gradle
           echo '        versionCode 1' >> app/build.gradle
           echo '        versionName "1.0"' >> app/build.gradle
           echo '    }' >> app/build.gradle
