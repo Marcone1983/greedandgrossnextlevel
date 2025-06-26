@@ -31,6 +31,9 @@ jobs:
         npm install --legacy-peer-deps
         npm ls || true
         
+        # Fix React Native gradle plugin layout issue
+        ./fix-gradle-plugin-layout.sh
+        
     - uses: actions/setup-java@v4
       
       with:
