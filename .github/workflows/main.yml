@@ -8,36 +8,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v4
-
+      
     - uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'npm'
-
+        
     - name: Install dependencies
       run: |
         rm -rf node_modules/detox || true
         npm uninstall detox --save-dev || true
-
+        
     - uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
-
+        
     - name: Fix React Native version
       run: |
         sed -i 's/0\.79\.0/0.80.0/g' package.json
+        sed -i 's/"@react-native\/babel-preset": "^0\.79\.0"/"@react-native\/babel-preset": "^0.80.0"/g' package.json
+        sed -i 's/"@react-native\/gradle-plugin": "^0\.79\.0"/"@react-native\/gradle-plugin": "^0.80.0"/g' package.json
+        sed -i 's/"@react-native\/metro-config": "^0\.79\.0"/"@react-native\/metro-config": "^0.80.0"/g' package.json
         npm install
-
-    - name: Download Android SDK tools
-      uses: android-actions/setup-android@v3
-
-    - name: Install Android SDK Platform 35
-      run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
-
+        
     - name: Find Android directory
       run: |
         if [ -d "android" ]; then
@@ -48,39 +45,41 @@ jobs:
           GRADLEW_PATH=$(find . -name "gradlew" -not -path "*/node_modules/*" | head -1)
           echo "ANDROID_DIR=$(dirname "$GRADLEW_PATH")" >> $GITHUB_ENV
         fi
-
-    - name: Build APK and AAB
+        
+    - name: Build all Android variants
       run: |
         cd "$ANDROID_DIR"
         chmod +x gradlew
+        
         touch lasspath
-
+        
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
-
+        
         if [ -f "settings.gradle" ]; then
           echo "includeBuild('../node_modules/@react-native/gradle-plugin')" >> settings.gradle
         fi
-
+        
         if [ ! -d "app" ]; then
+          echo "Creating app module structure..."
           mkdir -p app/src/main/java
           mkdir -p app/src/main/res
-
+          
           cat > app/build.gradle << 'EOF'
 apply plugin: "com.android.application"
 
 android {
-
-    compileSdkVersion 35
-
+    compileSdkVersion 34
+    buildToolsVersion "34.0.0"
+    
     defaultConfig {
         applicationId "com.greedgross"
         minSdkVersion 24
-        targetSdkVersion 35
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
     }
-
+    
     buildTypes {
         debug {
             debuggable true
@@ -95,13 +94,30 @@ dependencies {
     implementation project(':react-native')
 }
 EOF
-
+          
           echo "include ':app'" >> settings.gradle
         fi
-
+        
+        echo "Available build tasks:"
         ./gradlew tasks | grep -i assemble
-
+        
+        echo "Building Debug APK..."
         ./gradlew assembleDebug --stacktrace
+        
+        echo "Building Release APK..."  
         ./gradlew assembleRelease --stacktrace
+        
+        echo "Building Debug AAB..."
         ./gradlew bundleDebug --stacktrace || true
+        
+        echo "Building Release AAB..."
         ./gradlew bundleRelease --stacktrace || true
+        
+    - uses: actions/upload-artifact@v4
+      with:
+        name: android-builds-complete
+        path: |
+          **/build/outputs/apk/debug/*.apk
+          **/build/outputs/apk/release/*.apk
+          **/build/outputs/bundle/debug/*.aab
+          **/build/outputs/bundle/release/*.aab
