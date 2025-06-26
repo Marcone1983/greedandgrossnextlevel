@@ -56,8 +56,8 @@ def isNewArchitectureEnabled() {
 
 android {
     ndkVersion rootProject.ext.ndkVersion ?: "25.1.8937393"
-    compileSdkVersion = 35
-    buildToolsVersion = "35.0.0"
+    compileSdk 35
+    buildToolsVersion "35.0.0"
 
     namespace "com.greedandgross.cannabisbreeding"
     
