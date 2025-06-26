@@ -28,16 +28,9 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
         
-    - name: Fix React Native version
+    - name: Install dependencies with fixed versions
       run: |
-        sed -i 's/0\.79\.0/0.80.0/g' package.json
-        sed -i 's/"@react-native\/babel-preset": "^0\.79\.0"/"@react-native\/babel-preset": "^0.80.0"/g' package.json
-        sed -i 's/"@react-native\/gradle-plugin": "^0\.79\.0"/"@react-native\/gradle-plugin": "^0.80.0"/g' package.json
-        sed -i 's/"@react-native\/metro-config": "^0\.79\.0"/"@react-native\/metro-config": "^0.80.0"/g' package.json
-        npm install
-        
-        # Fix: React Native 0.80.0 non esiste, ripristina 0.79.0
-        sed -i 's/0\.80\.0/0.79.0/g' package.json
+        # Use React Native 0.79.0 (latest stable)
         npm install
         
     - name: Find Android directory
