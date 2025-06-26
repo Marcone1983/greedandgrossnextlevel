@@ -65,35 +65,23 @@ jobs:
           mkdir -p app/src/main/java
           mkdir -p app/src/main/res
           
-          cat > app/build.gradle << 'EOF'
-apply plugin: "com.android.application"
-
-android {
-    compileSdkVersion 34
-    buildToolsVersion "34.0.0"
-    
-    defaultConfig {
-        applicationId "com.greedgross"
-        minSdkVersion 24
-        targetSdkVersion 34
-        versionCode 1
-        versionName "1.0"
-    }
-    
-    buildTypes {
-        debug {
-            debuggable true
-        }
-        release {
-            minifyEnabled false
-        }
-    }
-}
-
-dependencies {
-    implementation project(':react-native')
-}
-EOF
+          echo 'apply plugin: "com.android.application"' > app/build.gradle
+          echo '' >> app/build.gradle
+          echo 'android {' >> app/build.gradle
+          echo '    compileSdkVersion 34' >> app/build.gradle
+          echo '    buildToolsVersion "34.0.0"' >> app/build.gradle
+          echo '    defaultConfig {' >> app/build.gradle
+          echo '        applicationId "com.greedgross"' >> app/build.gradle
+          echo '        minSdkVersion 24' >> app/build.gradle
+          echo '        targetSdkVersion 34' >> app/build.gradle
+          echo '        versionCode 1' >> app/build.gradle
+          echo '        versionName "1.0"' >> app/build.gradle
+          echo '    }' >> app/build.gradle
+          echo '    buildTypes {' >> app/build.gradle
+          echo '        debug { debuggable true }' >> app/build.gradle
+          echo '        release { minifyEnabled false }' >> app/build.gradle
+          echo '    }' >> app/build.gradle
+          echo '}' >> app/build.gradle
           
           echo "include ':app'" >> settings.gradle
         fi
