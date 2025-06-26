@@ -63,8 +63,8 @@ def isNewArchitectureEnabled() {
 
 android {
     ndkVersion rootProject.ext.ndkVersion ?: "25.1.8937393"
-    compileSdk 35
-    buildToolsVersion "35.0.0"
+    compileSdk 34
+    buildToolsVersion "34.0.0"
 
     namespace "com.greedandgross.cannabisbreeding"
     
@@ -75,7 +75,7 @@ android {
     defaultConfig {
         applicationId "com.greedandgross.cannabisbreeding"
         minSdkVersion rootProject.ext.minSdkVersion ?: 24
-        targetSdkVersion rootProject.ext.targetSdkVersion ?: 35
+        targetSdkVersion rootProject.ext.targetSdkVersion ?: 34
         versionCode 1
         versionName "1.0.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
