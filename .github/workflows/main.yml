@@ -66,8 +66,10 @@ jobs:
         maven { url file("$rootDir/../node_modules/jsc-android/dist") }
         }' build.gradle
         
+        # Remove plugin but ensure React Native is still available
         sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
         sed -i '/classpath.*react-native-gradle-plugin/d' build.gradle
+        sed -i '/apply plugin: "com.facebook.react"/d' app/build.gradle
         
         # Add buildConfig configuration for all subprojects (fixes lottie-react-native)
         if ! grep -q "buildFeatures" build.gradle; then
@@ -92,6 +94,12 @@ jobs:
           echo "                    kotlinOptions {" >> build.gradle
           echo "                        jvmTarget = '17'" >> build.gradle
           echo "                    }" >> build.gradle
+          echo "                }" >> build.gradle
+          echo "            }" >> build.gradle
+          echo "            // Add React Native dependencies to all modules" >> build.gradle
+          echo "            dependencies {" >> build.gradle
+          echo "                if (project.name != 'app') {" >> build.gradle
+          echo "                    implementation 'com.facebook.react:react-android:0.79.0'" >> build.gradle
           echo "                }" >> build.gradle
           echo "            }" >> build.gradle
           echo "        }" >> build.gradle

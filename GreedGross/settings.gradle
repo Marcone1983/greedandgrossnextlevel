@@ -24,6 +24,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url("$rootDir/../node_modules/react-native/android") }
         jcenter() {
             content {
                 includeModule("com.yqritc", "Android-ScalableVideoView")

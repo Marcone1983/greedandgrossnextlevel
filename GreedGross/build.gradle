@@ -44,7 +44,17 @@ allprojects {
         maven { url("$rootDir/../node_modules/jsc-android/dist") }
     }
     
+    // Ensure React Native is available to all modules
+    configurations.all {
+        resolutionStrategy {
+            force "com.facebook.react:react-android:0.79.0"
+            force "com.facebook.react:hermes-android:0.79.0"
+        }
+    }
 }
+
+// Apply React Native fixes to all modules
+apply from: "react-native-fix.gradle"
 
 // Root tasks that delegate to app module
 task assembleRelease {

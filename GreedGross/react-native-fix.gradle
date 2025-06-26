@@ -1,0 +1,57 @@
+// React Native dependency fix for all modules
+// This file ensures React Native classes are available to all native modules
+
+// Apply to all projects
+allprojects {
+    afterEvaluate { project ->
+        // Skip the root project
+        if (project.name == rootProject.name) return
+        
+        // Check if this is an Android library or application
+        if (project.hasProperty("android")) {
+            project.android {
+                // Ensure compileSdk is at least 35
+                if (compileSdkVersion.toInteger() < 35) {
+                    compileSdkVersion 35
+                }
+                
+                // Ensure buildToolsVersion
+                if (!buildToolsVersion || buildToolsVersion < "35.0.0") {
+                    buildToolsVersion = "35.0.0"
+                }
+            }
+            
+            // Add React Native dependencies if not already present
+            project.dependencies {
+                // Check if the module already has React Native
+                def hasReactNative = false
+                configurations.implementation.getDependencies().each { dep ->
+                    if (dep.group == "com.facebook.react" && dep.name == "react-android") {
+                        hasReactNative = true
+                    }
+                }
+                
+                // Add React Native if missing and this is a native module
+                if (!hasReactNative && project.name != "app") {
+                    implementation("com.facebook.react:react-android")
+                }
+            }
+            
+            // Ensure repositories include React Native
+            project.repositories {
+                maven { url("$rootDir/../node_modules/react-native/android") }
+            }
+        }
+    }
+}
+
+// Force React Native version resolution
+configurations.all {
+    resolutionStrategy {
+        eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'com.facebook.react') {
+                details.useVersion "0.79.0"
+            }
+        }
+    }
+}

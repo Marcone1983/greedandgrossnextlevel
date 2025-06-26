@@ -1,5 +1,4 @@
 apply plugin: "com.android.application"
-apply plugin: "com.facebook.react"
 apply plugin: "org.jetbrains.kotlin.android"
 
 import com.android.build.OutputFile
@@ -140,7 +139,9 @@ repositories {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
-    // React Native is included automatically by the com.facebook.react plugin
+    // React Native dependencies
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     
