@@ -287,6 +287,29 @@ jobs:
           
           # Build APK with auto-resolution enabled
           echo "🏗️ Building APK with automatic dependency resolution..."
+          
+          # Add local maven repository for React Native gradle plugin
+          echo "📦 Adding local Maven repository to settings.gradle..."
+          if [ -f "settings.gradle" ]; then
+            # Backup original
+            cp settings.gradle settings.gradle.backup
+            
+            # Add local maven repo at the beginning
+            {
+              echo "pluginManagement {"
+              echo "    repositories {"
+              echo "        mavenLocal()"
+              echo "        maven { url '../node_modules/@react-native/gradle-plugin/build' }"
+              echo "        gradlePluginPortal()"
+              echo "        google()"
+              echo "        mavenCentral()"
+              echo "    }"
+              echo "}"
+              echo ""
+              cat settings.gradle.backup
+            } > settings.gradle
+          fi
+          
           ./gradlew assembleDebug \
             -x test \
             -x lint \
