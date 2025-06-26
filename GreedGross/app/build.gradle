@@ -145,13 +145,13 @@ dependencies {
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     
-    // Firebase
-    implementation platform('com.google.firebase:firebase-bom:32.7.0')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.firebase:firebase-firestore'
-    implementation 'com.google.firebase:firebase-storage'
-    implementation 'com.google.firebase:firebase-crashlytics'
-    implementation 'com.google.firebase:firebase-perf'
+    // Firebase - commented out until google-services.json is added
+    // implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    // implementation 'com.google.firebase:firebase-analytics'
+    // implementation 'com.google.firebase:firebase-firestore'
+    // implementation 'com.google.firebase:firebase-storage'
+    // implementation 'com.google.firebase:firebase-crashlytics'
+    // implementation 'com.google.firebase:firebase-perf'
     
     // RevenueCat
     implementation 'com.revenuecat.purchases:purchases:6.9.7'
