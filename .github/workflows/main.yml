@@ -34,6 +34,8 @@ jobs:
         npm install
         # Apply simple fix
         ./scripts/simple-fix.sh
+        # Force repositories in modules
+        ./scripts/force-module-repos.sh
         
     - name: Find Android directory
       run: |
