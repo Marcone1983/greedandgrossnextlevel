@@ -35,6 +35,7 @@ EOF
 cd ../../../..
 
 # Do the same for react-android
+mkdir -p com/facebook/react/react-android/0.79.0
 cd com/facebook/react/react-android/0.79.0
 mkdir -p temp/META-INF
 echo "Manifest-Version: 1.0" > temp/META-INF/MANIFEST.MF
@@ -58,6 +59,7 @@ EOF
 cd ../../../..
 
 # Do the same for hermes-android
+mkdir -p com/facebook/react/hermes-android/0.79.0
 cd com/facebook/react/hermes-android/0.79.0
 mkdir -p temp/META-INF
 echo "Manifest-Version: 1.0" > temp/META-INF/MANIFEST.MF
