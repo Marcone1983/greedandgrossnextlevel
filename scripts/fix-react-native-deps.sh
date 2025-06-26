@@ -4,7 +4,7 @@ set -e
 echo "Fixing React Native dependencies..."
 
 # Find all modules that depend on com.facebook.react
-find ../node_modules -name "build.gradle" -not -path "*/react-native/*" | while read gradle_file; do
+find node_modules -name "build.gradle" -not -path "*/react-native/*" | while read gradle_file; do
   module_name=$(basename $(dirname $(dirname "$gradle_file")))
   
   # Check if it has com.facebook.react dependency
@@ -22,12 +22,21 @@ find ../node_modules -name "build.gradle" -not -path "*/react-native/*" | while 
   fi
 done
 
-# Add ReactAndroid to settings.gradle if not already there
-if ! grep -q "include ':ReactAndroid'" ../GreedGross/settings.gradle; then
-  echo "" >> ../GreedGross/settings.gradle
-  echo "// React Native modules" >> ../GreedGross/settings.gradle
-  echo "include ':ReactAndroid'" >> ../GreedGross/settings.gradle
-  echo "project(':ReactAndroid').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/ReactAndroid')" >> ../GreedGross/settings.gradle
+# Add ReactAndroid to settings.gradle if not already there  
+if [ -f "GreedGross/settings.gradle" ]; then
+  SETTINGS_FILE="GreedGross/settings.gradle"
+elif [ -f "android/settings.gradle" ]; then
+  SETTINGS_FILE="android/settings.gradle"
+else
+  echo "Could not find settings.gradle"
+  exit 1
+fi
+
+if ! grep -q "include ':ReactAndroid'" "$SETTINGS_FILE"; then
+  echo "" >> "$SETTINGS_FILE"
+  echo "// React Native modules" >> "$SETTINGS_FILE"
+  echo "include ':ReactAndroid'" >> "$SETTINGS_FILE"
+  echo "project(':ReactAndroid').projectDir = new File(rootProject.projectDir, '../node_modules/react-native/ReactAndroid')" >> "$SETTINGS_FILE"
 fi
 
 echo "Dependencies fixed!"
