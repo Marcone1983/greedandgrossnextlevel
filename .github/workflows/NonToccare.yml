@@ -89,6 +89,25 @@ jobs:
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
         
+      - name: Fix impossible React Native version
+        run: |
+          echo "🔧 Fixing impossible React Native 0.79.0 version..."
+          echo "ℹ️ React Native skipped 0.79.x - latest is 0.80.0"
+          
+          # Fix package.json - replace 0.79.0 with 0.80.0 (actual latest version)
+          if [ -f "package.json" ]; then
+            echo "📝 Fixing package.json..."
+            sed -i 's/"react-native": "0\.79\.0"/"react-native": "0.80.0"/g' package.json
+            sed -i 's/"@react-native\/babel-preset": "^0\.79\.0"/"@react-native\/babel-preset": "^0.80.0"/g' package.json
+            sed -i 's/"@react-native\/gradle-plugin": "^0\.79\.0"/"@react-native\/gradle-plugin": "^0.80.0"/g' package.json
+            sed -i 's/"@react-native\/metro-config": "^0\.79\.0"/"@react-native\/metro-config": "^0.80.0"/g' package.json
+            echo "✅ Fixed package.json: 0.79.0 → 0.80.0"
+          fi
+          
+          # Reinstall with correct versions
+          echo "📦 Reinstalling with correct versions..."
+          npm install
+          
       - name: Build React Native Android APK
         run: |
           cd "$ANDROID_DIR"
@@ -103,32 +122,20 @@ jobs:
             touch lasspath
           fi
           
-          # Check what React Native version is actually installed
-          echo "🔍 Checking installed React Native version..."
-          if [ -f "../package.json" ]; then
-            grep "react-native" ../package.json || true
-          fi
-          
           # Show original build.gradle
           echo "🔍 Original build.gradle:"
           cat build.gradle
           
-          # Fix build.gradle properly - comment out problematic lines instead of breaking them
-          echo "🔧 Fixing build.gradle properly..."
+          # Fix build.gradle with correct version
+          echo "🔧 Fixing build.gradle with real React Native version..."
           cp build.gradle build.gradle.backup
           
-          # Remove/comment problematic react-native plugin lines
-          sed -i '/com\.facebook\.react:react-native-gradle-plugin/d' build.gradle
-          sed -i '/react-native-gradle-plugin/d' build.gradle
-          
-          # Remove empty classpath lines
-          sed -i '/classpath[[:space:]]*$/d' build.gradle
-          sed -i '/classpath[[:space:]]*"[[:space:]]*"[[:space:]]*$/d' build.gradle
-          sed -i '/classpath[[:space:]]*""[[:space:]]*$/d' build.gradle
+          # Replace impossible 0.79.0 with working 0.80.0
+          sed -i 's/0\.79\.0/0.80.0/g' build.gradle
           
           # Show fixed build.gradle
-          echo "🔍 Fixed build.gradle:"
-          cat build.gradle
+          echo "🔍 Fixed build.gradle (should now use 0.80.0):"
+          grep "react-native-gradle-plugin" build.gradle || true
           
           # Remove Detox interference if exists
           if [ -f "settings.gradle" ]; then
