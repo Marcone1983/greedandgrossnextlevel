@@ -3,35 +3,15 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             eachDependency { DependencyResolveDetails details ->
-                // Map old Facebook package names to new React Native structure
+                // Map old Facebook package names to project dependencies
                 if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native') {
-                    // Use the actual React Native from node_modules
-                    details.useTarget("com.facebook.react:react-native:0.79.0")
+                    // Use project dependency instead
+                    details.useTarget project(":ReactAndroid")
                 }
                 if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-android') {
-                    details.useTarget("com.facebook.react:react-android:0.79.0")
-                }
-                if (details.requested.group == 'com.facebook.react' && details.requested.name == 'hermes-android') {
-                    details.useTarget("com.facebook.react:hermes-android:0.79.0")
+                    details.useTarget project(":ReactAndroid")
                 }
             }
-        }
-    }
-}
-
-// Add local Maven repository  
-allprojects {
-    repositories {
-        // Local maven repository with our stub artifacts
-        maven {
-            url file("$rootDir/../scripts")
-            content {
-                includeGroup "com.facebook.react"
-            }
-        }
-        // Also add the node_modules React Native location
-        maven {
-            url file("$rootDir/../node_modules/react-native/android")
         }
     }
 }

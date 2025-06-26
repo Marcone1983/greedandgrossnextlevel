@@ -37,13 +37,6 @@ buildscript {
 // Need allprojects for React Native plugin resolution
 allprojects {
     repositories {
-        // First check our local Maven repo for stub artifacts
-        maven {
-            url file("$rootDir/../scripts")
-            content {
-                includeGroup "com.facebook.react"
-            }
-        }
         google()
         mavenCentral()
         maven { url "https://www.jitpack.io" }
