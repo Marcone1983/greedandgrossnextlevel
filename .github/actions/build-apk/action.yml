@@ -20,10 +20,15 @@ runs:
       run: |
         echo "Applying runtime patches..."
         # Patch Folly headers in gradle cache if they exist
-        find ~/.gradle/caches -path "*/F14Table.h" -type f 2>/dev/null | head -10 | while read -r file; do
-          echo "Patching: $file"
-          sed -i 's/static_assert(std::regular<F14HashToken>);/\/\/ static_assert removed for C++17/' "$file" 2>/dev/null || true
-        done
+        FILES_TO_PATCH=$(find ~/.gradle/caches -path "*/F14Table.h" -type f 2>/dev/null | head -10 || true)
+        if [ -n "$FILES_TO_PATCH" ]; then
+          echo "$FILES_TO_PATCH" | while read -r file; do
+            echo "Patching: $file"
+            sed -i 's/static_assert(std::regular<F14HashToken>);/\/\/ static_assert removed for C++17/' "$file" 2>/dev/null || true
+          done
+        else
+          echo "No F14Table.h files found to patch"
+        fi
         
         # Run common fixes if script exists
         if [ -f "scripts/fix-common-android-errors.sh" ]; then
