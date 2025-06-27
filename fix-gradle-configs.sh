@@ -7,29 +7,12 @@ add_publishing_config() {
     local BUILD_FILE="$1"
     
     if [ -f "$BUILD_FILE" ]; then
-        # Check if publishing configuration already exists
-        if ! grep -q "publishing {" "$BUILD_FILE"; then
-            echo "Adding publishing configuration to: $BUILD_FILE"
-            # Add publishing configuration at the end of the file
-            cat >> "$BUILD_FILE" << 'EOF'
-
-// Added to fix Gradle 8.8 compatibility
-publishing {
-    publications {
-        release(MavenPublication) {
-            from components.release
-        }
-    }
-}
-
-configurations {
-    default
-}
-
-artifacts {
-    default file("${project.buildDir}/outputs/aar/${project.name}-release.aar")
-}
-EOF
+        # Check if configurations already exists
+        if ! grep -q "configurations {" "$BUILD_FILE"; then
+            echo "Adding configurations to: $BUILD_FILE"
+            # Add only configurations block
+            echo "" >> "$BUILD_FILE"
+            echo "configurations { default }" >> "$BUILD_FILE"
         fi
     fi
 }
@@ -55,7 +38,7 @@ MODULES=(
     "react-native-reanimated"
     "react-native-svg"
     "lottie-react-native"
-    "react-native-fs"
+    # "react-native-fs" # Skipping react-native-fs as it has issues
 )
 
 for module in "${MODULES[@]}"; do
@@ -65,19 +48,7 @@ for module in "${MODULES[@]}"; do
     add_publishing_config "$BUILD_FILE"
 done
 
-# Find all other React Native modules that might need this fix
-echo "Searching for other modules that might need configuration fix..."
-find node_modules -name "build.gradle" -path "*/android/*" -not -path "*/node_modules/*" 2>/dev/null | while read -r file; do
-    # Check if it's an Android library module
-    if grep -q "com.android.library" "$file"; then
-        # Check if it already has publishing configuration
-        if ! grep -q "publishing {" "$file" && ! grep -q "configurations {" "$file"; then
-            MODULE_DIR=$(dirname "$file")
-            MODULE_NAME=$(basename $(dirname "$MODULE_DIR"))
-            echo "Found module without publishing config: $MODULE_NAME"
-            add_publishing_config "$file"
-        fi
-    fi
-done
+# Skip automatic search for now as it might break some modules
+# Only fix the modules we explicitly listed above
 
 echo "✅ Gradle configuration fixing complete!"
