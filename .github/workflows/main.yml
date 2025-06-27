@@ -31,13 +31,7 @@ jobs:
             sed -i '/android {/a\    namespace "com.rnfs"' "$RNFS_BUILD_GRADLE"
           fi
       
-      # Clear Gradle cache to avoid corruption issues
-      - name: Clear Gradle Cache
-        run: |
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/wrapper/
-      
-      # Create gradle.properties with proper memory settings
+      # Create gradle.properties
       - name: Setup Gradle Properties
         run: |
           mkdir -p android
@@ -53,19 +47,78 @@ jobs:
       # Dai permessi di esecuzione a gradlew
       - run: chmod +x android/gradlew
       
-      # Esegui il build dalla directory android con retry
-      - name: Build Android
+      # Build con rilevamento e fix automatici
+      - name: Build Android with Auto-Fix
         run: |
           cd android
-          # Prova fino a 3 volte in caso di errori di download
-          for i in 1 2 3; do
-            ./gradlew bundleRelease --stacktrace --no-daemon && break || {
-              echo "Build attempt $i failed, retrying..."
-              ./gradlew --stop
-              rm -rf ~/.gradle/caches/jars-9/
-              sleep 10
-            }
+          
+          for attempt in 1 2 3 4 5; do
+            echo "🔨 Build attempt $attempt/5..."
+            
+            # Cattura l'output del build
+            if ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee build_output.log; then
+              echo "✅ Build succeeded!"
+              break
+            else
+              echo "❌ Build failed, analyzing error..."
+              
+              # Analizza e risolvi errori comuni
+              if grep -q "Failed to create Jar file" build_output.log; then
+                echo "🔧 Fixing: Corrupted JAR cache"
+                rm -rf ~/.gradle/caches/jars-*/
+                rm -rf ~/.gradle/caches/modules-*/
+                ./gradlew --stop
+              
+              elif grep -q "Namespace not specified" build_output.log; then
+                echo "🔧 Fixing: Missing namespace"
+                # Estrai il nome del modulo dal log
+                MODULE=$(grep -oP "project ':\K[^']+(?=')" build_output.log | head -1)
+                if [ ! -z "$MODULE" ]; then
+                  MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
+                  if [ -f "$MODULE_GRADLE" ]; then
+                    sed -i '/android {/a\    namespace "com.'${MODULE//-/.}'"' "$MODULE_GRADLE"
+                  fi
+                fi
+              
+              elif grep -q "OutOfMemoryError" build_output.log; then
+                echo "🔧 Fixing: Memory issues"
+                sed -i 's/-Xmx4096m/-Xmx6144m/g' gradle.properties
+                sed -i 's/MaxMetaspaceSize=1024m/MaxMetaspaceSize=2048m/g' gradle.properties
+              
+              elif grep -q "Could not resolve all files" build_output.log; then
+                echo "🔧 Fixing: Dependency resolution"
+                rm -rf ~/.gradle/caches/
+                ./gradlew --refresh-dependencies
+              
+              elif grep -q "SDK location not found" build_output.log; then
+                echo "🔧 Fixing: Missing SDK location"
+                echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+              
+              elif grep -q "Duplicate class" build_output.log; then
+                echo "🔧 Fixing: Duplicate classes"
+                ./gradlew clean
+                rm -rf build/ app/build/
+              
+              else
+                echo "⚠️ Unknown error, trying general fixes..."
+                ./gradlew clean
+                rm -rf ~/.gradle/caches/transforms-*/
+                ./gradlew --stop
+              fi
+              
+              # Aspetta un po' prima di riprovare
+              echo "⏳ Waiting before retry..."
+              sleep 5
+            fi
           done
+          
+          # Se dopo 5 tentativi fallisce ancora
+          if [ ! -f app/build/outputs/bundle/release/*.aab ]; then
+            echo "❌ Build failed after 5 attempts"
+            echo "📋 Last error log:"
+            tail -n 50 build_output.log
+            exit 1
+          fi
       
       # Upload APK/AAB artifacts
       - name: Upload build artifacts
@@ -76,4 +129,5 @@ jobs:
           path: |
             android/app/build/outputs/bundle/release/*.aab
             android/app/build/outputs/apk/release/*.apk
+            android/build_output.log
           retention-days: 7
