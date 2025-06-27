@@ -1,0 +1,53 @@
+// Global configuration for React Native modules to fix Gradle 8.8 compatibility issues
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                // Ensure namespace is set
+                if (!project.android.hasProperty('namespace')) {
+                    def manifestFile = file("${project.projectDir}/src/main/AndroidManifest.xml")
+                    if (manifestFile.exists()) {
+                        def packageName = new XmlParser().parse(manifestFile).@package
+                        if (packageName) {
+                            namespace packageName
+                        }
+                    }
+                }
+                
+                // Enable buildConfig for all modules
+                buildFeatures {
+                    buildConfig true
+                }
+            }
+            
+            // Add publishing configuration for Gradle 8.8
+            if (project.plugins.hasPlugin('com.android.library')) {
+                publishing {
+                    publications {
+                        release(MavenPublication) {
+                            afterEvaluate {
+                                from components.release
+                            }
+                        }
+                    }
+                }
+                
+                // Ensure default configuration exists
+                configurations {
+                    default
+                }
+                
+                // Add artifacts configuration
+                afterEvaluate {
+                    if (file("${project.buildDir}/outputs/aar/${project.name}-release.aar").exists() || 
+                        project.tasks.findByName('assembleRelease')) {
+                        artifacts {
+                            default file("${project.buildDir}/outputs/aar/${project.name}-release.aar")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
