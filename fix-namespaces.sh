@@ -18,7 +18,8 @@ add_namespace() {
         # Also add buildConfig if needed
         if ! grep -q "buildFeatures" "$BUILD_FILE"; then
             echo "Adding buildFeatures.buildConfig to: $BUILD_FILE"
-            sed -i "/android {/a\\    buildFeatures {\\n        buildConfig true\\n    }" "$BUILD_FILE"
+            # Find the android block and add buildFeatures inside it
+            awk '/android {/{print; print "    buildFeatures {"; print "        buildConfig true"; print "    }"; next}1' "$BUILD_FILE" > "$BUILD_FILE.tmp" && mv "$BUILD_FILE.tmp" "$BUILD_FILE"
         fi
     fi
 }
