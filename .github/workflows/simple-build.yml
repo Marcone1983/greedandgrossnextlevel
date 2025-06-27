@@ -22,6 +22,8 @@ jobs:
           
       - run: npm install --legacy-peer-deps
       
-      - uses: ./gradlew bundleRelease --stacktrace || true
-        with:
-          flavour: release
+      # Dai permessi di esecuzione a gradlew (se necessario)
+      - run: chmod +x ./gradlew
+      
+      # Esegui il build con gradlew
+      - run: ./gradlew bundleRelease --stacktrace || true
