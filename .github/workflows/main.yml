@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
       
       - uses: actions/setup-node@v4
         with:
@@ -22,10 +22,33 @@ jobs:
           
       - run: npm install --legacy-peer-deps
       
+      # Fix namespace issue for react-native-fs
+      - name: Fix react-native-fs namespace
+        run: |
+          # Aggiungi namespace al build.gradle di react-native-fs
+          echo "Fixing react-native-fs namespace issue..."
+          RNFS_BUILD_GRADLE="node_modules/react-native-fs/android/build.gradle"
+          if [ -f "$RNFS_BUILD_GRADLE" ]; then
+            # Aggiungi namespace dopo android {
+            sed -i '/android {/a\    namespace "com.rnfs"' "$RNFS_BUILD_GRADLE"
+          fi
+      
       # Dai permessi di esecuzione a gradlew
       - run: chmod +x android/gradlew
       
       # Esegui il build dalla directory android
-      - run: |
+      - name: Build Android
+        run: |
           cd android
           ./gradlew bundleRelease --stacktrace || true
+      
+      # Upload APK/AAB artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()  # Esegui sempre, anche se il build fallisce
+        with:
+          name: android-build
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/*.apk
+          retention-days: 7
