@@ -47,98 +47,64 @@ jobs:
         run: |
           cd android
           
-          # Tentativo 1
-          echo "::group::Build Attempt 1/5"
-          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 1"
-          echo "::endgroup::"
-          
-          # Fix per tentativo 2
-          echo "::group::Fixing issues for attempt 2"
-          if grep -q "Failed to create Jar file" ../build_log.txt; then
-            rm -rf ~/.gradle/caches/jars-*/
-            ./gradlew --stop
-          elif grep -q "Namespace not specified" ../build_log.txt; then
-            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
-              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
-              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
-              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
-                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
-                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
-              fi
-            done
-          fi
-          echo "::endgroup::"
-          
-          # Tentativo 2
-          echo "::group::Build Attempt 2/5"
-          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 2"
-          echo "::endgroup::"
-          
-          # Fix per tentativo 3
-          echo "::group::Fixing issues for attempt 3"
-          if grep -q "Failed to create Jar file" ../build_log.txt; then
-            rm -rf ~/.gradle/caches/jars-*/
-            ./gradlew --stop
-          elif grep -q "Namespace not specified" ../build_log.txt; then
-            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
-              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
-              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
-              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
-                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
-                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
-              fi
-            done
-          fi
-          echo "::endgroup::"
-          
-          # Tentativo 3
-          echo "::group::Build Attempt 3/5"
-          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 3"
-          echo "::endgroup::"
-          
-          # Fix per tentativo 4
-          echo "::group::Fixing issues for attempt 4"
-          if grep -q "Failed to create Jar file" ../build_log.txt; then
-            rm -rf ~/.gradle/caches/jars-*/
-            ./gradlew --stop
-          elif grep -q "Namespace not specified" ../build_log.txt; then
-            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
-              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
-              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
-              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
-                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
-                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
-              fi
-            done
-          fi
-          echo "::endgroup::"
-          
-          # Tentativo 4
-          echo "::group::Build Attempt 4/5"
-          ./gradlew bundleRelease --stacktrace --no-daemon --refresh-dependencies 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 4"
-          echo "::endgroup::"
-          
-          # Fix per tentativo 5
-          echo "::group::Fixing issues for attempt 5"
-          if grep -q "Failed to create Jar file" ../build_log.txt; then
-            rm -rf ~/.gradle/caches/jars-*/
-            ./gradlew --stop
-          elif grep -q "Namespace not specified" ../build_log.txt; then
-            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
-              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
-              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
-              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
-                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
-                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
-              fi
-            done
-          fi
-          echo "::endgroup::"
-          
-          # Tentativo 5
-          echo "::group::Build Attempt 5/5"
-          ./gradlew bundleRelease --stacktrace --no-daemon || exit 1
-          echo "::endgroup::"
+          for attempt in 1 2 3 4 5; do
+            echo "::group::Build Attempt $attempt/5"
+            
+            # Prova il build
+            ./gradlew bundleRelease --stacktrace --no-daemon && {
+              echo "✅ Build succeeded on attempt $attempt"
+              echo "::endgroup::"
+              exit 0
+            } || {
+              echo "❌ Build failed on attempt $attempt"
+              echo "::endgroup::"
+            }
+            
+            # Se siamo all'ultimo tentativo, esci
+            if [ $attempt -eq 5 ]; then
+              exit 1
+            fi
+            
+            # Fix automatici progressivamente più aggressivi
+            echo "::group::Auto-fixing issues"
+            
+            if [ $attempt -eq 1 ]; then
+              echo "Cleaning gradle caches..."
+              rm -rf ~/.gradle/caches/jars-*/
+              ./gradlew --stop
+              
+            elif [ $attempt -eq 2 ]; then
+              echo "Deep cleaning all caches..."
+              ./gradlew clean
+              rm -rf ~/.gradle/caches/
+              rm -rf ~/.gradle/wrapper/
+              cd .. && npm audit fix --force || true
+              cd android
+              
+            elif [ $attempt -eq 3 ]; then
+              echo "Fixing all namespaces..."
+              find ../node_modules -name "build.gradle" -path "*/android/*" | while read file; do
+                if ! grep -q "namespace" "$file"; then
+                  MODULE_NAME=$(echo "$file" | sed 's/.*node_modules\/\([^\/]*\).*/\1/')
+                  NAMESPACE=$(echo "$MODULE_NAME" | sed 's/-/./g')
+                  sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$file" 2>/dev/null || true
+                fi
+              done
+              
+            elif [ $attempt -eq 4 ]; then
+              echo "Nuclear option - reset everything..."
+              cd ..
+              rm -rf node_modules
+              npm install --legacy-peer-deps
+              npm audit fix --force || true
+              cd android
+              rm -rf build app/build ~/.gradle
+            fi
+            
+            echo "::endgroup::"
+            echo "Waiting before next attempt..."
+            sleep 3
+          done
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -148,5 +114,4 @@ jobs:
           path: |
             android/app/build/outputs/bundle/release/*.aab
             android/app/build/outputs/apk/release/*.apk
-            build_log.txt
           retention-days: 7
