@@ -76,11 +76,19 @@ jobs:
           
           # Fix per tentativo 3
           echo "::group::Fixing issues for attempt 3"
-          if grep -q "react-native-gesture-handler" ../build_log.txt; then
-            RNGH="../node_modules/react-native-gesture-handler/android/build.gradle"
-            [ -f "$RNGH" ] && ! grep -q "namespace" "$RNGH" && sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' "$RNGH"
+          if grep -q "Failed to create Jar file" ../build_log.txt; then
+            rm -rf ~/.gradle/caches/jars-*/
+            ./gradlew --stop
+          elif grep -q "Namespace not specified" ../build_log.txt; then
+            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
+              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
+              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
+              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
+                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
+                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
+              fi
+            done
           fi
-          rm -rf ~/.gradle/caches/
           echo "::endgroup::"
           
           # Tentativo 3
@@ -90,9 +98,18 @@ jobs:
           
           # Fix per tentativo 4
           echo "::group::Fixing issues for attempt 4"
-          ./gradlew clean
-          if grep -q "OutOfMemoryError" ../build_log.txt; then
-            sed -i 's/-Xmx4096m/-Xmx6144m/g' gradle.properties
+          if grep -q "Failed to create Jar file" ../build_log.txt; then
+            rm -rf ~/.gradle/caches/jars-*/
+            ./gradlew --stop
+          elif grep -q "Namespace not specified" ../build_log.txt; then
+            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
+              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
+              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
+              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
+                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
+                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
+              fi
+            done
           fi
           echo "::endgroup::"
           
@@ -103,10 +120,19 @@ jobs:
           
           # Fix per tentativo 5
           echo "::group::Fixing issues for attempt 5"
-          find ../node_modules -name "build.gradle" -exec grep -l "minSdk" {} \; | while read file; do
-            sed -i 's/minSdk [0-9]*/minSdk 24/g' "$file"
-          done
-          rm -rf build/ app/build/
+          if grep -q "Failed to create Jar file" ../build_log.txt; then
+            rm -rf ~/.gradle/caches/jars-*/
+            ./gradlew --stop
+          elif grep -q "Namespace not specified" ../build_log.txt; then
+            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
+              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
+              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
+              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
+                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
+                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
+              fi
+            done
+          fi
           echo "::endgroup::"
           
           # Tentativo 5
