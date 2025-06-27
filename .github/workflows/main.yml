@@ -90,6 +90,57 @@ jobs:
             fi
           done
       
+      # Fix configurazioni mancanti per Gradle 8.6
+      - name: Fix missing configurations
+        run: |
+          echo "Adding default configuration to modules..."
+          
+          # Lista dei moduli che hanno problemi di configurazione
+          MODULES=(
+            "react-native-device-info"
+            "@react-native-firebase/auth"
+            "@react-native-firebase/app"
+            "@react-native-firebase/firestore"
+            "@react-native-firebase/storage"
+            "react-native-screens"
+            "react-native-safe-area-context"
+            "react-native-gesture-handler"
+            "react-native-reanimated"
+          )
+          
+          for module in "${MODULES[@]}"; do
+            MODULE_PATH=$(echo "$module" | sed 's/@//')
+            BUILD_FILE="node_modules/$MODULE_PATH/android/build.gradle"
+            
+            if [ -f "$BUILD_FILE" ]; then
+              echo "Fixing configuration for $module..."
+              
+              # Rimuovi configurazioni esistenti problematiche
+              sed -i '/^configurations {/,/^}/d' "$BUILD_FILE" 2>/dev/null || true
+              
+              # Aggiungi la configurazione corretta
+              cat >> "$BUILD_FILE" << 'EOF'
+
+// Fix for Gradle 8.6 compatibility
+configurations {
+    default
+    archives
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                artifactId = project.name
+            }
+        }
+    }
+}
+EOF
+            fi
+          done
+      
       # Fix BuildConfig per TUTTI i moduli
       - name: Fix BuildConfig issues
         run: |
@@ -173,17 +224,19 @@ jobs:
               ./gradlew clean
               rm -rf build/ app/build/
               
-              # Verifica che tutti i moduli siano nel settings.gradle
-              echo "Checking settings.gradle..."
-              if ! grep -q "react-native-device-info" ../android/settings.gradle 2>/dev/null; then
-                echo "include ':react-native-device-info'" >> ../android/settings.gradle
-                echo "project(':react-native-device-info').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-device-info/android')" >> ../android/settings.gradle
-              fi
-              
-              if ! grep -q "react-native-firebase_auth" ../android/settings.gradle 2>/dev/null; then
-                echo "include ':react-native-firebase_auth'" >> ../android/settings.gradle
-                echo "project(':react-native-firebase_auth').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-firebase/auth/android')" >> ../android/settings.gradle
-              fi
+              # Fix dipendenze di configurazione per tutti i moduli
+              echo "Fixing dependency configurations..."
+              cd ..
+              find node_modules -name "build.gradle" -path "*/android/*" | while read file; do
+                # Aggiungi configurations se manca completamente
+                if ! grep -q "configurations {" "$file"; then
+                  echo "" >> "$file"
+                  echo "configurations {" >> "$file"
+                  echo "    default" >> "$file"
+                  echo "}" >> "$file"
+                fi
+              done
+              cd android
               
             elif [ $attempt -eq 4 ]; then
               echo "Nuclear reset..."
