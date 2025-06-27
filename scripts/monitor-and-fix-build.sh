@@ -19,7 +19,7 @@ analyze_and_fix_error() {
         echo "DETECTED: Duplicate class error"
         echo "FIX: Cleaning gradle cache and enabling Jetifier..."
         rm -rf ~/.gradle/caches/transforms-3
-        echo "android.enableJetifier=true" >> GreedGross/gradle.properties
+        echo "android.enableJetifier=true" >> android/gradle.properties
         return 0
     fi
     
@@ -35,7 +35,7 @@ analyze_and_fix_error() {
     if grep -q "uses-sdk:minSdkVersion .* cannot be smaller than" "$error_log"; then
         echo "DETECTED: SDK version mismatch"
         echo "FIX: Updating minSdkVersion to 24..."
-        sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 24/g' GreedGross/build.gradle
+        sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 24/g' android/build.gradle
         return 0
     fi
     
@@ -43,7 +43,7 @@ analyze_and_fix_error() {
     if grep -q "hermesEnabled" "$error_log" || grep -q "Hermes" "$error_log"; then
         echo "DETECTED: Hermes configuration issue"
         echo "FIX: Forcing Hermes enabled..."
-        echo "hermesEnabled=true" >> GreedGross/gradle.properties
+        echo "hermesEnabled=true" >> android/gradle.properties
         return 0
     fi
     
@@ -59,7 +59,7 @@ analyze_and_fix_error() {
     if grep -q "Keystore file .* not found" "$error_log"; then
         echo "DETECTED: Missing keystore"
         echo "FIX: Using debug keystore..."
-        sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/g' GreedGross/app/build.gradle
+        sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/g' android/app/build.gradle
         return 0
     fi
     
@@ -67,7 +67,7 @@ analyze_and_fix_error() {
     if grep -q "google-services.json" "$error_log"; then
         echo "DETECTED: Missing google-services.json"
         echo "FIX: Creating placeholder google-services.json..."
-        cat > GreedGross/app/google-services.json << 'EOF'
+        cat > android/app/google-services.json << 'EOF'
 {
   "project_info": {
     "project_number": "123456789",
@@ -93,7 +93,7 @@ EOF
     if grep -q "OutOfMemoryError" "$error_log" || grep -q "Java heap space" "$error_log"; then
         echo "DETECTED: Out of memory error"
         echo "FIX: Increasing JVM heap size..."
-        sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError/' GreedGross/gradle.properties
+        sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx6g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError/' android/gradle.properties
         return 0
     fi
     

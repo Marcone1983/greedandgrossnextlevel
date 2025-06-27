@@ -62,4 +62,4 @@ cp node_modules/react-native/android/com/facebook/react/react-native-gradle-plug
 echo "React Native Gradle Plugin setup complete!"
 echo ""
 echo "You can now run your Android build with:"
-echo "cd GreedGross && ./gradlew assembleRelease"
+echo "cd android && ./gradlew assembleRelease"

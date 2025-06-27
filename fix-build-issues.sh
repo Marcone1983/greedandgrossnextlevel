@@ -33,7 +33,7 @@ fi
 
 # 2. Create placeholder google-services.json
 echo "📄 Creating placeholder google-services.json..."
-cat > GreedGross/app/google-services.json << 'EOF'
+cat > android/app/google-services.json << 'EOF'
 {
   "project_info": {
     "project_number": "123456789012",
@@ -67,7 +67,7 @@ EOF
 
 # 3. Fix Gradle settings
 echo "🔧 Fixing Gradle settings..."
-cat > GreedGross/settings.gradle << 'EOF'
+cat > android/settings.gradle << 'EOF'
 pluginManagement {
     includeBuild("../node_modules/@react-native/gradle-plugin")
     repositories {
@@ -85,7 +85,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
     ex.autolinkLibrariesFromCommand()
 }
 
-rootProject.name = 'GreedGross'
+rootProject.name = 'android'
 include ':app'
 
 dependencyResolutionManagement {
@@ -100,11 +100,11 @@ EOF
 
 # 4. Update app/build.gradle to use React plugin
 echo "🔧 Updating app/build.gradle..."
-sed -i '1s/^/apply plugin: "com.facebook.react"\n/' GreedGross/app/build.gradle 2>/dev/null || true
+sed -i '1s/^/apply plugin: "com.facebook.react"\n/' android/app/build.gradle 2>/dev/null || true
 
 # 5. Clean build cache
 echo "🧹 Cleaning build cache..."
-cd GreedGross
+cd android
 rm -rf .gradle build app/build
 rm -rf ~/.gradle/caches/transforms-* 2>/dev/null || true
 
@@ -118,6 +118,6 @@ chmod +x gradlew
 echo "✅ ALL FIXES APPLIED!"
 echo ""
 echo "🚀 Now run:"
-echo "   cd GreedGross"
+echo "   cd android"
 echo "   ./gradlew clean"
 echo "   ./gradlew assembleRelease"

@@ -23,8 +23,8 @@ find node_modules -name "build.gradle" -not -path "*/react-native/*" | while rea
 done
 
 # Add ReactAndroid to settings.gradle if not already there  
-if [ -f "GreedGross/settings.gradle" ]; then
-  SETTINGS_FILE="GreedGross/settings.gradle"
+if [ -f "android/settings.gradle" ]; then
+  SETTINGS_FILE="android/settings.gradle"
 elif [ -f "android/settings.gradle" ]; then
   SETTINGS_FILE="android/settings.gradle"
 else

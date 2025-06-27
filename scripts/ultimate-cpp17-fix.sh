@@ -123,7 +123,7 @@ EOF
 
 # 4. Create a CMake toolchain file
 echo "4. Creating CMake toolchain file..."
-cat > GreedGross/app/cpp17-toolchain.cmake << 'EOF'
+cat > android/app/cpp17-toolchain.cmake << 'EOF'
 # Force C++17 standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -139,7 +139,7 @@ EOF
 
 # 5. Update app build.gradle to use the toolchain
 echo "5. Updating app build.gradle..."
-if ! grep -q "cpp17-toolchain.cmake" GreedGross/app/build.gradle; then
+if ! grep -q "cpp17-toolchain.cmake" android/app/build.gradle; then
     sed -i '/externalNativeBuild {/,/^    }/ {
         /cmake {/,/^        }/ {
             /arguments/ {
@@ -148,7 +148,7 @@ if ! grep -q "cpp17-toolchain.cmake" GreedGross/app/build.gradle; then
                 }
             }
         }
-    }' GreedGross/app/build.gradle 2>/dev/null || true
+    }' android/app/build.gradle 2>/dev/null || true
 fi
 
 # 6. Final cleanup of all C++20 references

@@ -14,9 +14,9 @@ find . -type d -name "build" -path "*/android/*" -exec rm -rf {} + 2>/dev/null |
 find . -type d -name ".gradle" -path "*/android/*" -exec rm -rf {} + 2>/dev/null || true
 
 # Create gradle.properties if missing
-if [ ! -f "GreedGross/gradle.properties" ]; then
+if [ ! -f "android/gradle.properties" ]; then
   echo "Creating gradle.properties..."
-  cat > GreedGross/gradle.properties << 'EOF'
+  cat > android/gradle.properties << 'EOF'
 # Project-wide Gradle settings.
 android.useAndroidX=true
 android.enableJetifier=true
@@ -34,7 +34,7 @@ fi
 
 # Force gradle wrapper download
 echo "Ensuring gradle wrapper..."
-cd GreedGross
+cd android
 if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
   echo "Downloading gradle wrapper..."
   curl -L https://github.com/gradle/gradle/raw/v8.2/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar

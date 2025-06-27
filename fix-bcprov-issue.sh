@@ -9,7 +9,7 @@ rm -rf ~/.gradle/caches/
 
 # Solution 2: Clear specific Android directories
 echo "Clearing Android build directories..."
-cd GreedGross
+cd android
 ./gradlew clean || true
 cd ..
 

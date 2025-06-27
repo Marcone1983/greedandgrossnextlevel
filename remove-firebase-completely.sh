@@ -7,8 +7,8 @@ echo "🔥 Removing Firebase completely to avoid build errors"
 sed -i '/@react-native-firebase/d' package.json
 
 # Remove Firebase from build.gradle dependencies
-sed -i '/com.google.firebase/d' GreedGross/build.gradle
-sed -i '/com.google.gms:google-services/d' GreedGross/build.gradle
+sed -i '/com.google.firebase/d' android/build.gradle
+sed -i '/com.google.gms:google-services/d' android/build.gradle
 
 # Remove Firebase imports from app files
 find . -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | while read file; do
@@ -17,6 +17,6 @@ find . -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" | while re
 done
 
 # Remove google-services.json if exists
-rm -f GreedGross/app/google-services.json
+rm -f android/app/google-services.json
 
 echo "✅ Firebase removed completely!"

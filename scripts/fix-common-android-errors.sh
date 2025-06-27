@@ -4,7 +4,7 @@ echo "=== Fixing Common Android Build Errors ==="
 
 # 1. Fix duplicate class errors
 echo "1. Preventing duplicate class errors..."
-cat >> GreedGross/gradle.properties << 'EOF'
+cat >> android/gradle.properties << 'EOF'
 
 # Prevent duplicate class errors
 android.enableJetifier=true
@@ -14,7 +14,7 @@ EOF
 
 # 2. Fix memory issues
 echo "2. Optimizing memory settings..."
-sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8/' GreedGross/gradle.properties
+sed -i 's/org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8/' android/gradle.properties
 
 # 3. Fix SDK version issues
 echo "3. Ensuring consistent SDK versions..."
@@ -40,7 +40,7 @@ EOF
 
 # 4. Fix missing repositories
 echo "4. Ensuring all repositories are available..."
-if [ -f "GreedGross/build.gradle" ]; then
+if [ -f "android/build.gradle" ]; then
     # Ensure all required repositories are present
     sed -i '/allprojects {/,/^}/ {
         /repositories {/,/^    }/ {
@@ -53,7 +53,7 @@ if [ -f "GreedGross/build.gradle" ]; then
         maven { url "https://www.jitpack.io" }
             }
         }
-    }' GreedGross/build.gradle
+    }' android/build.gradle
 fi
 
 # 5. Fix React Native autolinking issues
@@ -64,7 +64,7 @@ module.exports = {
   project: {
     ios: {},
     android: {
-      sourceDir: './GreedGross',
+      sourceDir: './android',
       manifestPath: 'app/src/main/AndroidManifest.xml',
       packageName: 'com.greedandgross.cannabisbreeding',
     },
@@ -86,21 +86,21 @@ EOF
 # 6. Fix Hermes issues
 echo "6. Ensuring Hermes is properly configured..."
 # Add Hermes Maven repository
-if ! grep -q "maven.*hermesPath" GreedGross/build.gradle; then
+if ! grep -q "maven.*hermesPath" android/build.gradle; then
     sed -i '/allprojects {/,/^}/ {
         /repositories {/,/^    }/ {
             /}$/ i\
         maven { url("$rootDir/../node_modules/react-native/android") }
         }
-    }' GreedGross/build.gradle
+    }' android/build.gradle
 fi
 
 # 7. Fix signing configuration
 echo "7. Setting up signing configuration..."
 # Ensure debug keystore exists
-if [ ! -f "GreedGross/app/debug.keystore" ]; then
+if [ ! -f "android/app/debug.keystore" ]; then
     echo "Creating debug keystore..."
-    cd GreedGross/app
+    cd android/app
     keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" 2>/dev/null || true
     cd ../..
 fi
@@ -112,7 +112,7 @@ rm -rf ~/.gradle/caches/transforms-3/*/transformed/jetified-react-android-0.79.0
 
 # 9. Create pre-build cleanup script
 echo "9. Creating pre-build cleanup script..."
-cat > GreedGross/pre-build-cleanup.sh << 'EOF'
+cat > android/pre-build-cleanup.sh << 'EOF'
 #!/bin/bash
 # Clean build artifacts before build
 echo "Cleaning build artifacts..."
@@ -121,6 +121,6 @@ rm -rf .gradle 2>/dev/null || true
 rm -rf ~/.gradle/caches/8.10.2/executionHistory 2>/dev/null || true
 ./gradlew clean 2>/dev/null || true
 EOF
-chmod +x GreedGross/pre-build-cleanup.sh
+chmod +x android/pre-build-cleanup.sh
 
 echo "=== Common Android build error fixes applied! ===

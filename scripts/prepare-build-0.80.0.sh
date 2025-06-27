@@ -11,9 +11,9 @@ echo "Running workflow version fixes..."
 node scripts/fix-workflow-version-issues.js
 
 # Pulisci la cache di gradle se esiste
-if [ -d "GreedGross" ]; then
+if [ -d "android" ]; then
   echo "Cleaning gradle cache..."
-  cd GreedGross
+  cd android
   ./gradlew clean || true
   cd ..
 elif [ -d "android" ]; then

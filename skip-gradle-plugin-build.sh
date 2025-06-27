@@ -36,7 +36,7 @@ fi
 # Alternative: Remove the gradle plugin entirely and use manual configuration
 echo "Creating manual React Native configuration..."
 
-cat > GreedGross/react-native-config.gradle << 'EOF'
+cat > android/react-native-config.gradle << 'EOF'
 // Manual React Native configuration
 ext.getReactNativeDir = {
     def reactNativeDir = file("$rootDir/../node_modules/react-native")
