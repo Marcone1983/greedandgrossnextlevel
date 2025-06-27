@@ -14,6 +14,12 @@ add_namespace() {
             # Add namespace after the android { line
             sed -i "/android {/a\\    namespace \"$PACKAGE_NAME\"" "$BUILD_FILE"
         fi
+        
+        # Also add buildConfig if needed
+        if ! grep -q "buildFeatures" "$BUILD_FILE"; then
+            echo "Adding buildFeatures.buildConfig to: $BUILD_FILE"
+            sed -i "/android {/a\\    buildFeatures {\\n        buildConfig true\\n    }" "$BUILD_FILE"
+        fi
     fi
 }
 
