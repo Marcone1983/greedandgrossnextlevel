@@ -34,14 +34,22 @@ jobs:
           mkdir -p android
           cat > android/gradle.properties << EOF
           org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
-          org.gradle.parallel=true
-          org.gradle.configureondemand=true
+          org.gradle.parallel=false
+          org.gradle.configureondemand=false
           org.gradle.daemon=false
           android.useAndroidX=true
           android.enableJetifier=true
+          org.gradle.console=plain
+          org.gradle.warning.mode=all
+          org.gradle.logging.level=info
           EOF
       
       - run: chmod +x android/gradlew
+      
+      - name: Pre-download Gradle
+        run: |
+          cd android
+          timeout 300 ./gradlew --version || true
       
       - name: Build with 5 attempts
         run: |
@@ -50,13 +58,21 @@ jobs:
           for attempt in 1 2 3 4 5; do
             echo "::group::Build Attempt $attempt/5"
             
-            # Prova il build
-            ./gradlew bundleRelease --stacktrace --no-daemon && {
+            # Kill any hanging gradle processes
+            pkill -f gradle || true
+            
+            # Prova il build con timeout di 10 minuti
+            timeout 600 ./gradlew bundleRelease --stacktrace --no-daemon --no-parallel --info && {
               echo "✅ Build succeeded on attempt $attempt"
               echo "::endgroup::"
               exit 0
             } || {
-              echo "❌ Build failed on attempt $attempt"
+              EXIT_CODE=$?
+              if [ $EXIT_CODE -eq 124 ]; then
+                echo "❌ Build timed out after 10 minutes"
+              else
+                echo "❌ Build failed with exit code $EXIT_CODE"
+              fi
               echo "::endgroup::"
             }
             
@@ -65,45 +81,36 @@ jobs:
               exit 1
             fi
             
-            # Fix automatici progressivamente più aggressivi
+            # Fix automatici
             echo "::group::Auto-fixing issues"
             
             if [ $attempt -eq 1 ]; then
-              echo "Cleaning gradle caches..."
+              echo "Killing gradle and cleaning caches..."
+              pkill -f gradle || true
+              rm -rf ~/.gradle/daemon/
               rm -rf ~/.gradle/caches/jars-*/
-              ./gradlew --stop
               
             elif [ $attempt -eq 2 ]; then
-              echo "Deep cleaning all caches..."
-              ./gradlew clean
-              rm -rf ~/.gradle/caches/
-              rm -rf ~/.gradle/wrapper/
-              cd .. && npm audit fix --force || true
-              cd android
+              echo "Deep cleaning..."
+              pkill -f gradle || true
+              ./gradlew --stop || true
+              rm -rf ~/.gradle/
+              rm -rf build/ app/build/
               
             elif [ $attempt -eq 3 ]; then
-              echo "Fixing all namespaces..."
-              find ../node_modules -name "build.gradle" -path "*/android/*" | while read file; do
-                if ! grep -q "namespace" "$file"; then
-                  MODULE_NAME=$(echo "$file" | sed 's/.*node_modules\/\([^\/]*\).*/\1/')
-                  NAMESPACE=$(echo "$MODULE_NAME" | sed 's/-/./g')
-                  sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$file" 2>/dev/null || true
-                fi
-              done
+              echo "Trying offline mode..."
+              echo "org.gradle.offline=true" >> gradle.properties
               
             elif [ $attempt -eq 4 ]; then
-              echo "Nuclear option - reset everything..."
+              echo "Nuclear reset..."
               cd ..
-              rm -rf node_modules
-              npm install --legacy-peer-deps
-              npm audit fix --force || true
+              rm -rf android/.gradle android/build android/app/build
+              rm -rf ~/.gradle
               cd android
-              rm -rf build app/build ~/.gradle
             fi
             
             echo "::endgroup::"
-            echo "Waiting before next attempt..."
-            sleep 3
+            sleep 5
           done
       
       - name: Upload build artifacts
@@ -114,4 +121,3 @@ jobs:
           path: |
             android/app/build/outputs/bundle/release/*.aab
             android/app/build/outputs/apk/release/*.apk
-          retention-days: 7
