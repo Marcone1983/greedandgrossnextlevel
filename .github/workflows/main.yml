@@ -17,16 +17,17 @@ jobs:
       
       - uses: actions/setup-node@v4
         with:
-          
           node-version: 24
           cache: npm
           
       - run: npm install --legacy-peer-deps
       
+      # Fix TUTTI i namespace PRIMA di iniziare
       - name: Fix ALL namespaces upfront
         run: |
           echo "Fixing all React Native module namespaces..."
           
+          # Fix namespace per moduli specifici
           echo "Fixing react-native-fs..."
           if [ -f "node_modules/react-native-fs/android/build.gradle" ]; then
             sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle || true
@@ -66,10 +67,11 @@ jobs:
           if [ -f "node_modules/react-native-vector-icons/android/build.gradle" ]; then
             sed -i '/android {/a\    namespace "com.oblador.vectoricons"' node_modules/react-native-vector-icons/android/build.gradle || true
           fi
-
-             echo "Fixing other modules..."
-             find node_modules -name "build.gradle" -path "*/android/*" -type f | while read file; do
-             if ! grep -q "namespace" "$file" 2>/dev/null; then
+          
+          # Fix generico per tutti gli altri moduli
+          echo "Fixing other modules..."
+          find node_modules -name "build.gradle" -path "*/android/*" -type f | while read file; do
+            if ! grep -q "namespace" "$file" 2>/dev/null; then
               MODULE_NAME=$(echo "$file" | sed 's/.*node_modules\/\([^\/]*\).*/\1/')
               NAMESPACE=$(echo "$MODULE_NAME" | sed 's/@//g' | sed 's/\//./' | sed 's/-/./g')
               echo "Adding namespace to $MODULE_NAME"
@@ -77,23 +79,28 @@ jobs:
             fi
           done
       
+      # Fix BuildConfig per TUTTI i moduli
       - name: Fix BuildConfig issues
         run: |
           echo "Enabling buildConfig for all modules..."
           find node_modules -name "build.gradle" -path "*/android/*" -type f | while read file; do
+            # Controlla se c'è già buildFeatures
             if grep -q "buildFeatures" "$file" 2>/dev/null; then
+              # Se c'è già buildFeatures, aggiungi buildConfig se non presente
               if ! grep -q "buildConfig" "$file" 2>/dev/null; then
                 sed -i '/buildFeatures {/a\        buildConfig true' "$file" 2>/dev/null || true
               fi
             else
-               {
-              sed -i '/android {/a\    buildFeatures {\n        buildConfig true\n    }' "$file" 2>/dev/null || true
+              # Se non c'è buildFeatures, aggiungilo dopo android {
+              # Usa printf invece di echo per gestire meglio le newline
+              awk '/android {/{print; print "    buildFeatures {"; print "        buildConfig true"; print "    }"; next}1' "$file" > "$file.tmp" && mv "$file.tmp" "$file" 2>/dev/null || true
             fi
           done
           
+          # Fix anche per il progetto principale
           if [ -f "android/app/build.gradle" ]; then
             if ! grep -q "buildConfig" "android/app/build.gradle" 2>/dev/null; then
-              sed -i '/android {/a\    buildFeatures {\n        buildConfig true\n    }' "android/app/build.gradle" 2>/dev/null || true
+              awk '/android {/{print; print "    buildFeatures {"; print "        buildConfig true"; print "    }"; next}1' "android/app/build.gradle" > "android/app/build.gradle.tmp" && mv "android/app/build.gradle.tmp" "android/app/build.gradle" 2>/dev/null || true
             fi
           fi
       
@@ -166,6 +173,7 @@ jobs:
               rm -rf ~/.gradle
               rm -rf android/.gradle android/build android/app/build
               
+              # Re-fix alcuni namespace critici
               sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' node_modules/react-native-gesture-handler/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.BV.LinearGradient"' node_modules/react-native-linear-gradient/android/build.gradle 2>/dev/null || true
