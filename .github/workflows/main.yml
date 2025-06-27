@@ -1,126 +1,31 @@
-name: Build APK
+name: simple build
 
 on:
-
   workflow_dispatch:
-  
-  push:
-  
-    branches: [main]
 
 jobs:
-
   build:
-  
     runs-on: ubuntu-latest
     
     steps:
-    
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-    - uses: actions/setup-node@v4
-     
-      with:
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
       
-        node-version: '22'
-        
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: |
-        npm install --legacy-peer-deps
-        npm ls || true
-        
-    - uses: actions/setup-java@v4
-      
-      with:
-      
-        distribution: 'temurin'
-        
-        java-version: '21'
-        
-    - name: Run build fixes
-      run: |
-        # Fix all gradle issues
-        ./fix-gradle-issues.sh
-        
-        # Fix specific bcprov jar issue
-        ./fix-bcprov-issue.sh
-        
-        # Emergency C++ fix
-        find node_modules -name "CMakeLists.txt" -type f -exec sed -i 's/CMAKE_CXX_STANDARD [0-9]*/CMAKE_CXX_STANDARD 17/g' {} \;
-        
-        # Create local.properties
-        echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
-        echo "ndk.dir=$ANDROID_NDK_ROOT" >> android/local.properties
-        
-        # Fix permissions
-        chmod +x android/gradlew
-        
-        # Fix namespace issue for react-native-fs
-        if [ -f "node_modules/react-native-fs/android/build.gradle" ]; then
-          echo "Fixing react-native-fs namespace..."
-          sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle
-        fi
-        
-        # Fix namespace for other modules that might have issues
-        for module in react-native-device-info react-native-share react-native-vector-icons react-native-webview react-native-linear-gradient react-native-haptic-feedback; do
-          BUILD_FILE="node_modules/$module/android/build.gradle"
-          if [ -f "$BUILD_FILE" ] && ! grep -q "namespace" "$BUILD_FILE"; then
-            echo "Adding namespace to $module..."
-            PACKAGE_NAME=$(grep -oP '(?<=package\s")[^"]+' node_modules/$module/android/src/main/AndroidManifest.xml 2>/dev/null || echo "com.$module" | sed 's/-/./g')
-            sed -i "/android {/a\\    namespace \"$PACKAGE_NAME\"" "$BUILD_FILE"
-          fi
-        done
-        
-    - name: Set Android directory
-      run: |
-        echo "ANDROID_DIR=android" >> $GITHUB_ENV
-        
-    - name: Build all
-      
-      run: |
-      
-        cd "$ANDROID_DIR"
-        
-        echo "Available build tasks:"
-        
-        ./gradlew tasks | grep -i assemble || true
-        
-        echo "Building Debug APK with verbose logging..."
-        ./gradlew assembleDebug --stacktrace --info 2>&1 | tee build.log || {
-          echo "❌ BUILD FAILED! Last 200 lines of error:"
-          tail -200 build.log
-          exit 1
-        }
-        
-        echo "Building Release APK..."  
-       
-        ./gradlew assembleRelease --stacktrace
-        
-        echo "Building Debug AAB..."
-      
-        ./gradlew bundleDebug --stacktrace || true
-        
-        echo "Building Release AAB..."
-       
-        ./gradlew bundleRelease --stacktrace || true
-        
-    - uses: actions/upload-artifact@v4
-      
-      with:
-      
-        name: android-builds-complete
-        path: |
-        
-          **/build/outputs/apk/debug/*.apk
-          **/build/outputs/apk/release/*.apk
-          **/build/outputs/bundle/debug/*.aab
-          **/build/outputs/bundle/release/*.aab
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
           
-    - uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: build-logs
-        path: |
-          **/build.log
+      - run: npm install --legacy-peer-deps
+      
+      # Dai permessi di esecuzione a gradlew
+      - run: chmod +x android/gradlew
+      
+      # Esegui il build dalla directory android
+      - run: |
+          cd android
+          ./gradlew bundleRelease --stacktrace || true
