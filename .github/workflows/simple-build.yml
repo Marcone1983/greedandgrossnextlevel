@@ -123,19 +123,25 @@ jobs:
               cd ..
               
               # Fix react-native-device-info
-              if [ -f "node_modules/react-native-device-info/android/build.gradle" ]; then
-                echo "Fixing react-native-device-info..."
+              echo "Fixing react-native-device-info..."
+              BUILD_FILE="node_modules/react-native-device-info/android/build.gradle"
+              if [ -f "$BUILD_FILE" ]; then
+                echo "Found react-native-device-info build.gradle"
                 # Aggiungi dopo l'ultima parentesi del file
-                echo "" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "afterEvaluate {" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "  publishing {" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "    publications {" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "      release(MavenPublication) {" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "        from components.release" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "      }" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "    }" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "  }" >> "node_modules/react-native-device-info/android/build.gradle"
-                echo "}" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "" >> "$BUILD_FILE"
+                echo "afterEvaluate {" >> "$BUILD_FILE"
+                echo "  publishing {" >> "$BUILD_FILE"
+                echo "    publications {" >> "$BUILD_FILE"
+                echo "      release(MavenPublication) {" >> "$BUILD_FILE"
+                echo "        from components.release" >> "$BUILD_FILE"
+                echo "      }" >> "$BUILD_FILE"
+                echo "    }" >> "$BUILD_FILE"
+                echo "  }" >> "$BUILD_FILE"
+                echo "}" >> "$BUILD_FILE"
+                echo "Fixed react-native-device-info"
+              else
+                echo "ERROR: react-native-device-info build.gradle not found at $BUILD_FILE!"
+                ls -la node_modules/react-native-device-info/android/ || echo "Directory not found"
               fi
               
               # Fix react-native-firebase modules
