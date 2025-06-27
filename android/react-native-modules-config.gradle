@@ -1,6 +1,6 @@
 // Global configuration for React Native modules to fix Gradle 8.8 compatibility issues
 
-subprojects {
+project.subprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             android {
