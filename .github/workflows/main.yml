@@ -63,6 +63,30 @@ jobs:
             fi
           done
       
+      # Fix BuildConfig per TUTTI i moduli
+      - name: Fix BuildConfig issues
+        run: |
+          echo "Enabling buildConfig for all modules..."
+          find node_modules -name "build.gradle" -path "*/android/*" | while read file; do
+            # Controlla se c'è già buildFeatures
+            if grep -q "buildFeatures" "$file"; then
+              # Se c'è già buildFeatures, aggiungi buildConfig se non presente
+              if ! grep -q "buildConfig" "$file"; then
+                sed -i '/buildFeatures {/a\        buildConfig true' "$file"
+              fi
+            else
+              # Se non c'è buildFeatures, aggiungilo dopo android {
+              sed -i '/android {/a\    buildFeatures {\n        buildConfig true\n    }' "$file"
+            fi
+          done
+          
+          # Fix anche per il progetto principale
+          if [ -f "android/app/build.gradle" ]; then
+            if ! grep -q "buildConfig" "android/app/build.gradle"; then
+              sed -i '/android {/a\    buildFeatures {\n        buildConfig true\n    }' "android/app/build.gradle"
+            fi
+          fi
+      
       - name: Setup Gradle Properties
         run: |
           mkdir -p android
@@ -132,7 +156,7 @@ jobs:
               rm -rf ~/.gradle
               rm -rf android/.gradle android/build android/app/build
               
-              # Re-fix namespaces dopo il reset
+              # Re-fix namespaces e buildConfig dopo il reset
               for module in react-native-fs react-native-gesture-handler react-native-linear-gradient; do
                 GRADLE_FILE="node_modules/$module/android/build.gradle"
                 if [ -f "$GRADLE_FILE" ]; then
@@ -142,6 +166,7 @@ jobs:
                     "react-native-linear-gradient") NS="com.BV.LinearGradient" ;;
                   esac
                   sed -i "/android {/a\\    namespace \"$NS\"" "$GRADLE_FILE" 2>/dev/null || true
+                  sed -i '/android {/a\    buildFeatures {\n        buildConfig true\n    }' "$GRADLE_FILE" 2>/dev/null || true
                 fi
               done
               
