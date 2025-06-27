@@ -11,8 +11,18 @@ add_namespace() {
         # Check if namespace already exists
         if ! grep -q "namespace" "$BUILD_FILE"; then
             echo "Adding namespace to: $BUILD_FILE"
-            # Add namespace after the android { line
-            sed -i "/android {/a\\    namespace \"$PACKAGE_NAME\"" "$BUILD_FILE"
+            # Use a more robust approach to add namespace
+            awk -v ns="$PACKAGE_NAME" '
+                /android[[:space:]]*{/ {
+                    print $0
+                    if (getline > 0) {
+                        print "    namespace \"" ns "\""
+                        print $0
+                    }
+                    next
+                }
+                {print}
+            ' "$BUILD_FILE" > "$BUILD_FILE.tmp" && mv "$BUILD_FILE.tmp" "$BUILD_FILE"
         fi
         
         # Also add buildConfig if needed
