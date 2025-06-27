@@ -103,8 +103,8 @@ jobs:
           
           # Fix per tentativo 5
           echo "::group::Fixing issues for attempt 5"
-          find ../node_modules -name "build.gradle" -exec grep -l "minSdkVersion" {} \; | while read file; do
-            sed -i 's/minSdkVersion [0-9]*/minSdkVersion 24/g' "$file"
+          find ../node_modules -name "build.gradle" -exec grep -l "minSdk" {} \; | while read file; do
+            sed -i 's/minSdk [0-9]*/minSdk 24/g' "$file"
           done
           rm -rf build/ app/build/
           echo "::endgroup::"
