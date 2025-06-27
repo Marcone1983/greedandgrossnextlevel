@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21  # CAMBIATO A JAVA 21 PER RISOLVERE L'ERRORE
       
       - uses: actions/setup-node@v4
         with:
@@ -39,17 +39,15 @@ jobs:
           org.gradle.daemon=false
           android.useAndroidX=true
           android.enableJetifier=true
-          org.gradle.console=plain
-          org.gradle.warning.mode=all
-          org.gradle.logging.level=info
           EOF
       
       - run: chmod +x android/gradlew
       
-      - name: Pre-download Gradle
+      - name: Clean Bouncy Castle cache
         run: |
-          cd android
-          timeout 300 ./gradlew --version || true
+          # Pulisci specificamente il JAR problematico
+          rm -rf ~/.gradle/caches/modules-2/files-2.1/org.bouncycastle/
+          rm -rf ~/.gradle/caches/jars-9/
       
       - name: Build with 5 attempts
         run: |
@@ -58,59 +56,61 @@ jobs:
           for attempt in 1 2 3 4 5; do
             echo "::group::Build Attempt $attempt/5"
             
-            # Kill any hanging gradle processes
-            pkill -f gradle || true
-            
-            # Prova il build con timeout di 10 minuti
-            timeout 600 ./gradlew bundleRelease --stacktrace --no-daemon --no-parallel --info && {
+            # Prova il build
+            if ./gradlew bundleRelease --stacktrace --no-daemon; then
               echo "✅ Build succeeded on attempt $attempt"
               echo "::endgroup::"
               exit 0
-            } || {
-              EXIT_CODE=$?
-              if [ $EXIT_CODE -eq 124 ]; then
-                echo "❌ Build timed out after 10 minutes"
-              else
-                echo "❌ Build failed with exit code $EXIT_CODE"
-              fi
+            else
+              echo "❌ Build failed on attempt $attempt"
               echo "::endgroup::"
-            }
+            fi
             
-            # Se siamo all'ultimo tentativo, esci
+            # Se siamo all'ultimo tentativo, esci con errore
             if [ $attempt -eq 5 ]; then
               exit 1
             fi
             
-            # Fix automatici
-            echo "::group::Auto-fixing issues"
+            # Fix specifici per ogni tentativo
+            echo "::group::Fixing errors for attempt $((attempt + 1))"
             
             if [ $attempt -eq 1 ]; then
-              echo "Killing gradle and cleaning caches..."
-              pkill -f gradle || true
-              rm -rf ~/.gradle/daemon/
+              echo "Removing Bouncy Castle and all JAR caches..."
+              rm -rf ~/.gradle/caches/modules-2/files-2.1/org.bouncycastle/
               rm -rf ~/.gradle/caches/jars-*/
+              rm -rf ~/.gradle/caches/transforms-*/
+              ./gradlew --stop || true
               
             elif [ $attempt -eq 2 ]; then
-              echo "Deep cleaning..."
-              pkill -f gradle || true
-              ./gradlew --stop || true
-              rm -rf ~/.gradle/
-              rm -rf build/ app/build/
+              echo "Force downgrading Bouncy Castle..."
+              # Aggiungi override per forzare versione più vecchia
+              cat >> build.gradle << 'EOF'
+              
+              allprojects {
+                  configurations.all {
+                      resolutionStrategy {
+                          force 'org.bouncycastle:bcprov-jdk18on:1.77'
+                      }
+                  }
+              }
+              EOF
               
             elif [ $attempt -eq 3 ]; then
-              echo "Trying offline mode..."
-              echo "org.gradle.offline=true" >> gradle.properties
+              echo "Excluding Bouncy Castle from problematic dependencies..."
+              find ../node_modules -name "build.gradle" | xargs grep -l "bouncycastle" | while read file; do
+                sed -i '/dependencies {/a\    configurations.all { exclude group: "org.bouncycastle" }' "$file" 2>/dev/null || true
+              done
               
             elif [ $attempt -eq 4 ]; then
-              echo "Nuclear reset..."
+              echo "Full reset..."
               cd ..
-              rm -rf android/.gradle android/build android/app/build
               rm -rf ~/.gradle
+              rm -rf android/.gradle android/build android/app/build
               cd android
             fi
             
             echo "::endgroup::"
-            sleep 5
+            sleep 3
           done
       
       - name: Upload build artifacts
