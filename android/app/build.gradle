@@ -184,7 +184,8 @@ dependencies {
     
     // Native module dependencies (manual since we removed the gradle plugin)
     implementation project(':react-native-async-storage_async-storage')
-    implementation project(':react-native-device-info')
+    // Removed react-native-device-info as it's not in package.json
+    // implementation project(':react-native-device-info')
     implementation project(':react-native-firebase_app')
     implementation project(':react-native-firebase_auth')
     implementation project(':react-native-firebase_firestore')

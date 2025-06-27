@@ -38,7 +38,7 @@ add_namespace() {
 add_namespace "node_modules/react-native-fs/android/build.gradle" "com.rnfs"
 
 # Fix other common modules that might have issues
-add_namespace "node_modules/react-native-device-info/android/build.gradle" "com.learnium.RNDeviceInfo"
+# react-native-device-info removed - not in package.json
 add_namespace "node_modules/react-native-share/android/build.gradle" "cl.json"
 add_namespace "node_modules/react-native-vector-icons/android/build.gradle" "com.oblador.vectoricons"
 add_namespace "node_modules/react-native-webview/android/build.gradle" "com.reactnativecommunity.webview"

@@ -8,8 +8,9 @@ def nodeModulesDir = new File(rootDir.parentFile, 'node_modules')
 include ':react-native-async-storage_async-storage'
 project(':react-native-async-storage_async-storage').projectDir = new File(nodeModulesDir, '@react-native-async-storage/async-storage/android')
 
-include ':react-native-device-info'
-project(':react-native-device-info').projectDir = new File(nodeModulesDir, 'react-native-device-info/android')
+// Removed react-native-device-info as it's not in package.json
+// include ':react-native-device-info'
+// project(':react-native-device-info').projectDir = new File(nodeModulesDir, 'react-native-device-info/android')
 
 include ':react-native-firebase_app'
 project(':react-native-firebase_app').projectDir = new File(nodeModulesDir, '@react-native-firebase/app/android')

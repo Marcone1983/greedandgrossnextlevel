@@ -37,7 +37,6 @@ jobs:
         run: |
           echo "Fixing missing default configurations..."
           MODULES=(
-            "react-native-device-info"
             "@react-native-firebase/auth"
             "@react-native-firebase/app"
             "@react-native-firebase/firestore"
@@ -122,27 +121,7 @@ jobs:
               echo "Fixing specific module configurations..."
               cd ..
               
-              # Fix react-native-device-info
-              echo "Fixing react-native-device-info..."
-              BUILD_FILE="node_modules/react-native-device-info/android/build.gradle"
-              if [ -f "$BUILD_FILE" ]; then
-                echo "Found react-native-device-info build.gradle"
-                # Aggiungi dopo l'ultima parentesi del file
-                echo "" >> "$BUILD_FILE"
-                echo "afterEvaluate {" >> "$BUILD_FILE"
-                echo "  publishing {" >> "$BUILD_FILE"
-                echo "    publications {" >> "$BUILD_FILE"
-                echo "      release(MavenPublication) {" >> "$BUILD_FILE"
-                echo "        from components.release" >> "$BUILD_FILE"
-                echo "      }" >> "$BUILD_FILE"
-                echo "    }" >> "$BUILD_FILE"
-                echo "  }" >> "$BUILD_FILE"
-                echo "}" >> "$BUILD_FILE"
-                echo "Fixed react-native-device-info"
-              else
-                echo "ERROR: react-native-device-info build.gradle not found at $BUILD_FILE!"
-                ls -la node_modules/react-native-device-info/android/ || echo "Directory not found"
-              fi
+              # react-native-device-info removed as it's not in package.json
               
               # Fix react-native-firebase modules
               for firebase_module in auth app firestore storage; do
@@ -174,7 +153,7 @@ jobs:
               sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' node_modules/react-native-gesture-handler/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.BV.LinearGradient"' node_modules/react-native-linear-gradient/android/build.gradle 2>/dev/null || true
-              sed -i '/android {/a\    namespace "com.learnium.RNDeviceInfo"' node_modules/react-native-device-info/android/build.gradle 2>/dev/null || true
+              # react-native-device-info removed - not in package.json
               sed -i '/android {/a\    namespace "io.invertase.firebase.auth"' node_modules/@react-native-firebase/auth/android/build.gradle 2>/dev/null || true
               
               cd android
