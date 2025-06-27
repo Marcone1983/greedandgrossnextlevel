@@ -68,6 +68,17 @@ jobs:
             sed -i '/android {/a\    namespace "com.oblador.vectoricons"' node_modules/react-native-vector-icons/android/build.gradle || true
           fi
           
+          # FIX PER I MODULI MANCANTI
+          echo "Fixing react-native-device-info..."
+          if [ -f "node_modules/react-native-device-info/android/build.gradle" ]; then
+            sed -i '/android {/a\    namespace "com.learnium.RNDeviceInfo"' node_modules/react-native-device-info/android/build.gradle || true
+          fi
+          
+          echo "Fixing @react-native-firebase/auth..."
+          if [ -f "node_modules/@react-native-firebase/auth/android/build.gradle" ]; then
+            sed -i '/android {/a\    namespace "io.invertase.firebase.auth"' node_modules/@react-native-firebase/auth/android/build.gradle || true
+          fi
+          
           # Fix generico per tutti gli altri moduli
           echo "Fixing other modules..."
           find node_modules -name "build.gradle" -path "*/android/*" -type f | while read file; do
@@ -84,20 +95,15 @@ jobs:
         run: |
           echo "Enabling buildConfig for all modules..."
           find node_modules -name "build.gradle" -path "*/android/*" -type f | while read file; do
-            # Controlla se c'è già buildFeatures
             if grep -q "buildFeatures" "$file" 2>/dev/null; then
-              # Se c'è già buildFeatures, aggiungi buildConfig se non presente
               if ! grep -q "buildConfig" "$file" 2>/dev/null; then
                 sed -i '/buildFeatures {/a\        buildConfig true' "$file" 2>/dev/null || true
               fi
             else
-              # Se non c'è buildFeatures, aggiungilo dopo android {
-              # Usa printf invece di echo per gestire meglio le newline
               awk '/android {/{print; print "    buildFeatures {"; print "        buildConfig true"; print "    }"; next}1' "$file" > "$file.tmp" && mv "$file.tmp" "$file" 2>/dev/null || true
             fi
           done
           
-          # Fix anche per il progetto principale
           if [ -f "android/app/build.gradle" ]; then
             if ! grep -q "buildConfig" "android/app/build.gradle" 2>/dev/null; then
               awk '/android {/{print; print "    buildFeatures {"; print "        buildConfig true"; print "    }"; next}1' "android/app/build.gradle" > "android/app/build.gradle.tmp" && mv "android/app/build.gradle.tmp" "android/app/build.gradle" 2>/dev/null || true
@@ -167,16 +173,30 @@ jobs:
               ./gradlew clean
               rm -rf build/ app/build/
               
+              # Verifica che tutti i moduli siano nel settings.gradle
+              echo "Checking settings.gradle..."
+              if ! grep -q "react-native-device-info" ../android/settings.gradle 2>/dev/null; then
+                echo "include ':react-native-device-info'" >> ../android/settings.gradle
+                echo "project(':react-native-device-info').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-device-info/android')" >> ../android/settings.gradle
+              fi
+              
+              if ! grep -q "react-native-firebase_auth" ../android/settings.gradle 2>/dev/null; then
+                echo "include ':react-native-firebase_auth'" >> ../android/settings.gradle
+                echo "project(':react-native-firebase_auth').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-firebase/auth/android')" >> ../android/settings.gradle
+              fi
+              
             elif [ $attempt -eq 4 ]; then
               echo "Nuclear reset..."
               cd ..
               rm -rf ~/.gradle
               rm -rf android/.gradle android/build android/app/build
               
-              # Re-fix alcuni namespace critici
+              # Re-fix namespaces critici
               sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' node_modules/react-native-gesture-handler/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.BV.LinearGradient"' node_modules/react-native-linear-gradient/android/build.gradle 2>/dev/null || true
+              sed -i '/android {/a\    namespace "com.learnium.RNDeviceInfo"' node_modules/react-native-device-info/android/build.gradle 2>/dev/null || true
+              sed -i '/android {/a\    namespace "io.invertase.firebase.auth"' node_modules/@react-native-firebase/auth/android/build.gradle 2>/dev/null || true
               
               cd android
             fi
