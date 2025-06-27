@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21  # CAMBIATO A JAVA 21 PER RISOLVERE L'ERRORE
+          java-version: 21
       
       - uses: actions/setup-node@v4
         with:
@@ -45,7 +45,6 @@ jobs:
       
       - name: Clean Bouncy Castle cache
         run: |
-          # Pulisci specificamente il JAR problematico
           rm -rf ~/.gradle/caches/modules-2/files-2.1/org.bouncycastle/
           rm -rf ~/.gradle/caches/jars-9/
       
@@ -56,7 +55,6 @@ jobs:
           for attempt in 1 2 3 4 5; do
             echo "::group::Build Attempt $attempt/5"
             
-            # Prova il build
             if ./gradlew bundleRelease --stacktrace --no-daemon; then
               echo "✅ Build succeeded on attempt $attempt"
               echo "::endgroup::"
@@ -66,12 +64,10 @@ jobs:
               echo "::endgroup::"
             fi
             
-            # Se siamo all'ultimo tentativo, esci con errore
             if [ $attempt -eq 5 ]; then
               exit 1
             fi
             
-            # Fix specifici per ogni tentativo
             echo "::group::Fixing errors for attempt $((attempt + 1))"
             
             if [ $attempt -eq 1 ]; then
@@ -83,22 +79,23 @@ jobs:
               
             elif [ $attempt -eq 2 ]; then
               echo "Force downgrading Bouncy Castle..."
-              # Aggiungi override per forzare versione più vecchia
-              cat >> build.gradle << 'EOF'
-              
-              allprojects {
-                  configurations.all {
-                      resolutionStrategy {
-                          force 'org.bouncycastle:bcprov-jdk18on:1.77'
-                      }
-                  }
-              }
-              EOF
+              echo "" >> build.gradle
+              echo "allprojects {" >> build.gradle
+              echo "    configurations.all {" >> build.gradle
+              echo "        resolutionStrategy {" >> build.gradle
+              echo "            force 'org.bouncycastle:bcprov-jdk18on:1.77'" >> build.gradle
+              echo "        }" >> build.gradle
+              echo "    }" >> build.gradle
+              echo "}" >> build.gradle
               
             elif [ $attempt -eq 3 ]; then
-              echo "Excluding Bouncy Castle from problematic dependencies..."
-              find ../node_modules -name "build.gradle" | xargs grep -l "bouncycastle" | while read file; do
-                sed -i '/dependencies {/a\    configurations.all { exclude group: "org.bouncycastle" }' "$file" 2>/dev/null || true
+              echo "Fixing all namespaces..."
+              find ../node_modules -name "build.gradle" -path "*/android/*" | while read file; do
+                if ! grep -q "namespace" "$file"; then
+                  MODULE_NAME=$(echo "$file" | sed 's/.*node_modules\/\([^\/]*\).*/\1/')
+                  NAMESPACE=$(echo "$MODULE_NAME" | sed 's/-/./g')
+                  sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$file" 2>/dev/null || true
+                fi
               done
               
             elif [ $attempt -eq 4 ]; then
