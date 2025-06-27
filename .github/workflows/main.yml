@@ -22,16 +22,11 @@ jobs:
           
       - run: npm install --legacy-peer-deps
       
-      # Fix namespace issue for react-native-fs
-      - name: Fix react-native-fs namespace
+      # Fix namespace issues for all modules
+      - name: Fix namespace issues
         run: |
-          # Aggiungi namespace al build.gradle di react-native-fs
-          echo "Fixing react-native-fs namespace issue..."
-          RNFS_BUILD_GRADLE="node_modules/react-native-fs/android/build.gradle"
-          if [ -f "$RNFS_BUILD_GRADLE" ]; then
-            # Aggiungi namespace dopo android {
-            sed -i '/android {/a\    namespace "com.rnfs"' "$RNFS_BUILD_GRADLE"
-          fi
+          chmod +x fix-namespaces.sh
+          ./fix-namespaces.sh
       
       # Dai permessi di esecuzione a gradlew
       - run: chmod +x android/gradlew

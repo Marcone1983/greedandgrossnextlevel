@@ -22,6 +22,11 @@ jobs:
           
       - run: npm install --legacy-peer-deps
       
+      # Fix namespace issues
+      - run: |
+          chmod +x fix-namespaces.sh
+          ./fix-namespaces.sh
+      
       # Dai permessi di esecuzione a gradlew (se necessario)
       - run: chmod +x android/gradlew
       
