@@ -118,18 +118,44 @@ jobs:
               ./gradlew clean
               rm -rf build/ app/build/
               
-              # Fix dipendenze di configurazione per tutti i moduli
-              echo "Fixing dependency configurations..."
+              # Fix specifico per i moduli problematici
+              echo "Fixing specific module configurations..."
               cd ..
-              find node_modules -name "build.gradle" -path "*/android/*" | while read file; do
-                # Aggiungi configurations se manca completamente
-                if ! grep -q "configurations {" "$file"; then
-                  echo "" >> "$file"
-                  echo "configurations {" >> "$file"
-                  echo "    default" >> "$file"
-                  echo "}" >> "$file"
+              
+              # Fix react-native-device-info
+              if [ -f "node_modules/react-native-device-info/android/build.gradle" ]; then
+                echo "Fixing react-native-device-info..."
+                # Aggiungi dopo l'ultima parentesi del file
+                echo "" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "afterEvaluate {" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "  publishing {" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "    publications {" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "      release(MavenPublication) {" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "        from components.release" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "      }" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "    }" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "  }" >> "node_modules/react-native-device-info/android/build.gradle"
+                echo "}" >> "node_modules/react-native-device-info/android/build.gradle"
+              fi
+              
+              # Fix react-native-firebase modules
+              for firebase_module in auth app firestore storage; do
+                BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
+                if [ -f "$BUILD_FILE" ]; then
+                  echo "Fixing @react-native-firebase/$firebase_module..."
+                  echo "" >> "$BUILD_FILE"
+                  echo "afterEvaluate {" >> "$BUILD_FILE"
+                  echo "  publishing {" >> "$BUILD_FILE"
+                  echo "    publications {" >> "$BUILD_FILE"
+                  echo "      release(MavenPublication) {" >> "$BUILD_FILE"
+                  echo "        from components.release" >> "$BUILD_FILE"
+                  echo "      }" >> "$BUILD_FILE"
+                  echo "    }" >> "$BUILD_FILE"
+                  echo "  }" >> "$BUILD_FILE"
+                  echo "}" >> "$BUILD_FILE"
                 fi
               done
+              
               cd android
               
             elif [ $attempt -eq 4 ]; then
