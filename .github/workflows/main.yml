@@ -192,7 +192,6 @@ EOF
               echo "::endgroup::"
               exit 0
             else
-              echo "❌ Build failed on attempt $attempt"
               echo "::endgroup::"
             fi
             
