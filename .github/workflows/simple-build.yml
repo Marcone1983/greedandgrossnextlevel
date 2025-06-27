@@ -32,21 +32,6 @@ jobs:
           chmod +x fix-gradle-configs.sh
           ./fix-gradle-configs.sh
       
-      # Fix missing default configurations
-      - name: Fix missing configurations
-        run: |
-          echo "Fixing missing default configurations..."
-          for module in react-native-device-info @react-native-firebase/auth @react-native-firebase/app; do
-            MODULE_PATH=$(echo "$module" | sed 's/@//')
-            BUILD_FILE="node_modules/$MODULE_PATH/android/build.gradle"
-            if [ -f "$BUILD_FILE" ]; then
-              if ! grep -q "configurations {" "$BUILD_FILE"; then
-                echo "" >> "$BUILD_FILE"
-                echo "configurations { default }" >> "$BUILD_FILE"
-              fi
-            fi
-          done
-      
       # Dai permessi di esecuzione a gradlew (se necessario)
       - run: chmod +x android/gradlew
       
