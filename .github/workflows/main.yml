@@ -25,7 +25,6 @@ jobs:
       # Fix namespace issue for react-native-fs
       - name: Fix react-native-fs namespace
         run: |
-          echo "Fixing react-native-fs namespace issue..."
           RNFS_BUILD_GRADLE="node_modules/react-native-fs/android/build.gradle"
           if [ -f "$RNFS_BUILD_GRADLE" ]; then
             sed -i '/android {/a\    namespace "com.rnfs"' "$RNFS_BUILD_GRADLE"
@@ -47,76 +46,80 @@ jobs:
       # Dai permessi di esecuzione a gradlew
       - run: chmod +x android/gradlew
       
-      # Build con rilevamento e fix automatici
-      - name: Build Android with Auto-Fix
+      # Build Android con auto-fix
+      - name: Build Android with Auto-Fix (5 attempts)
         run: |
           cd android
           
           for attempt in 1 2 3 4 5; do
-            echo "🔨 Build attempt $attempt/5..."
+            ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee build_log.txt || BUILD_FAILED=true
             
-            # Cattura l'output del build
-            if ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee build_output.log; then
-              echo "✅ Build succeeded!"
+            if [ -z "$BUILD_FAILED" ]; then
               break
-            else
-              echo "❌ Build failed, analyzing error..."
+            fi
+            
+            # Fix corrupted JAR cache
+            if grep -q "Failed to create Jar file" build_log.txt; then
+              rm -rf ~/.gradle/caches/jars-*/
+              rm -rf ~/.gradle/caches/modules-*/
+              ./gradlew --stop
               
-              # Analizza e risolvi errori comuni
-              if grep -q "Failed to create Jar file" build_output.log; then
-                echo "🔧 Fixing: Corrupted JAR cache"
-                rm -rf ~/.gradle/caches/jars-*/
-                rm -rf ~/.gradle/caches/modules-*/
-                ./gradlew --stop
-              
-              elif grep -q "Namespace not specified" build_output.log; then
-                echo "🔧 Fixing: Missing namespace"
-                # Estrai il nome del modulo dal log
-                MODULE=$(grep -oP "project ':\K[^']+(?=')" build_output.log | head -1)
-                if [ ! -z "$MODULE" ]; then
-                  MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
-                  if [ -f "$MODULE_GRADLE" ]; then
-                    sed -i '/android {/a\    namespace "com.'${MODULE//-/.}'"' "$MODULE_GRADLE"
+            # Fix missing namespaces
+            elif grep -q "Namespace not specified" build_log.txt; then
+              grep -B5 "Namespace not specified" build_log.txt | grep "project ':" | while read -r line; do
+                MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
+                MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
+                if [ -f "$MODULE_GRADLE" ]; then
+                  if ! grep -q "namespace" "$MODULE_GRADLE"; then
+                    NAMESPACE=$(echo $MODULE | sed 's/-/./g')
+                    sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
                   fi
                 fi
+              done
               
-              elif grep -q "OutOfMemoryError" build_output.log; then
-                echo "🔧 Fixing: Memory issues"
-                sed -i 's/-Xmx4096m/-Xmx6144m/g' gradle.properties
-                sed -i 's/MaxMetaspaceSize=1024m/MaxMetaspaceSize=2048m/g' gradle.properties
-              
-              elif grep -q "Could not resolve all files" build_output.log; then
-                echo "🔧 Fixing: Dependency resolution"
-                rm -rf ~/.gradle/caches/
-                ./gradlew --refresh-dependencies
-              
-              elif grep -q "SDK location not found" build_output.log; then
-                echo "🔧 Fixing: Missing SDK location"
-                echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-              
-              elif grep -q "Duplicate class" build_output.log; then
-                echo "🔧 Fixing: Duplicate classes"
-                ./gradlew clean
-                rm -rf build/ app/build/
-              
-              else
-                echo "⚠️ Unknown error, trying general fixes..."
-                ./gradlew clean
-                rm -rf ~/.gradle/caches/transforms-*/
-                ./gradlew --stop
+            # Fix gesture handler
+            elif grep -q "react-native-gesture-handler" build_log.txt && grep -q "ExecutionException" build_log.txt; then
+              RNGH_GRADLE="../node_modules/react-native-gesture-handler/android/build.gradle"
+              if [ -f "$RNGH_GRADLE" ]; then
+                grep -q "namespace" "$RNGH_GRADLE" || sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' "$RNGH_GRADLE"
               fi
+              rm -rf ~/.gradle/caches/
               
-              # Aspetta un po' prima di riprovare
-              echo "⏳ Waiting before retry..."
-              sleep 5
+            # Fix memory issues
+            elif grep -q "OutOfMemoryError" build_log.txt || grep -q "Java heap space" build_log.txt; then
+              CURRENT_MEM=$(grep "Xmx" gradle.properties | sed 's/.*-Xmx\([0-9]*\)m.*/\1/')
+              NEW_MEM=$((CURRENT_MEM + 2048))
+              sed -i "s/-Xmx${CURRENT_MEM}m/-Xmx${NEW_MEM}m/g" gradle.properties
+              
+            # Fix dependency issues
+            elif grep -q "Could not resolve all files" build_log.txt || grep -q "Could not download" build_log.txt; then
+              ./gradlew --stop
+              rm -rf ~/.gradle/caches/
+              REFRESH_DEPS="--refresh-dependencies"
+              
+            # Fix duplicate classes
+            elif grep -q "Duplicate class" build_log.txt; then
+              ./gradlew clean
+              rm -rf build/ app/build/
+              
+            # Fix SDK version issues
+            elif grep -q "minSdk" build_log.txt || grep -q "uses-sdk:minSdkVersion" build_log.txt; then
+              find ../node_modules -name "build.gradle" -exec grep -l "minSdkVersion" {} \; | while read file; do
+                sed -i 's/minSdkVersion [0-9]*/minSdkVersion 24/g' "$file"
+              done
+              
+            # General fixes
+            else
+              ./gradlew clean
+              rm -rf ~/.gradle/caches/transforms-*/
+              ./gradlew --stop
             fi
+            
+            unset BUILD_FAILED
+            sleep 3
           done
           
-          # Se dopo 5 tentativi fallisce ancora
-          if [ ! -f app/build/outputs/bundle/release/*.aab ]; then
-            echo "❌ Build failed after 5 attempts"
-            echo "📋 Last error log:"
-            tail -n 50 build_output.log
+          if [ ! -f app/build/outputs/bundle/release/*.aab ] && [ ! -f app/build/outputs/apk/release/*.apk ]; then
             exit 1
           fi
       
@@ -129,5 +132,5 @@ jobs:
           path: |
             android/app/build/outputs/bundle/release/*.aab
             android/app/build/outputs/apk/release/*.apk
-            android/build_output.log
+            android/build_log.txt
           retention-days: 7
