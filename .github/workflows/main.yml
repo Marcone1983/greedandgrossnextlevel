@@ -43,69 +43,76 @@ jobs:
       
       - run: chmod +x android/gradlew
       
-      # Tentativo 1
-      - name: Build Attempt 1
-        id: attempt1
-        continue-on-error: true
+      - name: Build with 5 attempts
         run: |
           cd android
-          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log_1.txt
-      
-      # Fix e Tentativo 2
-      - name: Fix and Build Attempt 2
-        if: steps.attempt1.outcome == 'failure'
-        id: attempt2
-        continue-on-error: true
-        run: |
-          cd android
-          if grep -q "Failed to create Jar file" ../build_log_1.txt; then
+          
+          # Tentativo 1
+          echo "::group::Build Attempt 1/5"
+          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 1"
+          echo "::endgroup::"
+          
+          # Fix per tentativo 2
+          echo "::group::Fixing issues for attempt 2"
+          if grep -q "Failed to create Jar file" ../build_log.txt; then
             rm -rf ~/.gradle/caches/jars-*/
             ./gradlew --stop
-          elif grep -q "Namespace not specified" ../build_log_1.txt; then
-            MODULE=$(grep -B5 "Namespace not specified" ../build_log_1.txt | grep -oP "project ':\K[^']+" | head -1)
-            if [ ! -z "$MODULE" ]; then
-              sed -i "/android {/a\\    namespace \"com.${MODULE//-/.}\"" "../node_modules/$MODULE/android/build.gradle"
-            fi
+          elif grep -q "Namespace not specified" ../build_log.txt; then
+            grep -B5 "Namespace not specified" ../build_log.txt | grep "project ':" | while read -r line; do
+              MODULE=$(echo $line | sed "s/.*project ':\(.*\)'.*/\1/")
+              MODULE_GRADLE="../node_modules/$MODULE/android/build.gradle"
+              if [ -f "$MODULE_GRADLE" ] && ! grep -q "namespace" "$MODULE_GRADLE"; then
+                NAMESPACE=$(echo $MODULE | sed 's/-/./g')
+                sed -i "/android {/a\\    namespace \"com.${NAMESPACE}\"" "$MODULE_GRADLE"
+              fi
+            done
           fi
-          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log_2.txt
-      
-      # Fix e Tentativo 3
-      - name: Fix and Build Attempt 3
-        if: steps.attempt2.outcome == 'failure'
-        id: attempt3
-        continue-on-error: true
-        run: |
-          cd android
-          if grep -q "react-native-gesture-handler" ../build_log_2.txt; then
-            sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' ../node_modules/react-native-gesture-handler/android/build.gradle || true
-            rm -rf ~/.gradle/caches/
-          elif grep -q "OutOfMemoryError" ../build_log_2.txt; then
+          echo "::endgroup::"
+          
+          # Tentativo 2
+          echo "::group::Build Attempt 2/5"
+          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 2"
+          echo "::endgroup::"
+          
+          # Fix per tentativo 3
+          echo "::group::Fixing issues for attempt 3"
+          if grep -q "react-native-gesture-handler" ../build_log.txt; then
+            RNGH="../node_modules/react-native-gesture-handler/android/build.gradle"
+            [ -f "$RNGH" ] && ! grep -q "namespace" "$RNGH" && sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' "$RNGH"
+          fi
+          rm -rf ~/.gradle/caches/
+          echo "::endgroup::"
+          
+          # Tentativo 3
+          echo "::group::Build Attempt 3/5"
+          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 3"
+          echo "::endgroup::"
+          
+          # Fix per tentativo 4
+          echo "::group::Fixing issues for attempt 4"
+          ./gradlew clean
+          if grep -q "OutOfMemoryError" ../build_log.txt; then
             sed -i 's/-Xmx4096m/-Xmx6144m/g' gradle.properties
           fi
-          ./gradlew bundleRelease --stacktrace --no-daemon 2>&1 | tee ../build_log_3.txt
-      
-      # Fix e Tentativo 4
-      - name: Fix and Build Attempt 4
-        if: steps.attempt3.outcome == 'failure'
-        id: attempt4
-        continue-on-error: true
-        run: |
-          cd android
-          ./gradlew clean
-          rm -rf ~/.gradle/caches/
-          ./gradlew bundleRelease --stacktrace --no-daemon --refresh-dependencies 2>&1 | tee ../build_log_4.txt
-      
-      # Tentativo 5 finale
-      - name: Final Build Attempt 5
-        if: steps.attempt4.outcome == 'failure'
-        run: |
-          cd android
+          echo "::endgroup::"
+          
+          # Tentativo 4
+          echo "::group::Build Attempt 4/5"
+          ./gradlew bundleRelease --stacktrace --no-daemon --refresh-dependencies 2>&1 | tee ../build_log.txt && exit 0 || echo "Failed attempt 4"
+          echo "::endgroup::"
+          
+          # Fix per tentativo 5
+          echo "::group::Fixing issues for attempt 5"
           find ../node_modules -name "build.gradle" -exec grep -l "minSdkVersion" {} \; | while read file; do
             sed -i 's/minSdkVersion [0-9]*/minSdkVersion 24/g' "$file"
           done
-          ./gradlew --stop
-          rm -rf build/ app/build/ ~/.gradle/caches/
-          ./gradlew bundleRelease --stacktrace --no-daemon
+          rm -rf build/ app/build/
+          echo "::endgroup::"
+          
+          # Tentativo 5
+          echo "::group::Build Attempt 5/5"
+          ./gradlew bundleRelease --stacktrace --no-daemon || exit 1
+          echo "::endgroup::"
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -115,5 +122,5 @@ jobs:
           path: |
             android/app/build/outputs/bundle/release/*.aab
             android/app/build/outputs/apk/release/*.apk
-            build_log_*.txt
+            build_log.txt
           retention-days: 7
