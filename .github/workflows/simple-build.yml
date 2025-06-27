@@ -55,8 +55,108 @@ jobs:
             fi
           done
       
-      # Dai permessi di esecuzione a gradlew (se necessario)
+      - name: Setup Gradle Properties
+        run: |
+          mkdir -p android
+          cat > android/gradle.properties << EOF
+          org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+          org.gradle.parallel=false
+          org.gradle.configureondemand=false
+          org.gradle.daemon=false
+          android.useAndroidX=true
+          android.enableJetifier=true
+          EOF
+      
       - run: chmod +x android/gradlew
       
-      # Esegui il build con gradlew
-      - run: cd android && ./gradlew bundleRelease --stacktrace
+      - name: Clean Bouncy Castle cache
+        run: |
+          rm -rf ~/.gradle/caches/modules-2/files-2.1/org.bouncycastle/
+          rm -rf ~/.gradle/caches/jars-9/
+      
+      - name: Build with 5 attempts
+        run: |
+          cd android
+          
+          for attempt in 1 2 3 4 5; do
+            echo "::group::Build Attempt $attempt/5"
+            
+            if ./gradlew bundleRelease --stacktrace --no-daemon; then
+              echo "✅ Build succeeded on attempt $attempt"
+              echo "::endgroup::"
+              exit 0
+            else
+              echo "❌ Build failed on attempt $attempt"
+              echo "::endgroup::"
+            fi
+            
+            if [ $attempt -eq 5 ]; then
+              exit 1
+            fi
+            
+            echo "::group::Fixing errors for attempt $((attempt + 1))"
+            
+            if [ $attempt -eq 1 ]; then
+              echo "Cleaning all caches..."
+              rm -rf ~/.gradle/caches/
+              ./gradlew --stop || true
+              
+            elif [ $attempt -eq 2 ]; then
+              echo "Downgrading problematic dependencies..."
+              echo "" >> build.gradle
+              echo "allprojects {" >> build.gradle
+              echo "    configurations.all {" >> build.gradle
+              echo "        resolutionStrategy {" >> build.gradle
+              echo "            force 'org.bouncycastle:bcprov-jdk18on:1.77'" >> build.gradle
+              echo "        }" >> build.gradle
+              echo "    }" >> build.gradle
+              echo "}" >> build.gradle
+              
+            elif [ $attempt -eq 3 ]; then
+              echo "Increasing memory and cleaning..."
+              sed -i 's/-Xmx4096m/-Xmx6144m/g' gradle.properties
+              ./gradlew clean
+              rm -rf build/ app/build/
+              
+              # Fix dipendenze di configurazione per tutti i moduli
+              echo "Fixing dependency configurations..."
+              cd ..
+              find node_modules -name "build.gradle" -path "*/android/*" | while read file; do
+                # Aggiungi configurations se manca completamente
+                if ! grep -q "configurations {" "$file"; then
+                  echo "" >> "$file"
+                  echo "configurations {" >> "$file"
+                  echo "    default" >> "$file"
+                  echo "}" >> "$file"
+                fi
+              done
+              cd android
+              
+            elif [ $attempt -eq 4 ]; then
+              echo "Nuclear reset..."
+              cd ..
+              rm -rf ~/.gradle
+              rm -rf android/.gradle android/build android/app/build
+              
+              # Re-fix namespaces critici
+              sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle 2>/dev/null || true
+              sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' node_modules/react-native-gesture-handler/android/build.gradle 2>/dev/null || true
+              sed -i '/android {/a\    namespace "com.BV.LinearGradient"' node_modules/react-native-linear-gradient/android/build.gradle 2>/dev/null || true
+              sed -i '/android {/a\    namespace "com.learnium.RNDeviceInfo"' node_modules/react-native-device-info/android/build.gradle 2>/dev/null || true
+              sed -i '/android {/a\    namespace "io.invertase.firebase.auth"' node_modules/@react-native-firebase/auth/android/build.gradle 2>/dev/null || true
+              
+              cd android
+            fi
+            
+            echo "::endgroup::"
+            sleep 3
+          done
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-build
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/*.apk
