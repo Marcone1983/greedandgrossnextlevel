@@ -27,10 +27,10 @@ jobs:
           chmod +x fix-namespaces.sh
           ./fix-namespaces.sh
       
-      # Fix Gradle configuration issues
-      - run: |
-          chmod +x fix-gradle-configs.sh
-          ./fix-gradle-configs.sh
+      # Skip fix-gradle-configs.sh for now as it's causing syntax errors
+      # - run: |
+      #     chmod +x fix-gradle-configs.sh
+      #     ./fix-gradle-configs.sh
       
       # Fix missing default configurations
       - name: Fix missing configurations
