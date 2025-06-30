@@ -225,7 +225,6 @@ task copyDownloadableDepsToLibs(type: Copy) {
 // React Native configuration for 0.79.0 without plugin
 
 // Apply Google Services plugin
-// TODO: Add google-services.json file before enabling these
-// apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
 // apply plugin: 'com.google.firebase.crashlytics'
 // apply plugin: 'com.google.firebase.firebase-perf'
