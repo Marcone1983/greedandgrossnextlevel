@@ -1,4 +1,15 @@
 {
   "name": "GreedAndGross",
-  "displayName": "GREED & GROSS"
+  "displayName": "GREED & GROSS",
+  "android": {
+    "package": "com.greedandgross.cannabisbreeding"
+  },
+  "ios": {
+    "bundleIdentifier": "com.greedandgross.cannabisbreeding"
+  },
+  "extra": {
+    "eas": {
+      "projectId": "a589c75a-35c2-4985-b397-640eecc17584"
+    }
+  }
 }
