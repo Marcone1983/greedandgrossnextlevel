@@ -47,6 +47,11 @@ allprojects {
         maven { url("$rootDir/../local-maven") }
     }
     
+    // Force Java 17 for all modules
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ["-source", "17", "-target", "17"]
+    }
+    
     // Ensure React Native is available to all modules
     configurations.all {
         resolutionStrategy {
@@ -86,6 +91,11 @@ subprojects {
         
         if (project.hasProperty('android')) {
             project.android {
+                // Force Java 17 for all Android modules
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
                 // Ensure namespace is set for all modules
                 if (!project.android.hasProperty('namespace') || project.android.namespace == null) {
                     def manifestFile = file("${project.projectDir}/src/main/AndroidManifest.xml")
