@@ -22,7 +22,6 @@ jobs:
           
       - run: npm install --legacy-peer-deps
       
-      # Fix Firebase modules for Gradle 8.8 - MUST BE DONE FIRST!
       - name: Fix Firebase modules
         run: |
           echo "Removing publishing blocks from Firebase modules..."
@@ -30,12 +29,11 @@ jobs:
             BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
             if [ -f "$BUILD_FILE" ]; then
               echo "Fixing @react-native-firebase/$firebase_module..."
-              # Comment out the problematic afterEvaluate { publishing { ... } } block
+              { publishing { ... } } block
               sed -i '/afterEvaluate {/,/^}/s/^/\/\/ /' "$BUILD_FILE" || true
             fi
           done
           
-      # Fix react-native-safe-area-context Kotlin issue
       - name: Fix react-native-safe-area-context
         run: |
           if [ -f "fix-safe-area-context.sh" ]; then
@@ -43,17 +41,10 @@ jobs:
             ./fix-safe-area-context.sh
           fi
       
-      # Fix namespace issues
       - run: |
           chmod +x fix-namespaces.sh
           ./fix-namespaces.sh
       
-      # Skip fix-gradle-configs.sh for now as it's causing syntax errors
-      # - run: |
-      #     chmod +x fix-gradle-configs.sh
-      #     ./fix-gradle-configs.sh
-      
-      # Fix missing default configurations
       - name: Fix missing configurations
         run: |
           echo "Fixing missing default configurations..."
@@ -92,7 +83,7 @@ jobs:
           
       - name: Setup Android SDK
         run: |
-          # Create local.properties with Android SDK path
+
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
           echo "Android SDK location: $ANDROID_SDK_ROOT"
       
@@ -111,11 +102,10 @@ jobs:
             echo "::group::Build Attempt $attempt/5"
             
             if ./gradlew bundleRelease --stacktrace --no-daemon; then
-              echo "✅ Build succeeded on attempt $attempt"
+              
               echo "::endgroup::"
               exit 0
             else
-              echo "❌ Build failed on attempt $attempt"
               echo "::endgroup::"
             fi
             
@@ -147,19 +137,15 @@ jobs:
               ./gradlew clean
               rm -rf build/ app/build/
               
-              # Fix specifico per i moduli problematici
               echo "Fixing specific module configurations..."
               cd ..
               
-              # react-native-device-info removed as it's not in package.json
-              
-              # Fix react-native-firebase modules - REMOVE publishing blocks
               echo "Removing publishing blocks from Firebase modules..."
               for firebase_module in auth app firestore storage analytics; do
                 BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
                 if [ -f "$BUILD_FILE" ]; then
                   echo "Fixing @react-native-firebase/$firebase_module..."
-                  # Comment out the problematic afterEvaluate { publishing { ... } } block
+                   { publishing { ... } } block
                   sed -i '/afterEvaluate {/,/^}/s/^/\/\/ /' "$BUILD_FILE" || true
                 fi
               done
@@ -172,11 +158,9 @@ jobs:
               rm -rf ~/.gradle
               rm -rf android/.gradle android/build android/app/build
               
-              # Re-fix namespaces critici
               sed -i '/android {/a\    namespace "com.rnfs"' node_modules/react-native-fs/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.swmansion.gesturehandler"' node_modules/react-native-gesture-handler/android/build.gradle 2>/dev/null || true
               sed -i '/android {/a\    namespace "com.BV.LinearGradient"' node_modules/react-native-linear-gradient/android/build.gradle 2>/dev/null || true
-              # react-native-device-info removed - not in package.json
               sed -i '/android {/a\    namespace "io.invertase.firebase.auth"' node_modules/@react-native-firebase/auth/android/build.gradle 2>/dev/null || true
               
               cd android
