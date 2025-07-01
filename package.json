@@ -80,5 +80,18 @@
     "prettier": "^3.3.3",
     "typescript": "^5.7.2"
   },
-  "private": true
+  "private": true,
+  "description": "// Trigger CI # Trigger build Sat Jun 21 18:44:37 CEST 2025 # Trigger build Tue Jul  1 05:52:30 CEST 2025",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marcone1983/greedandgrossnextlevel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Marcone1983/greedandgrossnextlevel/issues"
+  },
+  "homepage": "https://github.com/Marcone1983/greedandgrossnextlevel#readme"
 }
