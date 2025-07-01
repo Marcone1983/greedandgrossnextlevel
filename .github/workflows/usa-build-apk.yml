@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
           
       - uses: actions/setup-node@v4
         with:
@@ -25,6 +25,15 @@ jobs:
           cache: npm
           
       - run: npm install --legacy-peer-deps
+      
+      - name: Fix Firebase modules for Gradle 8.8
+        run: |
+          if [ -f "fix-firebase-modules.sh" ]; then
+            chmod +x fix-firebase-modules.sh
+            ./fix-firebase-modules.sh
+          else
+            echo "fix-firebase-modules.sh not found, skipping..."
+          fi
       
       - name: Setup Android
         run: |

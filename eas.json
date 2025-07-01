@@ -11,7 +11,7 @@
         "credentialsSource": "local",
         "image": "latest"
       },
-      "prebuildCommand": "rm -f yarn.lock package-lock.json && bash .eas/build/pre-install.sh"
+      "prebuildCommand": "rm -f yarn.lock package-lock.json && bash .eas/build/pre-install.sh && chmod +x fix-firebase-modules.sh && ./fix-firebase-modules.sh"
     },
     "preview": {
       "distribution": "internal"
@@ -29,7 +29,7 @@
       "env": {
         "REACT_NATIVE_MAVEN_REPO_PATH": "node_modules/react-native/android"
       },
-      "prebuildCommand": "rm -f yarn.lock package-lock.json && bash .eas/build/pre-install.sh"
+      "prebuildCommand": "rm -f yarn.lock package-lock.json && bash .eas/build/pre-install.sh && chmod +x fix-firebase-modules.sh && ./fix-firebase-modules.sh"
     }
   },
   "submit": {
