@@ -164,6 +164,7 @@ jobs:
               sed -i '/android {/a\    namespace "io.invertase.firebase.auth"' node_modules/@react-native-firebase/auth/android/build.gradle 2>/dev/null || true
               
               cd android
+            
             fi
             
             echo "::endgroup::"
