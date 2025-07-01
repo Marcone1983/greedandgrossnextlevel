@@ -1,12 +1,19 @@
-/**
- * Metro configuration for React Native
- * https://reactnative.dev/docs/metro
- *
- * @format
- */
-
 const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 
-const config = {};
+const defaultConfig = getDefaultConfig(__dirname);
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+const config = {
+  resolver: {
+    assetExts: [...defaultConfig.resolver.assetExts, 'db', 'mp3', 'ttf', 'obj', 'png', 'jpg'],
+  },
+  transformer: {
+    getTransformOptions: async () => ({
+      transform: {
+        experimentalImportSupport: false,
+        inlineRequires: true,
+      },
+    }),
+  },
+};
+
+module.exports = mergeConfig(defaultConfig, config);

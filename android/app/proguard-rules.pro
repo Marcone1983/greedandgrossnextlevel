@@ -1,39 +1,26 @@
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in /usr/local/Cellar/android-sdk/24.3.3/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
-
-# Add any project specific keep options here:
-
 # React Native
--keep class com.facebook.react.** { *; }
--keep class com.facebook.hermes.** { *; }
--keep class com.facebook.jni.** { *; }
-
-# OkHttp
--keepattributes Signature
--keepattributes *Annotation*
--keep class okhttp3.** { *; }
--keep interface okhttp3.** { *; }
--dontwarn okhttp3.**
-
-# Okio
--keep class sun.misc.Unsafe { *; }
--dontwarn java.nio.file.*
--dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
--dontwarn okio.**
+-keep public class com.facebook.react.** { *; }
+-keep public class com.facebook.hermes.** { *; }
+-keep public class com.facebook.jni.** { *; }
 
 # Firebase
 -keep class com.google.firebase.** { *; }
--dontwarn com.google.firebase.**
+-keep class com.google.android.gms.** { *; }
 
-# RevenueCat
--keep class com.revenuecat.purchases.** { *; }
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
 
-# Native Base
--keep class io.invertase.** { *; }
--dontwarn io.invertase.**
+# Reanimated
+-keep class com.swmansion.reanimated.** { *; }
+-keep class com.facebook.react.turbomodule.** { *; }
+
+# Vector Icons
+-keep class com.oblador.vectoricons.** { *; }
+
+# WebView
+-keepclassmembers class * extends android.webkit.WebViewClient {
+    public void *(android.webkit.WebView, java.lang.String);
+}

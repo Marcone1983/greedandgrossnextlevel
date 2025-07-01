@@ -1,97 +1,26 @@
 apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-// apply plugin: "com.facebook.react" // Removed to avoid gradle plugin issues
+apply plugin: "com.facebook.react"
+apply plugin: 'com.google.gms.google-services'
 
-import com.android.build.OutputFile
-
-// react {
-//     // The root of your project, i.e. where "package.json" lives. Default is '../..'
-//     root = file("../../")
-//     // The folder where the react-native Codegen will use to output the generated source code. Default is 'build/generated/codegen'
-//     codegenDir = file("$buildDir/generated/codegen")
-//     // The cli.js file which used to run the bundler command. Default is ../node_modules/react-native/cli.js
-//     cliFile = file("../../node_modules/react-native/cli.js")
-//     // The path to the JS bundle file to be used for Release builds. Default is 'index.android.bundle'
-//     bundleAssetName = "index.android.bundle"
-//     // The entry file for bundle generation. Default is 'index.js'
-//     entryFile = file("../../index.js")
-//     // Bundle command and packager args
-//     bundleCommand = "bundle"
-//     extraPackagerArgs = []
-// }
-
-// React Native 0.79.0 uses the gradle plugin to handle native modules automatically
-
-/**
- * Set this to true to create two separate APKs instead of one:
- *   - An APK that only works on ARM devices
- *   - An APK that only works on x86 devices
- * The advantage is the size of the APK is reduced by about 4MB.
- * Upload all the APKs to the Play Store and people will download
- * the correct one based on the CPU architecture of their device.
- */
-def enableSeparateBuildPerCPUArchitecture = false
-
-/**
- * Run Proguard to shrink the Java bytecode in release builds.
- */
-def enableProguardInReleaseBuilds = true
-
-/**
- * Hermes configuration for compatibility with older modules
- * In React Native 0.79.0, Hermes is enabled by default
- */
-project.ext.hermesEnabled = true
-
-// Assicuriamoci che hermesEnabled sia disponibile per tutti i moduli
-ext {
-    hermesEnabled = true
+react {
 }
 
-/**
- * The preferred build flavor of JavaScriptCore.
- */
-// JSC is now handled automatically by React Native 0.79.0
-
-/**
- * Return the New Architecture enabled property
- */
-def isNewArchitectureEnabled() {
-    // Legge dal gradle.properties
-    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
-}
+def enableProguardInReleaseBuilds = false
+def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
-    ndkVersion rootProject.ext.ndkVersion ?: "25.1.8937393"
-    compileSdk 35
-    buildToolsVersion "35.0.0"
+    ndkVersion rootProject.ext.ndkVersion
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.greedandgross.cannabisbreeding"
-    
-    buildFeatures {
-        buildConfig true
-    }
-    
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-    
+    namespace "com.linkbridge.app"
     defaultConfig {
-        applicationId "com.greedandgross.cannabisbreeding"
-        minSdkVersion rootProject.ext.minSdkVersion ?: 24
-        targetSdkVersion rootProject.ext.targetSdkVersion ?: 34
+        applicationId "com.linkbridge.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
-        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
-        buildConfigField "boolean", "IS_HERMES_ENABLED", hermesEnabled.toString()
-        
-        // Add permissions
-        manifestPlaceholders = [
-            appName: "GREED & GROSS"
-        ]
+        multiDexEnabled true
     }
-
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -100,136 +29,37 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('GREED_GROSS_UPLOAD_STORE_FILE')) {
-                storeFile file(GREED_GROSS_UPLOAD_STORE_FILE)
-                storePassword GREED_GROSS_UPLOAD_STORE_PASSWORD
-                keyAlias GREED_GROSS_UPLOAD_KEY_ALIAS
-                keyPassword GREED_GROSS_UPLOAD_KEY_PASSWORD
+            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+                storeFile file(MYAPP_UPLOAD_STORE_FILE)
+                storePassword MYAPP_UPLOAD_STORE_PASSWORD
+                keyAlias MYAPP_UPLOAD_KEY_ALIAS
+                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
             }
         }
     }
-
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
-
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            // For each separate APK per architecture, set a unique version code as described here:
-            // https://developer.android.com/studio/build/configure-apk-splits.html
-            // Example: versionCode 1 will generate 1001 for armeabi-v7a, 1002 for x86, etc.
-            def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
-            def abi = output.getFilter(OutputFile.ABI)
-            if (abi != null) {  // null for the universal APK
-                output.versionCodeOverride =
-                        defaultConfig.versionCode * 1000 + versionCodes.get(abi)
-            }
-        }
-    }
-    
-    packagingOptions {
-        pickFirst "lib/x86/libc++_shared.so"
-        pickFirst "lib/x86_64/libc++_shared.so"
-        pickFirst "lib/arm64-v8a/libc++_shared.so"
-        pickFirst "lib/armeabi-v7a/libc++_shared.so"
-    }
-}
-
-// React Native configuration
-repositories {
-    maven { url "$rootDir/../node_modules/react-native/android" }
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-    //noinspection GradleDynamicVersion
-    // React Native dependencies
     implementation("com.facebook.react:react-android")
-    implementation("com.facebook.react:hermes-android")
+    implementation("com.facebook.react:flipper-integration")
 
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
-    
-    // Firebase - commented out until google-services.json is added
-    // implementation platform('com.google.firebase:firebase-bom:32.7.0')
-    // implementation 'com.google.firebase:firebase-analytics'
-    // implementation 'com.google.firebase:firebase-firestore'
-    // implementation 'com.google.firebase:firebase-storage'
-    // implementation 'com.google.firebase:firebase-crashlytics'
-    // implementation 'com.google.firebase:firebase-perf'
-    
-    // RevenueCat
-    implementation 'com.revenuecat.purchases:purchases:6.9.7'
-    
-    // Other dependencies
-    implementation 'androidx.core:core-splashscreen:1.0.1'
-    
-    debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.fbjni'
+    if (hermesEnabled.toBoolean()) {
+        implementation("com.facebook.react:hermes-android")
+    } else {
+        implementation jscFlavor
     }
-
-    debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.flipper'
-        exclude group:'com.squareup.okhttp3', module:'okhttp'
-    }
-
-    debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
-        exclude group:'com.facebook.flipper'
-    }
-
-    // Hermes is now handled automatically by React Native 0.79.0
     
-    // Native module dependencies (manual since we removed the gradle plugin)
-    implementation project(':react-native-async-storage_async-storage')
-    // Removed react-native-device-info as it's not in package.json
-    // implementation project(':react-native-device-info')
-    implementation project(':react-native-firebase_app')
-    implementation project(':react-native-firebase_auth')
-    implementation project(':react-native-firebase_firestore')
-    implementation project(':react-native-firebase_storage')
-    implementation project(':react-native-gesture-handler')
-    implementation project(':react-native-linear-gradient')
-    implementation project(':react-native-haptic-feedback')
-    implementation project(':react-native-reanimated')
-    implementation project(':react-native-safe-area-context')
-    implementation project(':react-native-screens')
-    implementation project(':react-native-share')
-    implementation project(':react-native-svg')
-    implementation project(':react-native-fs')
-    implementation project(':react-native-vector-icons')
-    implementation project(':react-native-webview')
+    implementation 'androidx.multidex:multidex:2.0.1'
 }
 
-if (isNewArchitectureEnabled()) {
-    // If new architecture is enabled, we let you build RN from source
-    // Otherwise we fallback to a prebuilt .aar bundled in the NPM package.
-    // This will be applied to all the imported transtitive dependency.
-    configurations.all {
-        resolutionStrategy.dependencySubstitution {
-            substitute(module("com.facebook.react:react-native"))
-                    .using(project(":ReactAndroid")).because("On New Architecture we're building React Native from source")
-        }
-    }
-}
-
-// Run this once to be able to run the application with BUCK
-// puts all compile dependencies into folder libs for BUCK to use
-task copyDownloadableDepsToLibs(type: Copy) {
-    from configurations.implementation
-    into 'libs'
-}
-
-// React Native configuration for 0.79.0 without plugin
-
-// Apply Google Services plugin
-apply plugin: 'com.google.gms.google-services'
-// apply plugin: 'com.google.firebase.crashlytics'
-// apply plugin: 'com.google.firebase.firebase-perf'
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

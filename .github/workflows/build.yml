@@ -1,278 +1,88 @@
-name: build android apk
+name: Build Android Release
 
 on:
   push:
-    branches: [main]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
-    
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-          
-      - run: npm install --legacy-peer-deps
-        
-      - name: Create env file
-        run: |
-          cat > .env << 'ENVEOF'
-          FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}
-          FIREBASE_AUTH_DOMAIN=${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL=${{ secrets.OPENAI_MODEL }}
-          REVENUECAT_API_KEY_IOS=${{ secrets.REVENUECAT_API_KEY_IOS }}
-          REVENUECAT_API_KEY_ANDROID=${{ secrets.REVENUECAT_API_KEY_ANDROID }}
-          API_BASE_URL=${{ secrets.API_BASE_URL }}
-          WEBSOCKET_URL=${{ secrets.WEBSOCKET_URL }}
-          ADMIN_SECRET=${{ secrets.ADMIN_SECRET }}
-          APP_VERSION=${{ secrets.APP_VERSION }}
-          ENVIRONMENT=production
-          ENVEOF
-          
-      - name: Setup Android
-        run: |
-          cd android
-          chmod +x gradlew
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          
-      - name: Create google services
-        run: |
-          cd android
-          cat > app/google-services.json << 'GOOGLEEOF'
-          {
-            "project_info": {
-              "project_number": "${{ secrets.FIREBASE_PROJECT_NUMBER }}",
-              "project_id": "${{ secrets.FIREBASE_PROJECT_ID }}",
-              "storage_bucket": "${{ secrets.FIREBASE_STORAGE_BUCKET }}"
-            },
-            "client": [
-              {
-                "client_info": {
-                  "mobilesdk_app_id": "${{ secrets.FIREBASE_APP_ID }}",
-                  "android_client_info": {
-                    "package_name": "com.greedandgross.cannabisbreeding"
-                  }
-                },
-                "oauth_client": [
-                  {
-                    "client_id": "${{ secrets.FIREBASE_CLIENT_ID }}",
-                    "client_type": 3
-                  }
-                ],
-                "api_key": [
-                  {
-                    "current_key": "${{ secrets.FIREBASE_API_KEY }}"
-                  }
-                ],
-                "services": {
-                  "appinvite_service": {
-                    "other_platform_oauth_client": [
-                      {
-                        "client_id": "${{ secrets.FIREBASE_CLIENT_ID }}",
-                        "client_type": 3
-                      }
-                    ]
-                  }
-                }
-              }
-            ],
-            "configuration_version": "1"
-          }
-          GOOGLEEOF
-          
-      - name: Setup keystore
-        run: |
-          cd android
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > app/greed-gross-release-key.keystore
-          cat >> gradle.properties << 'GRADLEEOF'
-          
-          GREED_GROSS_UPLOAD_STORE_FILE=greed-gross-release-key.keystore
-          GREED_GROSS_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          GREED_GROSS_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
-          GREED_GROSS_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
-          GRADLEEOF
-          
-      - name: Setup RN gradle plugin
-        run: |
-          if [ -d "node_modules/@react-native/gradle-plugin" ]; then
-            cd node_modules/@react-native/gradle-plugin
-            mkdir -p build/com/facebook/react/react-native-gradle-plugin/0.79.0
-            mkdir -p temp-jar/META-INF
-            echo "Manifest-Version: 1.0" > temp-jar/META-INF/MANIFEST.MF
-            cd temp-jar && jar cf ../build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.jar * && cd ..
-            echo '<?xml version="1.0" encoding="UTF-8"?><project><modelVersion>4.0.0</modelVersion><groupId>com.facebook.react</groupId><artifactId>react-native-gradle-plugin</artifactId><version>0.79.0</version></project>' > build/com/facebook/react/react-native-gradle-plugin/0.79.0/react-native-gradle-plugin-0.79.0.pom
-            cd ../../..
-          fi
-          
-      - name: Fix reanimated
-        run: |
-          # Fix Hermes detection
-          sed -i '165s/if (appProject?.hermesEnabled?.toBoolean() || appProject?.ext?.react?.enableHermes?.toBoolean())/if (true)/' node_modules/react-native-reanimated/android/build.gradle || true
-          
-          # Force C++17 instead of C++20 to fix std::regular error
-          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/CMAKE_CXX_STANDARD 20/CMAKE_CXX_STANDARD 17/g' {} \;
-          find node_modules/react-native-reanimated -name "CMakeLists.txt" -exec sed -i 's/cxx_std_20/cxx_std_17/g' {} \;
-          
-          # Also fix in build.gradle files
-          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/-std=c++20/-std=c++17/g' {} \;
-          find node_modules/react-native-reanimated -name "*.gradle" -exec sed -i 's/cppFlags.add("-std=c++20")/cppFlags.add("-std=c++17")/g' {} \;
-          
-      - name: Verify native modules
-        run: |
-          echo "Checking if all native modules are installed..."
-          for module in react-native-reanimated react-native-safe-area-context react-native-screens react-native-share react-native-svg react-native-fs react-native-vector-icons react-native-webview; do
-            if [ ! -d "node_modules/$module/android" ]; then
-              echo "ERROR: $module/android directory not found!"
-              npm install $module --legacy-peer-deps
-            else
-              echo "✓ $module found"
-            fi
-          done
-          
-      - name: Fix autolinking manually
-        run: |
-          # Create the autolinking directory
-          mkdir -p android/app/build/generated/autolinking/src/main/java/com/facebook/react
-          
-          # Create PackageList.java manually with correct imports
-          cat > android/app/build/generated/autolinking/src/main/java/com/facebook/react/PackageList.java << 'EOF'
-package com.facebook.react;
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-import android.app.Application;
-import android.content.Context;
-import android.content.res.Resources;
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-import com.facebook.react.ReactPackage;
-import com.facebook.react.shell.MainPackageConfig;
-import com.facebook.react.shell.MainReactPackage;
-import java.util.Arrays;
-import java.util.ArrayList;
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        cache: 'npm'
 
-// Import solo i pacchetti che effettivamente usi
-import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
-import com.swmansion.gesturehandler.RNGestureHandlerPackage;
-import com.swmansion.rnscreens.RNScreensPackage;
-import com.swmansion.reanimated.ReanimatedPackage;
-import cl.json.RNSharePackage;
-import com.horcrux.svg.SvgPackage;
-import com.oblador.vectoricons.VectorIconsPackage;
-import com.reactnativecommunity.webview.RNCWebViewPackage;
-import com.rnfs.RNFSPackage;
-import com.mkuczera.RNReactNativeHapticFeedbackPackage;
-import com.learnium.RNDeviceInfo.RNDeviceInfoPackage;
-import com.BV.LinearGradient.LinearGradientPackage;
-import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
-import io.invertase.firebase.app.ReactNativeFirebaseAppPackage;
-import io.invertase.firebase.auth.ReactNativeFirebaseAuthPackage;
-import io.invertase.firebase.firestore.ReactNativeFirebaseFirestorePackage;
-import io.invertase.firebase.storage.ReactNativeFirebaseStoragePackage;
+    - name: Install dependencies
+      run: |
+        npm ci --legacy-peer-deps
+        cd android
+        ./gradlew clean
 
-public class PackageList {
-  private Application application;
-  private ReactNativeHost reactNativeHost;
-  private MainPackageConfig mConfig;
+    - name: Create google-services.json
+      run: |
+        echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
 
-  public PackageList(ReactNativeHost reactNativeHost) {
-    this(reactNativeHost, null);
-  }
+    - name: Create .env file
+      run: |
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" > .env
 
-  public PackageList(Application application) {
-    this(application, null);
-  }
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
 
-  public PackageList(ReactNativeHost reactNativeHost, MainPackageConfig config) {
-    this.reactNativeHost = reactNativeHost;
-    mConfig = config;
-  }
+    - name: Build Release AAB
+      run: |
+        cd android
+        ./gradlew bundleRelease
+      env:
+        MYAPP_UPLOAD_STORE_FILE: release.keystore
+        MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-  public PackageList(Application application, MainPackageConfig config) {
-    this.reactNativeHost = null;
-    this.application = application;
-    mConfig = config;
-  }
+    - name: Upload AAB
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release
+        path: android/app/build/outputs/bundle/release/app-release.aab
 
-  private ReactNativeHost getReactNativeHost() {
-    return this.reactNativeHost;
-  }
+    - name: Upload Mapping File
+      uses: actions/upload-artifact@v3
+      with:
+        name: mapping
+        path: android/app/build/outputs/mapping/release/
 
-  private Resources getResources() {
-    return this.getApplication().getResources();
-  }
-
-  private Application getApplication() {
-    if (this.reactNativeHost == null) return this.application;
-    return this.reactNativeHost.getApplication();
-  }
-
-  private Context getApplicationContext() {
-    return this.getApplication().getApplicationContext();
-  }
-
-  public ArrayList<ReactPackage> getPackages() {
-    return new ArrayList<>(Arrays.<ReactPackage>asList(
-      new MainReactPackage(mConfig),
-      new AsyncStoragePackage(),
-      new RNDeviceInfoPackage(),
-      new ReactNativeFirebaseAppPackage(),
-      new ReactNativeFirebaseAuthPackage(),
-      new ReactNativeFirebaseFirestorePackage(),
-      new ReactNativeFirebaseStoragePackage(),
-      new RNGestureHandlerPackage(),
-      new LinearGradientPackage(),
-      new RNReactNativeHapticFeedbackPackage(),
-      new ReanimatedPackage(),
-      new SafeAreaContextPackage(),
-      new RNScreensPackage(),
-      new RNSharePackage(),
-      new SvgPackage(),
-      new RNFSPackage(),
-      new VectorIconsPackage(),
-      new RNCWebViewPackage()
-    ));
-  }
-}
-EOF
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "android/app/build/outputs/bundle/release/app-release.aab"
+        tag: v${{ github.run_number }}
+        name: Release Build ${{ github.run_number }}
+        body: |
+          ## 🚀 Release Build ${{ github.run_number }}
           
-      - name: Test Metro bundling first
-        run: |
-          # Test if Metro can bundle the JS
-          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/test.bundle --assets-dest /tmp || {
-            echo "Metro bundling failed! Check JS errors"
-            exit 1
-          }
-          echo "Metro bundling test passed"
+          ### 📱 Download
+          - [app-release.aab](https://github.com/${{ github.repository }}/releases/download/v${{ github.run_number }}/app-release.aab)
           
-      - name: Build APK
-        run: |
-          cd android
-          # Run gradle build
-          java -cp gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleRelease --no-daemon --stacktrace || {
-            echo "Build failed!"
-            exit 1
-          }
-          
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: greed-gross-apk
-          path: |
-            android/app/build/outputs/apk/**/*.apk
-            android/app/build/outputs/bundle/**/*.aab
-          if-no-files-found: warn
+          ### 📋 Details
+          - Build Number: ${{ github.run_number }}
+          - Commit: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        allowUpdates: true

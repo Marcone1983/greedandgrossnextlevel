@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "123456789012",
-    "project_id": "greedandgross-temp",
-    "storage_bucket": "greedandgross-temp.appspot.com"
+    "project_number": "616726949995",
+    "project_id": "linkbridge-80cda",
+    "storage_bucket": "linkbridge-80cda.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789012:android:abcdef123456",
+        "mobilesdk_app_id": "1:616726949995:android:fe1e2be607329a7647012e",
         "android_client_info": {
-          "package_name": "com.greedandgross.cannabisbreeding"
+          "package_name": "com.linkbridge.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "616726949995-example.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyA-TEMPORARY-KEY-FOR-BUILD"
+          "current_key": "AIzaSyCP5xKQUB4UZvZBuF9_K9XfMjc0eG4dcbc"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "616726949995-example.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
