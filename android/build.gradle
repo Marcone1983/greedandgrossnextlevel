@@ -107,10 +107,8 @@ subprojects {
                 
                 // Force all modules to use react-android instead of react-native
                 configurations.all {
-                    resolutionStrategy {
-                        dependencySubstitution {
-                            substitute module('com.facebook.react:react-native') with module('com.facebook.react:react-android:0.79.0')
-                        }
+                    resolutionStrategy.dependencySubstitution {
+                        substitute(module('com.facebook.react:react-native')).using(module('com.facebook.react:react-android:0.79.0'))
                     }
                 }
             }
