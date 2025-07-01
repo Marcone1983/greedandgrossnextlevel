@@ -44,7 +44,7 @@
     "react-native-pdf": "^6.7.1",
     "react-native-purchases": "^8.11.5",
     "react-native-reanimated": "3.16.7",
-    "react-native-safe-area-context": "4.10.5",
+    "react-native-safe-area-context": "4.11.1",
     "react-native-screens": "^3.34.0",
     "react-native-share": "^10.0.2",
     "react-native-svg": "^15.12.0",
@@ -81,7 +81,7 @@
     "typescript": "^5.7.2"
   },
   "private": true,
-  "description": "// Trigger CI # Trigger build Sat Jun 21 18:44:37 CEST 2025 # Trigger build Tue Jul  1 05:52:30 CEST 2025",
+  "description": "// Trigger CI # Trigger build Sat Jun 21 18:44:37 CEST 2025 # Trigger build Tue Jul  1 05:52:30 CEST 2025 # Trigger build Tue Jul  1 07:48:00 CEST 2025",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Marcone1983/greedandgrossnextlevel.git"
