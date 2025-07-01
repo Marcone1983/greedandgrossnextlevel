@@ -11,7 +11,11 @@
         "credentialsSource": "local",
         "image": "latest"
       },
-      "prebuildCommand": "rm -f yarn.lock && bash .eas/build/pre-install.sh"
+      "prebuildCommand": "rm -f yarn.lock && bash .eas/build/pre-install.sh && bash .eas/build/pre-build.sh",
+      "env": {
+        "EAS_BUILD_RUNNER_SKIP_NATIVE_MODULES_REBUILD": "1",
+        "EAS_BUILD_NPM_CACHE_DISABLED": "1"
+      }
     },
     "preview": {
       "distribution": "internal"
@@ -26,10 +30,12 @@
       "cache": {
         "disabled": true
       },
+      "prebuildCommand": "rm -f yarn.lock && bash .eas/build/pre-install.sh && bash .eas/build/pre-build.sh",
       "env": {
-        "REACT_NATIVE_MAVEN_REPO_PATH": "node_modules/react-native/android"
-      },
-      "prebuildCommand": "rm -f yarn.lock && bash .eas/build/pre-install.sh"
+        "REACT_NATIVE_MAVEN_REPO_PATH": "node_modules/react-native/android",
+        "EAS_BUILD_RUNNER_SKIP_NATIVE_MODULES_REBUILD": "1",
+        "EAS_BUILD_NPM_CACHE_DISABLED": "1"
+      }
     }
   },
   "submit": {
