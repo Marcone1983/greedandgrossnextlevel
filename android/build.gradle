@@ -52,6 +52,14 @@ allprojects {
         options.compilerArgs += ["-source", "17", "-target", "17"]
     }
     
+    // Fix Kotlin metadata version conflicts
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+            freeCompilerArgs += ["-Xskip-metadata-version-check"]
+        }
+    }
+    
     // Ensure React Native is available to all modules
     configurations.all {
         resolutionStrategy {
