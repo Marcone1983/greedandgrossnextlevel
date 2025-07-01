@@ -22,6 +22,19 @@ jobs:
           
       - run: npm install --legacy-peer-deps
       
+      # Fix Firebase modules for Gradle 8.8 - MUST BE DONE FIRST!
+      - name: Fix Firebase modules
+        run: |
+          echo "Removing publishing blocks from Firebase modules..."
+          for firebase_module in auth app firestore storage analytics; do
+            BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
+            if [ -f "$BUILD_FILE" ]; then
+              echo "Fixing @react-native-firebase/$firebase_module..."
+              # Comment out the problematic afterEvaluate { publishing { ... } } block
+              sed -i '/afterEvaluate {/,/^}/s/^/\/\/ /' "$BUILD_FILE" || true
+            fi
+          done
+      
       # Fix namespace issues
       - run: |
           chmod +x fix-namespaces.sh
@@ -123,21 +136,14 @@ jobs:
               
               # react-native-device-info removed as it's not in package.json
               
-              # Fix react-native-firebase modules
-              for firebase_module in auth app firestore storage; do
+              # Fix react-native-firebase modules - REMOVE publishing blocks
+              echo "Removing publishing blocks from Firebase modules..."
+              for firebase_module in auth app firestore storage analytics; do
                 BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
                 if [ -f "$BUILD_FILE" ]; then
                   echo "Fixing @react-native-firebase/$firebase_module..."
-                  echo "" >> "$BUILD_FILE"
-                  echo "afterEvaluate {" >> "$BUILD_FILE"
-                  echo "  publishing {" >> "$BUILD_FILE"
-                  echo "    publications {" >> "$BUILD_FILE"
-                  echo "      release(MavenPublication) {" >> "$BUILD_FILE"
-                  echo "        from components.release" >> "$BUILD_FILE"
-                  echo "      }" >> "$BUILD_FILE"
-                  echo "    }" >> "$BUILD_FILE"
-                  echo "  }" >> "$BUILD_FILE"
-                  echo "}" >> "$BUILD_FILE"
+                  # Comment out the problematic afterEvaluate { publishing { ... } } block
+                  sed -i '/afterEvaluate {/,/^}/s/^/\/\/ /' "$BUILD_FILE" || true
                 fi
               done
               
