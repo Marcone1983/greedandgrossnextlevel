@@ -29,7 +29,7 @@ jobs:
             BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
             if [ -f "$BUILD_FILE" ]; then
               echo "Fixing @react-native-firebase/$firebase_module..."
-              { publishing { ... } } block
+              # Comment out the problematic afterEvaluate { publishing { ... } } block
               sed -i '/afterEvaluate {/,/^}/s/^/\/\/ /' "$BUILD_FILE" || true
             fi
           done
@@ -145,7 +145,7 @@ jobs:
                 BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
                 if [ -f "$BUILD_FILE" ]; then
                   echo "Fixing @react-native-firebase/$firebase_module..."
-                   { publishing { ... } } block
+                  # Comment out the problematic afterEvaluate { publishing { ... } } block
                   sed -i '/afterEvaluate {/,/^}/s/^/\/\/ /' "$BUILD_FILE" || true
                 fi
               done
