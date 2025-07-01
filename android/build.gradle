@@ -10,9 +10,9 @@ allprojects {
 
 buildscript {
     ext {
-        buildToolsVersion = "34.0.0"
+        buildToolsVersion = "35.0.0"
         minSdkVersion = 24
-        compileSdkVersion = 34
+        compileSdkVersion = 35
         targetSdkVersion = 34
         ndkVersion = "25.1.8937393"
         kotlinVersion = "1.8.10"
@@ -25,7 +25,7 @@ buildscript {
         maven { url("$rootDir/../node_modules/@react-native/gradle-plugin/build") }
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.2.1")
+        classpath("com.android.tools.build:gradle:8.6.0")
         // React Native 0.79.0 plugin is included via settings.gradle includeBuild
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.google.gms:google-services:4.4.0")
