@@ -86,6 +86,8 @@ jobs:
           android.useAndroidX=true
           android.enableJetifier=true
           kotlin.jvm.target.validation.mode=IGNORE
+          org.gradle.warning.mode=none
+          android.suppressUnsupportedCompileSdk=35
           EOF
           
       - name: Setup Android SDK
