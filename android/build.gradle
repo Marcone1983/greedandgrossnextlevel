@@ -52,11 +52,19 @@ allprojects {
         resolutionStrategy {
             force "com.facebook.react:react-android:0.79.0"
             force "com.facebook.react:hermes-android:0.79.0"
+            force "com.facebook.react:react-native:0.79.0"
             
             // Force specific bouncycastle version to avoid jar corruption
             force 'org.bouncycastle:bcprov-jdk18on:1.77'
             force 'org.bouncycastle:bcpkix-jdk18on:1.77'
             force 'org.bouncycastle:bcutil-jdk18on:1.77'
+            
+            // Replace dynamic version (+) with specific version
+            eachDependency { details ->
+                if (details.requested.group == 'com.facebook.react' && details.requested.name == 'react-native' && details.requested.version == '+') {
+                    details.useVersion '0.79.0'
+                }
+            }
         }
     }
 }
@@ -94,6 +102,15 @@ subprojects {
                 if (!buildFeatures.hasProperty('buildConfig') || buildFeatures.buildConfig == null) {
                     buildFeatures {
                         buildConfig = true
+                    }
+                }
+                
+                // Force all modules to use react-android instead of react-native
+                configurations.all {
+                    resolutionStrategy {
+                        dependencySubstitution {
+                            substitute module('com.facebook.react:react-native') with module('com.facebook.react:react-android:0.79.0')
+                        }
                     }
                 }
             }

@@ -1,0 +1,10 @@
+# This patch file fixes the react-native dependency version for all modules
+# Apply with: patch -p0 < patches/react-native-modules.patch
+
+--- node_modules/@react-native-async-storage/async-storage/android/build.gradle
++++ node_modules/@react-native-async-storage/async-storage/android/build.gradle
+@@ -90,7 +90,7 @@
+ dependencies {
+   implementation 'com.facebook.react:react-native:+'
++  implementation 'com.facebook.react:react-android:0.79.0'
+ }
