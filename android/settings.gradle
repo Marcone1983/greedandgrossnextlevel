@@ -57,11 +57,12 @@ project(':react-native-vector-icons').projectDir = new File(nodeModulesDir, 'rea
 include ':react-native-webview'
 project(':react-native-webview').projectDir = new File(nodeModulesDir, 'react-native-webview/android')
 
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
-    repositories {
-        google()
-        mavenCentral()
-        maven { url("$rootDir/../node_modules/react-native/android") }
-    }
-}
+// Commented out to allow module-level repositories
+// dependencyResolutionManagement {
+//     repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+//     repositories {
+//         google()
+//         mavenCentral()
+//         maven { url("$rootDir/../node_modules/react-native/android") }
+//     }
+// }

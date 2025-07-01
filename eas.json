@@ -19,6 +19,9 @@
       },
       "cache": {
         "disabled": true
+      },
+      "env": {
+        "REACT_NATIVE_MAVEN_REPO_PATH": "node_modules/react-native/android"
       }
     }
   },

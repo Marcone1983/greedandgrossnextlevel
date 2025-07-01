@@ -1,0 +1,8 @@
+# Ignore expo folder if exists
+greed-gross-expo/
+
+# Ignore local maven repo
+local-maven/
+
+# Don't upload credentials
+credentials.json
