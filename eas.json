@@ -8,9 +8,10 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk",
-        "credentialsSource": "local"
+        "credentialsSource": "local",
+        "image": "latest"
       },
-      "prebuildCommand": "rm -f yarn.lock package-lock.json"
+      "prebuildCommand": "rm -f yarn.lock package-lock.json && bash .eas/build/pre-install.sh"
     },
     "preview": {
       "distribution": "internal"
@@ -19,7 +20,8 @@
       "autoIncrement": true,
       "android": {
         "buildType": "apk",
-        "credentialsSource": "local"
+        "credentialsSource": "local",
+        "image": "latest"
       },
       "cache": {
         "disabled": true
@@ -27,7 +29,7 @@
       "env": {
         "REACT_NATIVE_MAVEN_REPO_PATH": "node_modules/react-native/android"
       },
-      "prebuildCommand": "rm -f yarn.lock package-lock.json"
+      "prebuildCommand": "rm -f yarn.lock package-lock.json && bash .eas/build/pre-install.sh"
     }
   },
   "submit": {
