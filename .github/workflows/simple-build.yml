@@ -87,6 +87,12 @@ jobs:
           android.enableJetifier=true
           kotlin.jvm.target.validation.mode=IGNORE
           EOF
+          
+      - name: Setup Android SDK
+        run: |
+          # Create local.properties with Android SDK path
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          echo "Android SDK location: $ANDROID_SDK_ROOT"
       
       - run: chmod +x android/gradlew
       
