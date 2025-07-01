@@ -14,11 +14,7 @@ if [ -f "$BUILD_FILE" ]; then
     }' "$BUILD_FILE"
     fi
     
-    # Add necessary dependencies for new React Native version
-    if ! grep -q "implementation.*react-android" "$BUILD_FILE"; then
-        sed -i '/dependencies {/a\
-    implementation "com.facebook.react:react-android"' "$BUILD_FILE"
-    fi
+    # Don't add dependencies - it's already handled by React Native
 fi
 
 # Fix the SafeAreaProviderManager.kt type mismatch
