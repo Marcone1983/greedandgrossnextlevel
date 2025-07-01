@@ -34,6 +34,14 @@ jobs:
               sed -i '/afterEvaluate {/,/^}/s/^/\/\/ /' "$BUILD_FILE" || true
             fi
           done
+          
+      # Fix react-native-safe-area-context Kotlin issue
+      - name: Fix react-native-safe-area-context
+        run: |
+          if [ -f "fix-safe-area-context.sh" ]; then
+            chmod +x fix-safe-area-context.sh
+            ./fix-safe-area-context.sh
+          fi
       
       # Fix namespace issues
       - run: |
@@ -77,6 +85,7 @@ jobs:
           org.gradle.daemon=false
           android.useAndroidX=true
           android.enableJetifier=true
+          kotlin.jvm.target.validation.mode=IGNORE
           EOF
       
       - run: chmod +x android/gradlew
