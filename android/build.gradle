@@ -66,6 +66,16 @@ allprojects {
 // Fix for React Native modules with Gradle 8.8
 subprojects {
     afterEvaluate { project ->
+        // Force all subprojects to use the correct repositories
+        project.repositories {
+            // IMPORTANT: React Native Maven repository MUST be first
+            maven { url("$rootDir/../node_modules/react-native/android") }
+            google()
+            mavenCentral()
+            maven { url("$rootDir/../node_modules/jsc-android/dist") }
+            maven { url "https://www.jitpack.io" }
+        }
+        
         if (project.hasProperty('android')) {
             project.android {
                 // Ensure namespace is set for all modules
