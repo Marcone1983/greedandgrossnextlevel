@@ -3,3 +3,7 @@ greed-gross-expo/
 
 # Ignore local maven repo
 local-maven/
+
+# Ignore lock files to force fresh install
+package-lock.json
+yarn.lock
