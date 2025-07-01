@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
       
       - uses: actions/setup-node@v4
         with:
@@ -21,6 +21,14 @@ jobs:
           cache: npm
           
       - run: npm install --legacy-peer-deps
+      
+      # Fix Firebase modules for Gradle 8.8
+      - name: Fix Firebase modules
+        run: |
+          if [ -f "fix-firebase-modules.sh" ]; then
+            chmod +x fix-firebase-modules.sh
+            ./fix-firebase-modules.sh
+          fi
       
       # Fix namespace issues
       - run: |
@@ -123,23 +131,13 @@ jobs:
               
               # react-native-device-info removed as it's not in package.json
               
-              # Fix react-native-firebase modules
-              for firebase_module in auth app firestore storage; do
-                BUILD_FILE="node_modules/@react-native-firebase/$firebase_module/android/build.gradle"
-                if [ -f "$BUILD_FILE" ]; then
-                  echo "Fixing @react-native-firebase/$firebase_module..."
-                  echo "" >> "$BUILD_FILE"
-                  echo "afterEvaluate {" >> "$BUILD_FILE"
-                  echo "  publishing {" >> "$BUILD_FILE"
-                  echo "    publications {" >> "$BUILD_FILE"
-                  echo "      release(MavenPublication) {" >> "$BUILD_FILE"
-                  echo "        from components.release" >> "$BUILD_FILE"
-                  echo "      }" >> "$BUILD_FILE"
-                  echo "    }" >> "$BUILD_FILE"
-                  echo "  }" >> "$BUILD_FILE"
-                  echo "}" >> "$BUILD_FILE"
-                fi
-              done
+              # Re-run Firebase fixes
+              if [ -f "../fix-firebase-modules.sh" ]; then
+                cd ..
+                chmod +x fix-firebase-modules.sh
+                ./fix-firebase-modules.sh
+                cd android
+              fi
               
               cd android
               
